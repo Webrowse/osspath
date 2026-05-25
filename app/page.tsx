@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { getSession } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 import { SessionProvider } from "@/components/session-provider"
 import { Navbar } from "@/components/navbar"
 import {
@@ -114,7 +115,7 @@ const FILTER_FEATURES = [
 ]
 
 export default async function HomePage() {
-  const session = await getSession()
+  const [session, companyCount] = await Promise.all([getSession(), prisma.company.count()])
 
   return (
     <SessionProvider>
@@ -173,7 +174,7 @@ export default async function HomePage() {
               </span>
               <span style={{ color: "var(--fg-0)" }}>now in private beta</span>
               <span style={{ opacity: 0.5 }}>·</span>
-              <span>tracking 412 companies</span>
+              <span>tracking {companyCount} companies</span>
             </div>
 
             {/* Headline */}
@@ -288,7 +289,7 @@ export default async function HomePage() {
               }}
             >
               {[
-                { k: "412", l: "companies tracked", c: "var(--fg-0)" },
+                { k: String(companyCount), l: "companies tracked", c: "var(--fg-0)" },
                 { k: "1,180+", l: "open roles indexed", c: "var(--d-rust)" },
                 { k: "97%", l: "remote-first listings", c: "var(--d-accent)" },
               ].map((x, i) => (
@@ -359,7 +360,7 @@ export default async function HomePage() {
                 textDecoration: "none",
               }}
             >
-              Explore all 412 companies
+              Explore all {companyCount} companies
               <ArrowRight size={12} />
             </Link>
           </div>
@@ -390,7 +391,7 @@ export default async function HomePage() {
                 kicker="Filters"
                 title={
                   <>
-                    Slice 412 companies
+                    Slice {companyCount} companies
                     <br />
                     down to the 12 that matter.
                   </>

@@ -3,7 +3,6 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,143 +11,366 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { PreferencesSwitcher } from "@/components/preferences-switcher"
-import { cn } from "@/lib/utils"
-import { LayoutDashboard, LogOut } from "lucide-react"
+import { LogOut, LayoutDashboard, ArrowRight } from "lucide-react"
 
-const navLinks = [
-  { href: "/companies",     label: "Companies"    },
-  { href: "/#how-it-works", label: "How it works" },
-  { href: "/changelog",     label: "Changelog"    },
-  { href: "/about",         label: "About"        },
+const NAV_LINKS = [
+  {
+    href: "/companies",
+    label: "Companies",
+    match: (p: string) => p.startsWith("/companies"),
+  },
+  {
+    href: "/workflow",
+    label: "Workflow",
+    match: (p: string) => p === "/workflow",
+  },
+  {
+    href: "/demo",
+    label: "Demo",
+    match: (p: string) => false, // demo redirects; never shows as active
+    isDemo: true,
+  },
+  {
+    href: "/changelog",
+    label: "Changelog",
+    match: (p: string) => p === "/changelog",
+  },
 ]
 
 export function Navbar() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
+  const isOnLanding = pathname === "/"
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex h-14 items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2.5">
-              {/* j. gradient logo */}
-              <div
+    <header
+      style={{
+        position: "sticky",
+        top: 0,
+        zIndex: 50,
+        borderBottom: "1px solid var(--line-soft)",
+        background: "color-mix(in oklch, var(--bg-0), transparent 15%)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1240,
+          margin: "0 auto",
+          padding: "0 32px",
+          height: 52,
+          display: "flex",
+          alignItems: "center",
+          gap: 0,
+        }}
+      >
+        {/* Logo */}
+        <Link
+          href="/"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            textDecoration: "none",
+            marginRight: 32,
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              width: 26,
+              height: 26,
+              borderRadius: 7,
+              background: "linear-gradient(135deg, var(--d-rust) 0%, var(--d-accent) 100%)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "oklch(0.99 0 0)",
+              fontWeight: 700,
+              fontSize: 12,
+              fontFamily: "var(--font-mono)",
+              flexShrink: 0,
+            }}
+          >
+            j.
+          </div>
+          <span
+            style={{
+              fontSize: 13.5,
+              fontWeight: 600,
+              color: "var(--fg-0)",
+              letterSpacing: "-0.01em",
+              whiteSpace: "nowrap",
+            }}
+          >
+            jobs.adarshrust
+          </span>
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              padding: "1px 5px",
+              borderRadius: 4,
+              background: "var(--bg-2)",
+              border: "1px solid var(--line-soft)",
+              color: "var(--fg-3)",
+            }}
+          >
+            v0.4
+          </span>
+        </Link>
+
+        {/* Nav */}
+        <nav
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            flex: 1,
+          }}
+        >
+          {NAV_LINKS.map((link) => {
+            const active = link.match(pathname)
+            return (
+              <Link
+                key={link.label}
+                href={link.href}
                 style={{
-                  width: 26,
-                  height: 26,
-                  borderRadius: 7,
-                  background: "linear-gradient(135deg, var(--d-rust) 0%, var(--d-accent) 100%)",
+                  position: "relative",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "5px 10px",
+                  borderRadius: 6,
+                  fontSize: 13,
+                  fontWeight: active ? 500 : 400,
+                  color: active ? "var(--fg-0)" : "var(--fg-2)",
+                  background: active ? "var(--bg-2)" : "transparent",
+                  textDecoration: "none",
+                  transition: "color 100ms, background 100ms",
+                  whiteSpace: "nowrap",
+                }}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.color = "var(--fg-0)"
+                    e.currentTarget.style.background = "var(--bg-2)"
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.color = "var(--fg-2)"
+                    e.currentTarget.style.background = "transparent"
+                  }
+                }}
+              >
+                {link.label}
+                {link.isDemo && (
+                  <span
+                    style={{
+                      width: 5,
+                      height: 5,
+                      borderRadius: 999,
+                      background: "var(--d-ok)",
+                      flexShrink: 0,
+                      animation: "d-pulse 2.5s ease-out infinite",
+                    }}
+                  />
+                )}
+              </Link>
+            )
+          })}
+        </nav>
+
+        {/* Right side */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            flexShrink: 0,
+          }}
+        >
+          {/* ⌘K hint */}
+          <span
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              fontFamily: "var(--font-mono)",
+              fontSize: 11,
+              color: "var(--fg-3)",
+              marginRight: 4,
+            }}
+          >
+            <kbd
+              style={{
+                padding: "1px 5px",
+                borderRadius: 4,
+                border: "1px solid var(--line)",
+                background: "var(--bg-2)",
+                color: "var(--fg-2)",
+                fontSize: 10,
+              }}
+            >
+              ⌘K
+            </kbd>
+          </span>
+
+          {status === "loading" ? (
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 999,
+                background: "var(--bg-3)",
+                animation: "d-pulse 1.5s ease-in-out infinite",
+              }}
+            />
+          ) : session?.user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "center",
-                  color: "oklch(0.99 0 0)",
-                  fontWeight: 700,
-                  fontSize: 12,
-                  fontFamily: "var(--font-mono)",
-                  flexShrink: 0,
-                }}
-              >
-                j.
-              </div>
-              <span className="font-semibold text-sm tracking-tight text-foreground">
-                jobs.adarshrust
-              </span>
-              <span
-                style={{
-                  fontFamily: "var(--font-mono)",
-                  fontSize: 10.5,
-                  padding: "1px 6px",
-                  borderRadius: 4,
-                  background: "var(--bg-2)",
+                  gap: 7,
+                  padding: "4px 10px 4px 5px",
+                  borderRadius: 20,
                   border: "1px solid var(--line-soft)",
-                  color: "var(--fg-2)",
-                }}
-              >
-                v0.4
-              </span>
-            </Link>
-            <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={cn(
-                    "px-3 py-1.5 text-sm rounded-md transition-colors",
-                    pathname === link.href
-                      ? "bg-white/12 text-foreground font-medium"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/6"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span
-              className="hidden md:flex items-center gap-1.5 mr-1"
-              style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)" }}
-            >
-              <kbd
-                style={{
-                  padding: "1px 5px",
-                  borderRadius: 4,
-                  border: "1px solid var(--line)",
                   background: "var(--bg-2)",
-                  color: "var(--fg-2)",
-                  fontSize: 10,
+                  cursor: "pointer",
+                  outline: "none",
                 }}
               >
-                ⌘K
-              </kbd>
-            </span>
-            <PreferencesSwitcher />
-            {status === "loading" ? (
-              <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse" />
-            ) : session?.user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={session.user.image ?? undefined} />
-                    <AvatarFallback className="bg-white/10 text-xs">
-                      {session.user.name?.slice(0, 2).toUpperCase() ?? "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  <div className="px-2 py-1.5">
-                    <p className="text-sm font-medium truncate">{session.user.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
-                  </div>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem render={<Link href="/dashboard" />}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    className="text-red-400 cursor-pointer"
+                <Avatar style={{ width: 22, height: 22 }}>
+                  <AvatarImage src={session.user.image ?? undefined} />
+                  <AvatarFallback
+                    style={{
+                      background: "var(--bg-3)",
+                      fontSize: 9,
+                      color: "var(--fg-1)",
+                    }}
                   >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign out
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Button
-                size="sm"
-                variant="secondary"
+                    {session.user.name?.slice(0, 2).toUpperCase() ?? "U"}
+                  </AvatarFallback>
+                </Avatar>
+                <span
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 500,
+                    color: "var(--fg-0)",
+                    maxWidth: 100,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {session.user.name?.split(" ")[0]}
+                </span>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" style={{ minWidth: 180 }}>
+                <div style={{ padding: "8px 10px 6px" }}>
+                  <p
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 500,
+                      color: "var(--fg-0)",
+                      margin: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {session.user.name}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: 11,
+                      color: "var(--fg-3)",
+                      margin: "2px 0 0",
+                      fontFamily: "var(--font-mono)",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {session.user.email}
+                  </p>
+                </div>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem render={<Link href="/dashboard" />}>
+                  <LayoutDashboard size={13} style={{ marginRight: 8 }} />
+                  Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem render={<Link href="/companies" />}>
+                  <span style={{ marginRight: 8, fontSize: 13 }}>⌘</span>
+                  Open workspace
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                  style={{ color: "var(--d-danger)", cursor: "pointer" }}
+                >
+                  <LogOut size={13} style={{ marginRight: 8 }} />
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <button
                 onClick={() => signIn()}
-                className="text-xs h-8"
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: 13,
+                  color: "var(--fg-2)",
+                  padding: "5px 8px",
+                  borderRadius: 6,
+                  transition: "color 100ms",
+                  fontFamily: "var(--font-sans)",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-0)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-2)")}
               >
                 Sign in
-              </Button>
-            )}
-          </div>
+              </button>
+
+              <Link
+                href="/companies"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  height: 30,
+                  padding: "0 12px",
+                  borderRadius: 7,
+                  fontSize: 12.5,
+                  fontWeight: 500,
+                  color: "oklch(0.99 0 0)",
+                  background: isOnLanding ? "var(--d-accent)" : "var(--bg-3)",
+                  border: isOnLanding ? "none" : "1px solid var(--line-soft)",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                  transition: "opacity 100ms",
+                  boxShadow: isOnLanding
+                    ? "0 1px 0 oklch(1 0 0 / 0.18) inset"
+                    : "none",
+                  ...(isOnLanding ? {} : { color: "var(--fg-0)" }),
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              >
+                {isOnLanding ? (
+                  <>
+                    Get started
+                    <ArrowRight size={12} />
+                  </>
+                ) : (
+                  "Open app"
+                )}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>
