@@ -1,0 +1,223 @@
+"use client"
+
+import { useState, useTransition } from "react"
+import type React from "react"
+import { toast } from "sonner"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { upsertApplication, deleteApplication } from "@/actions/company"
+import { ApplicationStatus } from "@/lib/generated/prisma"
+import { STATUS_LABELS } from "@/types"
+import { Trash2 } from "lucide-react"
+
+const STATUSES: ApplicationStatus[] = [
+  "WISHLIST",
+  "APPLIED",
+  "OA",
+  "RECRUITER_CALL",
+  "INTERVIEWING",
+  "FINAL_ROUND",
+  "OFFER",
+  "REJECTED",
+  "GHOSTED",
+]
+
+interface ApplicationDialogProps {
+  companyId: string
+  companyName: string
+  application?: {
+    status: string
+    appliedAt?: Date | null
+    notes?: string | null
+    salary?: string | null
+    recruiterName?: string | null
+    reminderDate?: Date | null
+  } | null
+  trigger: React.ReactNode
+  onSuccess?: () => void
+}
+
+export function ApplicationDialog({
+  companyId,
+  companyName,
+  application,
+  trigger,
+  onSuccess,
+}: ApplicationDialogProps) {
+  const [open, setOpen] = useState(false)
+  const [isPending, startTransition] = useTransition()
+  const [status, setStatus] = useState<ApplicationStatus>(
+    (application?.status as ApplicationStatus) ?? "WISHLIST"
+  )
+  const [notes, setNotes] = useState(application?.notes ?? "")
+  const [recruiterName, setRecruiterName] = useState(application?.recruiterName ?? "")
+  const [salary, setSalary] = useState(application?.salary ?? "")
+  const [appliedAt, setAppliedAt] = useState(
+    application?.appliedAt
+      ? new Date(application.appliedAt).toISOString().split("T")[0]
+      : ""
+  )
+  const [reminderDate, setReminderDate] = useState(
+    application?.reminderDate
+      ? new Date(application.reminderDate).toISOString().split("T")[0]
+      : ""
+  )
+
+  const handleSave = () => {
+    startTransition(async () => {
+      try {
+        await upsertApplication(companyId, {
+          status,
+          appliedAt: appliedAt || null,
+          notes: notes || null,
+          recruiterName: recruiterName || null,
+          salary: salary || null,
+          reminderDate: reminderDate || null,
+        })
+        toast.success("Application saved")
+        setOpen(false)
+        onSuccess?.()
+      } catch {
+        toast.error("Failed to save application")
+      }
+    })
+  }
+
+  const handleDelete = () => {
+    startTransition(async () => {
+      try {
+        await deleteApplication(companyId)
+        toast.success("Application removed")
+        setOpen(false)
+        onSuccess?.()
+      } catch {
+        toast.error("Failed to remove application")
+      }
+    })
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger render={trigger as React.ReactElement} />
+      <DialogContent className="sm:max-w-md bg-card border-border">
+        <DialogHeader>
+          <DialogTitle className="text-base">{companyName}</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Status</Label>
+            <Select value={status} onValueChange={(v) => setStatus(v as ApplicationStatus)}>
+              <SelectTrigger className="h-8 text-sm bg-white/5 border-white/10">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {STATUSES.map((s) => (
+                  <SelectItem key={s} value={s} className="text-sm">
+                    {STATUS_LABELS[s]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Applied date</Label>
+              <Input
+                type="date"
+                value={appliedAt}
+                onChange={(e) => setAppliedAt(e.target.value)}
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Reminder</Label>
+              <Input
+                type="date"
+                value={reminderDate}
+                onChange={(e) => setReminderDate(e.target.value)}
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Recruiter name</Label>
+              <Input
+                value={recruiterName}
+                onChange={(e) => setRecruiterName(e.target.value)}
+                placeholder="Jane Smith"
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Salary / comp</Label>
+              <Input
+                value={salary}
+                onChange={(e) => setSalary(e.target.value)}
+                placeholder="$180k + equity"
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">Notes</Label>
+            <Textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Interview notes, recruiter feedback, follow-ups..."
+              className="text-sm bg-white/5 border-white/10 resize-none min-h-[80px]"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between gap-2 pt-2">
+          {application && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleDelete}
+              disabled={isPending}
+              className="text-red-400 hover:text-red-300 hover:bg-red-950/30 h-8"
+            >
+              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+              Remove
+            </Button>
+          )}
+          <div className="flex gap-2 ml-auto">
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => setOpen(false)}
+              className="h-8 bg-white/5"
+            >
+              Cancel
+            </Button>
+            <Button size="sm" onClick={handleSave} disabled={isPending} className="h-8">
+              {isPending ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
