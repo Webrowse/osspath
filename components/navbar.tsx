@@ -17,10 +17,10 @@ import { cn } from "@/lib/utils"
 import { LayoutDashboard, LogOut } from "lucide-react"
 
 const navLinks = [
-  { href: "/companies", label: "Companies" },
-  { href: "/dashboard", label: "How it works" },
-  { href: "/companies", label: "Changelog" },
-  { href: "/companies", label: "About" },
+  { href: "/companies",     label: "Companies"    },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/changelog",     label: "Changelog"    },
+  { href: "/about",         label: "About"        },
 ]
 
 export function Navbar() {

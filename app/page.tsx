@@ -89,7 +89,7 @@ const ROADMAP_ITEMS = [
     color: "var(--d-rust)",
   },
   {
-    stage: "2026", title: "Career intelligence",
+    stage: "2027", title: "Career intelligence",
     desc: "Cohort comp data, hiring trends, automated discovery for your stack.",
     color: "var(--d-warn)",
   },
@@ -128,6 +128,7 @@ export default async function HomePage() {
       >
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
         <section
+          id="hero"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -317,6 +318,7 @@ export default async function HomePage() {
 
         {/* ── Companies Preview ─────────────────────────────────────────────── */}
         <section
+          id="companies"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -365,6 +367,7 @@ export default async function HomePage() {
 
         {/* ── Filters Section ───────────────────────────────────────────────── */}
         <section
+          id="how-it-works"
           style={{
             background: "var(--bg-1)",
             borderTop: "1px solid var(--line-soft)",
@@ -455,6 +458,7 @@ export default async function HomePage() {
 
         {/* ── Dashboard Workspace ───────────────────────────────────────────── */}
         <section
+          id="workspace"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -496,6 +500,7 @@ export default async function HomePage() {
 
         {/* ── Roadmap ───────────────────────────────────────────────────────── */}
         <section
+          id="roadmap"
           style={{
             background: "var(--bg-1)",
             borderTop: "1px solid var(--line-soft)",

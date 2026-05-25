@@ -7,6 +7,7 @@ import { cache } from "react"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
+  trustHost: true,
   providers: [
     GitHub({
       clientId: process.env.GITHUB_ID!,
