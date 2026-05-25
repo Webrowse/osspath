@@ -1,77 +1,101 @@
 "use server"
 
 import { prisma } from "@/lib/prisma"
-import { auth } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import { ApplicationStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@/lib/generated/prisma"
 
-export async function saveCompany(companyId: string) {
-  const session = await auth()
+async function requireUser() {
+  const session = await getSession()
   if (!session?.user?.id) throw new Error("Unauthorized")
+  return session.user.id
+}
 
-  await prisma.savedCompany.upsert({
-    where: { userId_companyId: { userId: session.user.id, companyId } },
-    create: { userId: session.user.id, companyId },
-    update: {},
-  })
-
+function revalidateAll() {
   revalidatePath("/dashboard")
   revalidatePath("/companies")
 }
 
-export async function unsaveCompany(companyId: string) {
-  const session = await auth()
-  if (!session?.user?.id) throw new Error("Unauthorized")
-
-  await prisma.savedCompany.deleteMany({
-    where: { userId: session.user.id, companyId },
-  })
-
-  revalidatePath("/dashboard")
-  revalidatePath("/companies")
-}
-
-export async function upsertApplication(
+export async function upsertCompanyState(
   companyId: string,
   data: {
-    status?: ApplicationStatus
+    status: UserCompanyStatus
     appliedAt?: string | null
-    notes?: string | null
+    rejectedAt?: string | null
+    offerReceivedAt?: string | null
+    lastCheckedAt?: string | null
+    lastOpeningSeenAt?: string | null
+    followUpAt?: string | null
+    remindAfterDays?: number | null
     recruiterName?: string | null
-    salary?: string | null
-    reminderDate?: string | null
-  }
+    notes?: string | null
+    salaryExpectation?: string | null
+  },
 ) {
-  const session = await auth()
-  if (!session?.user?.id) throw new Error("Unauthorized")
+  const userId = await requireUser()
 
   const parsed = {
-    status: data.status ?? "WISHLIST",
-    appliedAt: data.appliedAt ? new Date(data.appliedAt) : null,
-    notes: data.notes ?? null,
+    status: data.status,
+    appliedAt: data.appliedAt ? new Date(data.appliedAt) : undefined,
+    rejectedAt: data.rejectedAt ? new Date(data.rejectedAt) : undefined,
+    offerReceivedAt: data.offerReceivedAt ? new Date(data.offerReceivedAt) : undefined,
+    lastCheckedAt: data.lastCheckedAt ? new Date(data.lastCheckedAt) : undefined,
+    lastOpeningSeenAt: data.lastOpeningSeenAt ? new Date(data.lastOpeningSeenAt) : undefined,
+    followUpAt: data.followUpAt ? new Date(data.followUpAt) : undefined,
+    remindAfterDays: data.remindAfterDays ?? null,
     recruiterName: data.recruiterName ?? null,
-    salary: data.salary ?? null,
-    reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
-  } as const
+    notes: data.notes ?? null,
+    salaryExpectation: data.salaryExpectation ?? null,
+  }
 
-  await prisma.application.upsert({
-    where: { userId_companyId: { userId: session.user.id, companyId } },
-    create: { userId: session.user.id, companyId, ...parsed },
+  await prisma.userCompanyState.upsert({
+    where: { userId_companyId: { userId, companyId } },
+    create: { userId, companyId, ...parsed },
     update: parsed,
   })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/companies")
+  revalidateAll()
 }
 
-export async function deleteApplication(companyId: string) {
-  const session = await auth()
-  if (!session?.user?.id) throw new Error("Unauthorized")
+export async function removeCompanyState(companyId: string) {
+  const userId = await requireUser()
 
-  await prisma.application.deleteMany({
-    where: { userId: session.user.id, companyId },
+  await prisma.userCompanyState.deleteMany({
+    where: { userId, companyId },
   })
 
-  revalidatePath("/dashboard")
-  revalidatePath("/companies")
+  revalidateAll()
+}
+
+// Quick actions for the company card
+export async function markCompanyStatus(companyId: string, status: UserCompanyStatus) {
+  const userId = await requireUser()
+
+  const extra: Record<string, Date | null> = {}
+  if (status === "APPLIED") extra.appliedAt = new Date()
+  if (status === "REJECTED") extra.rejectedAt = new Date()
+  if (status === "OFFER") extra.offerReceivedAt = new Date()
+  if (status === "NO_OPENINGS" || status === "HIRING_FREEZE") {
+    extra.lastCheckedAt = new Date()
+  }
+
+  await prisma.userCompanyState.upsert({
+    where: { userId_companyId: { userId, companyId } },
+    create: { userId, companyId, status, ...extra },
+    update: { status, ...extra },
+  })
+
+  revalidateAll()
+}
+
+export async function markChecked(companyId: string) {
+  const userId = await requireUser()
+
+  await prisma.userCompanyState.upsert({
+    where: { userId_companyId: { userId, companyId } },
+    create: { userId, companyId, lastCheckedAt: new Date() },
+    update: { lastCheckedAt: new Date() },
+  })
+
+  revalidateAll()
 }

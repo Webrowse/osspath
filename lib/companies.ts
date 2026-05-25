@@ -1,92 +1,185 @@
 import { unstable_cache } from "next/cache"
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
+import type { CompanyFilters, TimeFilter } from "@/types"
+import { PAGE_SIZE } from "@/types"
+import type { UserCompanyStatus } from "@/lib/generated/prisma"
+
+// ─── Where clause builders ────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type WhereClause = any
+type AnyWhere = any
 
-function buildWhere(
-  search: string,
-  tags: string[],
-  remoteOnly: boolean,
-  rustOnly: boolean,
-): WhereClause {
-  const where: WhereClause = {}
-  if (search) {
+function buildCompanyWhere(
+  filters: Pick<CompanyFilters, "q" | "tags" | "remoteOnly" | "rustOnly" | "companyType">,
+): AnyWhere {
+  const where: AnyWhere = {}
+  if (filters.q) {
     where.OR = [
-      { name: { contains: search, mode: "insensitive" } },
-      { description: { contains: search, mode: "insensitive" } },
+      { name: { contains: filters.q, mode: "insensitive" } },
+      { description: { contains: filters.q, mode: "insensitive" } },
     ]
   }
-  if (remoteOnly) where.remote = true
-  if (rustOnly) where.rustLevel = { not: "NONE" }
-  if (tags.length > 0) where.tags = { hasSome: tags }
+  if (filters.remoteOnly) where.remote = true
+  if (filters.rustOnly) where.rustLevel = { not: "NONE" }
+  if (filters.tags.length > 0) where.tags = { hasEvery: filters.tags }
+  if (filters.companyType) where.companyType = filters.companyType
   return where
 }
 
-// Base company list — cached 60s, shared across all users
-const fetchBaseCompanies = unstable_cache(
-  async (search: string, tags: string[], remoteOnly: boolean, rustOnly: boolean) =>
-    prisma.company.findMany({
-      where: buildWhere(search, tags, remoteOnly, rustOnly),
-      orderBy: { name: "asc" },
-    }),
-  ["companies-list"],
-  { revalidate: 60 },
-)
+function buildTimeCondition(timeFilter: TimeFilter, userId: string): AnyWhere {
+  const now = new Date()
+  const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000)
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
-// Individual company — cached 60s
-const fetchBaseCompany = unstable_cache(
-  async (slug: string) => prisma.company.findUnique({ where: { slug } }),
-  ["company-by-slug"],
-  { revalidate: 60 },
-)
-
-// User-specific overlay — always fresh, fetches all in two queries
-async function getUserData(userId: string) {
-  const [applications, saved] = await Promise.all([
-    prisma.application.findMany({
-      where: { userId },
-      select: {
-        companyId: true,
-        status: true,
-        appliedAt: true,
-        notes: true,
-        salary: true,
-        recruiterName: true,
-        reminderDate: true,
-      },
-    }),
-    prisma.savedCompany.findMany({
-      where: { userId },
-      select: { companyId: true },
-    }),
-  ])
-  return {
-    applicationMap: new Map(applications.map((a) => [a.companyId, a])),
-    savedSet: new Set(saved.map((s) => s.companyId)),
+  switch (timeFilter) {
+    case "applied_today":
+      return { userStates: { some: { userId, appliedAt: { gte: today } } } }
+    case "applied_7d":
+      return { userStates: { some: { userId, appliedAt: { gte: daysAgo(7) } } } }
+    case "applied_30d":
+      return { userStates: { some: { userId, appliedAt: { gte: daysAgo(30) } } } }
+    case "applied_older_30d":
+      return { userStates: { some: { userId, appliedAt: { lt: daysAgo(30) } } } }
+    case "not_checked_7d":
+      return {
+        userStates: {
+          some: { userId, OR: [{ lastCheckedAt: { lt: daysAgo(7) } }, { lastCheckedAt: null }] },
+        },
+      }
+    case "not_checked_14d":
+      return {
+        userStates: {
+          some: { userId, OR: [{ lastCheckedAt: { lt: daysAgo(14) } }, { lastCheckedAt: null }] },
+        },
+      }
+    case "updated_7d":
+      return { userStates: { some: { userId, updatedAt: { gte: daysAgo(7) } } } }
+    case "follow_up_due":
+      return { userStates: { some: { userId, followUpAt: { lte: now } } } }
   }
 }
 
-export async function getCompanies(opts?: {
-  search?: string
-  tags?: string[]
-  remoteOnly?: boolean
-  rustOnly?: boolean
-  userId?: string
-}) {
-  const search = opts?.search ?? ""
-  const tags = opts?.tags ?? []
-  const remoteOnly = opts?.remoteOnly ?? false
-  const rustOnly = opts?.rustOnly ?? false
-  const userId = opts?.userId
+function buildFullWhere(filters: CompanyFilters, userId: string): AnyWhere {
+  const conditions: AnyWhere[] = [buildCompanyWhere(filters)]
+  const { statuses, hideNotInterested, timeFilter } = filters
 
-  // Cached company list and user data fetched in parallel
-  const [companies, userData] = await Promise.all([
-    fetchBaseCompanies(search, tags, remoteOnly, rustOnly),
-    userId ? getUserData(userId) : Promise.resolve(null),
-  ])
+  if (statuses.length > 0) {
+    const hasNotApplied = statuses.includes("NOT_APPLIED")
+    const others = statuses.filter((s) => s !== "NOT_APPLIED")
 
+    if (hasNotApplied && others.length === 0) {
+      conditions.push({ userStates: { none: { userId } } })
+    } else if (hasNotApplied) {
+      conditions.push({
+        OR: [
+          { userStates: { none: { userId } } },
+          { userStates: { some: { userId, status: { in: others } } } },
+        ],
+      })
+    } else {
+      conditions.push({ userStates: { some: { userId, status: { in: statuses } } } })
+    }
+  }
+
+  if (timeFilter) conditions.push(buildTimeCondition(timeFilter, userId))
+
+  if (hideNotInterested) {
+    conditions.push({
+      NOT: { userStates: { some: { userId, status: "NOT_INTERESTED" as UserCompanyStatus } } },
+    })
+  }
+
+  return conditions.length === 1 ? conditions[0] : { AND: conditions }
+}
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type CompanyState = {
+  status: UserCompanyStatus
+  appliedAt: Date | null
+  rejectedAt: Date | null
+  offerReceivedAt: Date | null
+  lastCheckedAt: Date | null
+  lastOpeningSeenAt: Date | null
+  followUpAt: Date | null
+  notes: string | null
+  recruiterName: string | null
+  salaryExpectation: string | null
+  updatedAt: Date
+}
+
+export type CompanyListItem = {
+  id: string
+  name: string
+  slug: string
+  logoUrl: string | null
+  description: string
+  careersUrl: string
+  loginUrl: string | null
+  tags: string[]
+  remote: boolean
+  rustLevel: string
+  atsProvider: string | null
+  companyType: string | null
+  isHiring: boolean
+  createdAt: Date
+  userState: CompanyState | null
+}
+
+export type StatusCounts = Partial<Record<UserCompanyStatus, number>>
+
+export type CompanyListResult = {
+  companies: CompanyListItem[]
+  total: number
+  page: number
+  pageSize: number
+  totalPages: number
+  statusCounts?: StatusCounts
+}
+
+// ─── Cached base query (no user state) ───────────────────────────────────────
+
+const fetchBaseCompanies = unstable_cache(
+  async (whereJson: string, skip: number, take: number) => {
+    const where = JSON.parse(whereJson)
+    const [companies, total] = await Promise.all([
+      prisma.company.findMany({ where, orderBy: { name: "asc" }, skip, take }),
+      prisma.company.count({ where }),
+    ])
+    return { companies, total }
+  },
+  ["companies-base"],
+  { revalidate: 60 },
+)
+
+// Fetch user states only for a specific set of company IDs
+async function fetchUserStates(userId: string, companyIds: string[]) {
+  if (companyIds.length === 0) return new Map<string, CompanyState>()
+  const rows = await prisma.userCompanyState.findMany({
+    where: { userId, companyId: { in: companyIds } },
+    select: {
+      companyId: true,
+      status: true,
+      appliedAt: true,
+      rejectedAt: true,
+      offerReceivedAt: true,
+      lastCheckedAt: true,
+      lastOpeningSeenAt: true,
+      followUpAt: true,
+      notes: true,
+      recruiterName: true,
+      salaryExpectation: true,
+      updatedAt: true,
+    },
+  })
+  return new Map(rows.map((r) => [r.companyId, r as CompanyState]))
+}
+
+function mergeCompanies(
+  companies: Awaited<ReturnType<typeof prisma.company.findMany>>,
+  stateMap: Map<string, CompanyState>,
+): CompanyListItem[] {
   return companies.map((c) => ({
     id: c.id,
     name: c.name,
@@ -99,19 +192,81 @@ export async function getCompanies(opts?: {
     remote: c.remote,
     rustLevel: c.rustLevel,
     atsProvider: c.atsProvider,
+    companyType: c.companyType,
+    isHiring: c.isHiring,
     createdAt: c.createdAt,
-    application: userData ? (userData.applicationMap.get(c.id) ?? null) : undefined,
-    isSaved: userData ? userData.savedSet.has(c.id) : undefined,
+    userState: stateMap.get(c.id) ?? null,
   }))
 }
 
-export type CompanyListItem = Awaited<ReturnType<typeof getCompanies>>[number]
+// ─── Main getCompanies ────────────────────────────────────────────────────────
+
+export async function getCompanies(
+  filters: CompanyFilters,
+  userId?: string,
+): Promise<CompanyListResult> {
+  const skip = (filters.page - 1) * PAGE_SIZE
+  const hasUserFilters =
+    !!userId &&
+    (filters.statuses.length > 0 || !!filters.timeFilter || filters.hideNotInterested)
+
+  let companies: Awaited<ReturnType<typeof prisma.company.findMany>>
+  let total: number
+
+  if (hasUserFilters) {
+    const where = buildFullWhere(filters, userId!)
+    ;[companies, total] = await Promise.all([
+      prisma.company.findMany({ where, orderBy: { name: "asc" }, skip, take: PAGE_SIZE }),
+      prisma.company.count({ where }),
+    ])
+  } else {
+    const where = buildCompanyWhere(filters)
+    const result = await fetchBaseCompanies(JSON.stringify(where), skip, PAGE_SIZE)
+    companies = result.companies
+    total = result.total
+  }
+
+  const [stateMap, statusCountRows] = await Promise.all([
+    userId
+      ? fetchUserStates(userId, companies.map((c) => c.id))
+      : Promise.resolve(new Map<string, CompanyState>()),
+    userId
+      ? prisma.userCompanyState.groupBy({
+          by: ["status"],
+          where: { userId },
+          _count: { status: true },
+        })
+      : Promise.resolve([]),
+  ])
+
+  const statusCounts: StatusCounts = Object.fromEntries(
+    statusCountRows.map((r) => [r.status, r._count.status]),
+  )
+
+  return {
+    companies: mergeCompanies(companies, stateMap),
+    total,
+    page: filters.page,
+    pageSize: PAGE_SIZE,
+    totalPages: Math.ceil(total / PAGE_SIZE),
+    statusCounts: userId ? statusCounts : undefined,
+  }
+}
+
+// ─── Single company ───────────────────────────────────────────────────────────
+
+const fetchBaseCompany = unstable_cache(
+  async (slug: string) => prisma.company.findUnique({ where: { slug } }),
+  ["company-by-slug"],
+  { revalidate: 60 },
+)
 
 export async function getCompanyBySlug(slug: string, userId?: string) {
-  // Cached company and user data fetched in parallel
-  const [company, userData] = await Promise.all([
+  const [company, state] = await Promise.all([
     fetchBaseCompany(slug),
-    userId ? getUserData(userId) : Promise.resolve(null),
+    userId
+      ? prisma.userCompanyState.findFirst({ where: { userId, company: { slug } } })
+      : Promise.resolve(null),
   ])
 
   if (!company) return null
@@ -128,29 +283,59 @@ export async function getCompanyBySlug(slug: string, userId?: string) {
     remote: company.remote,
     rustLevel: company.rustLevel,
     atsProvider: company.atsProvider,
+    companyType: company.companyType,
+    isHiring: company.isHiring,
     createdAt: company.createdAt,
-    application: userData ? (userData.applicationMap.get(company.id) ?? null) : undefined,
-    isSaved: userData ? userData.savedSet.has(company.id) : undefined,
+    userState: state ?? null,
   }
 }
 
-// Dashboard data — user-specific, always fresh. Uses cached getSession for dedup.
+// ─── Related companies ────────────────────────────────────────────────────────
+
+export async function getRelatedCompanies(
+  companyId: string,
+  tags: string[],
+  limit = 6,
+): Promise<CompanyListItem[]> {
+  if (tags.length === 0) return []
+  const rows = await prisma.company.findMany({
+    where: { id: { not: companyId }, tags: { hasSome: tags } },
+    orderBy: { name: "asc" },
+    take: limit,
+  })
+  return rows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    logoUrl: c.logoUrl,
+    description: c.description,
+    careersUrl: c.careersUrl,
+    loginUrl: c.loginUrl,
+    tags: c.tags,
+    remote: c.remote,
+    rustLevel: c.rustLevel,
+    atsProvider: c.atsProvider,
+    companyType: c.companyType,
+    isHiring: c.isHiring,
+    createdAt: c.createdAt,
+    userState: null,
+  }))
+}
+
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+
 export async function getDashboardData() {
   const session = await getSession()
   if (!session?.user?.id) return null
 
-  const [applications, saved] = await Promise.all([
-    prisma.application.findMany({
-      where: { userId: session.user.id },
-      include: { company: true },
-      orderBy: { updatedAt: "desc" },
-    }),
-    prisma.savedCompany.findMany({
-      where: { userId: session.user.id },
-      include: { company: true },
-      orderBy: { createdAt: "desc" },
-    }),
-  ])
+  const states = await prisma.userCompanyState.findMany({
+    where: {
+      userId: session.user.id,
+      status: { notIn: ["NOT_APPLIED", "NOT_INTERESTED"] },
+    },
+    include: { company: true },
+    orderBy: { updatedAt: "desc" },
+  })
 
-  return { applications, saved }
+  return { states }
 }

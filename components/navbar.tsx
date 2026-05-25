@@ -12,12 +12,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { PreferencesSwitcher } from "@/components/preferences-switcher"
 import { cn } from "@/lib/utils"
-import { Building2, LayoutDashboard, LogOut } from "lucide-react"
+import { LayoutDashboard, LogOut } from "lucide-react"
 
 const navLinks = [
   { href: "/companies", label: "Companies" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/dashboard", label: "How it works" },
+  { href: "/companies", label: "Changelog" },
+  { href: "/companies", label: "About" },
 ]
 
 export function Navbar() {
@@ -29,24 +32,53 @@ export function Navbar() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-14 items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded bg-white/10">
-                <Building2 className="h-4 w-4 text-white" />
+            <Link href="/" className="flex items-center gap-2.5">
+              {/* j. gradient logo */}
+              <div
+                style={{
+                  width: 26,
+                  height: 26,
+                  borderRadius: 7,
+                  background: "linear-gradient(135deg, var(--d-rust) 0%, var(--d-accent) 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "oklch(0.99 0 0)",
+                  fontWeight: 700,
+                  fontSize: 12,
+                  fontFamily: "var(--font-mono)",
+                  flexShrink: 0,
+                }}
+              >
+                j.
               </div>
               <span className="font-semibold text-sm tracking-tight text-foreground">
                 jobs.adarshrust
+              </span>
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10.5,
+                  padding: "1px 6px",
+                  borderRadius: 4,
+                  background: "var(--bg-2)",
+                  border: "1px solid var(--line-soft)",
+                  color: "var(--fg-2)",
+                }}
+              >
+                v0.4
               </span>
             </Link>
             <nav className="hidden md:flex items-center gap-1">
               {navLinks.map((link) => (
                 <Link
-                  key={link.href}
+                  key={link.label}
                   href={link.href}
                   className={cn(
                     "px-3 py-1.5 text-sm rounded-md transition-colors",
-                    pathname.startsWith(link.href)
-                      ? "bg-white/10 text-foreground"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    pathname === link.href
+                      ? "bg-white/12 text-foreground font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/6"
                   )}
                 >
                   {link.label}
@@ -55,7 +87,25 @@ export function Navbar() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            <span
+              className="hidden md:flex items-center gap-1.5 mr-1"
+              style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--fg-3)" }}
+            >
+              <kbd
+                style={{
+                  padding: "1px 5px",
+                  borderRadius: 4,
+                  border: "1px solid var(--line)",
+                  background: "var(--bg-2)",
+                  color: "var(--fg-2)",
+                  fontSize: 10,
+                }}
+              >
+                ⌘K
+              </kbd>
+            </span>
+            <PreferencesSwitcher />
             {status === "loading" ? (
               <div className="h-8 w-8 rounded-full bg-white/10 animate-pulse" />
             ) : session?.user ? (

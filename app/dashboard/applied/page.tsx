@@ -3,28 +3,20 @@ import { ApplicationRow } from "@/components/application-row"
 import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
-import { ApplicationStatus } from "@/lib/generated/prisma"
+import { ACTIVE_PIPELINE_STATUSES } from "@/types"
+import type { UserCompanyStatus } from "@/lib/generated/prisma"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Applied" }
 
-const APPLIED_STATUSES: ApplicationStatus[] = [
-  "APPLIED",
-  "OA",
-  "RECRUITER_CALL",
-  "INTERVIEWING",
-  "FINAL_ROUND",
-  "OFFER",
-]
-
 export default async function AppliedPage() {
   const data = await getDashboardData()
 
-  const applied = data?.applications.filter((a) =>
-    APPLIED_STATUSES.includes(a.status as ApplicationStatus)
+  const active = data?.states.filter((s) =>
+    ACTIVE_PIPELINE_STATUSES.includes(s.status as UserCompanyStatus),
   ) ?? []
 
-  if (applied.length === 0) {
+  if (active.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 mb-4">
@@ -44,28 +36,28 @@ export default async function AppliedPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-bold text-foreground">Applied</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">{applied.length} active applications</p>
+        <h1 className="text-lg font-bold text-foreground">Active Applications</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">{active.length} in pipeline</p>
       </div>
-
       <div className="rounded-lg border border-border bg-card px-4">
-        {applied.map((app) => (
+        {active.map((s) => (
           <ApplicationRow
-            key={app.id}
-            companyId={app.company.id}
-            companyName={app.company.name}
-            companySlug={app.company.slug}
-            companyLogoUrl={app.company.logoUrl}
-            companyTags={app.company.tags}
-            careersUrl={app.company.careersUrl}
-            loginUrl={app.company.loginUrl}
-            application={{
-              status: app.status as ApplicationStatus,
-              appliedAt: app.appliedAt,
-              notes: app.notes,
-              salary: app.salary,
-              recruiterName: app.recruiterName,
-              reminderDate: app.reminderDate,
+            key={s.id}
+            companyId={s.company.id}
+            companyName={s.company.name}
+            companySlug={s.company.slug}
+            companyLogoUrl={s.company.logoUrl}
+            careersUrl={s.company.careersUrl}
+            loginUrl={s.company.loginUrl}
+            userState={{
+              status: s.status as UserCompanyStatus,
+              appliedAt: s.appliedAt,
+              rejectedAt: s.rejectedAt,
+              followUpAt: s.followUpAt,
+              lastCheckedAt: s.lastCheckedAt,
+              notes: s.notes,
+              salaryExpectation: s.salaryExpectation,
+              recruiterName: s.recruiterName,
             }}
           />
         ))}

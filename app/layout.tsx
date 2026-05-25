@@ -2,6 +2,9 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
+import { SessionProvider } from "@/components/session-provider"
+import { UIPreferencesProvider } from "@/lib/theme"
+import { CommandPaletteMount } from "@/components/command-palette"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,24 +38,40 @@ export const metadata: Metadata = {
     title: "jobs.adarshrust.com",
     description: "Remote engineering job tracker for Rust and systems engineers.",
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: { index: true, follow: true },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+// Reads preferences before React hydrates — prevents flash of wrong theme
+const preferencesScript = `
+(function(){
+  try {
+    var t = localStorage.getItem('ui-theme') || 'graphite';
+    var d = localStorage.getItem('ui-density') || 'comfortable';
+    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-density', d);
+    if (t !== 'light') document.documentElement.classList.add('dark');
+  } catch(e) {}
+})()
+`
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased`}
+      suppressHydrationWarning
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
     >
+      <head>
+        {/* eslint-disable-next-line react/no-danger */}
+        <script dangerouslySetInnerHTML={{ __html: preferencesScript }} />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        {children}
+        <SessionProvider>
+          <UIPreferencesProvider>
+            {children}
+            <CommandPaletteMount />
+          </UIPreferencesProvider>
+        </SessionProvider>
         <Toaster />
       </body>
     </html>

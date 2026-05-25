@@ -3,34 +3,22 @@ import { ApplicationRow } from "@/components/application-row"
 import { Layers } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
-import { STATUS_LABELS } from "@/types"
-import { ApplicationStatus } from "@/lib/generated/prisma"
+import { DASHBOARD_STATUS_ORDER, STATUS_LABELS } from "@/types"
+import type { UserCompanyStatus } from "@/lib/generated/prisma"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Dashboard" }
 
-const STATUS_ORDER: ApplicationStatus[] = [
-  "OFFER",
-  "FINAL_ROUND",
-  "INTERVIEWING",
-  "RECRUITER_CALL",
-  "OA",
-  "APPLIED",
-  "WISHLIST",
-  "GHOSTED",
-  "REJECTED",
-]
-
 export default async function DashboardPage() {
   const data = await getDashboardData()
 
-  if (!data || data.applications.length === 0) {
+  if (!data || data.states.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
         <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 mb-4">
           <Layers className="h-7 w-7 text-muted-foreground/40" />
         </div>
-        <p className="text-sm font-medium text-muted-foreground">No applications yet</p>
+        <p className="text-sm font-medium text-muted-foreground">Nothing tracked yet</p>
         <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs">
           Start tracking applications from the companies directory
         </p>
@@ -41,33 +29,23 @@ export default async function DashboardPage() {
     )
   }
 
-  const sorted = [...data.applications].sort((a, b) => {
-    const ai = STATUS_ORDER.indexOf(a.status as ApplicationStatus)
-    const bi = STATUS_ORDER.indexOf(b.status as ApplicationStatus)
-    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi)
-  })
-
-  const groupedByStatus = sorted.reduce(
-    (acc, app) => {
-      const key = app.status as ApplicationStatus
+  const grouped = data.states.reduce(
+    (acc, s) => {
+      const key = s.status as UserCompanyStatus
       if (!acc[key]) acc[key] = []
-      acc[key].push(app)
+      acc[key].push(s)
       return acc
     },
-    {} as Record<ApplicationStatus, typeof sorted>
+    {} as Record<UserCompanyStatus, typeof data.states>,
   )
 
-  const orderedKeys = STATUS_ORDER.filter((s) => groupedByStatus[s]?.length > 0)
+  const orderedKeys = DASHBOARD_STATUS_ORDER.filter((s) => grouped[s]?.length > 0)
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-bold text-foreground">All Applications</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {data.applications.length} total
-          </p>
-        </div>
+      <div>
+        <h1 className="text-lg font-bold text-foreground">All Applications</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">{data.states.length} tracked</p>
       </div>
 
       {orderedKeys.map((status) => (
@@ -76,28 +54,27 @@ export default async function DashboardPage() {
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               {STATUS_LABELS[status]}
             </h2>
-            <span className="text-xs text-muted-foreground/60">
-              {groupedByStatus[status].length}
-            </span>
+            <span className="text-xs text-muted-foreground/60">{grouped[status].length}</span>
           </div>
           <div className="rounded-lg border border-border bg-card px-4">
-            {groupedByStatus[status].map((app) => (
+            {grouped[status].map((s) => (
               <ApplicationRow
-                key={app.id}
-                companyId={app.company.id}
-                companyName={app.company.name}
-                companySlug={app.company.slug}
-                companyLogoUrl={app.company.logoUrl}
-                companyTags={app.company.tags}
-                careersUrl={app.company.careersUrl}
-                loginUrl={app.company.loginUrl}
-                application={{
-                  status: app.status as ApplicationStatus,
-                  appliedAt: app.appliedAt,
-                  notes: app.notes,
-                  salary: app.salary,
-                  recruiterName: app.recruiterName,
-                  reminderDate: app.reminderDate,
+                key={s.id}
+                companyId={s.company.id}
+                companyName={s.company.name}
+                companySlug={s.company.slug}
+                companyLogoUrl={s.company.logoUrl}
+                careersUrl={s.company.careersUrl}
+                loginUrl={s.company.loginUrl}
+                userState={{
+                  status: s.status as UserCompanyStatus,
+                  appliedAt: s.appliedAt,
+                  rejectedAt: s.rejectedAt,
+                  followUpAt: s.followUpAt,
+                  lastCheckedAt: s.lastCheckedAt,
+                  notes: s.notes,
+                  salaryExpectation: s.salaryExpectation,
+                  recruiterName: s.recruiterName,
                 }}
               />
             ))}

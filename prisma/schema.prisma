@@ -16,10 +16,9 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
-  accounts       Account[]
-  sessions       Session[]
-  applications   Application[]
-  savedCompanies SavedCompany[]
+  accounts      Account[]
+  sessions      Session[]
+  companyStates UserCompanyState[]
 
   @@map("users")
 }
@@ -64,25 +63,7 @@ model VerificationToken {
   @@map("verification_tokens")
 }
 
-model Company {
-  id          String    @id @default(cuid())
-  name        String
-  slug        String    @unique
-  logoUrl     String?
-  description String
-  careersUrl  String
-  loginUrl    String?
-  tags        String[]
-  remote      Boolean   @default(true)
-  rustLevel   RustLevel @default(NONE)
-  atsProvider String?
-  createdAt   DateTime  @default(now())
-
-  applications Application[]
-  savedByUsers SavedCompany[]
-
-  @@map("companies")
-}
+// ─── Company ─────────────────────────────────────────────────────────────────
 
 enum RustLevel {
   NONE
@@ -91,8 +72,46 @@ enum RustLevel {
   CORE
 }
 
-enum ApplicationStatus {
-  WISHLIST
+enum CompanyType {
+  STARTUP
+  SCALEUP
+  ENTERPRISE
+  OPEN_SOURCE
+  AGENCY
+}
+
+model Company {
+  id          String       @id @default(cuid())
+  name        String
+  slug        String       @unique
+  logoUrl     String?
+  description String
+  careersUrl  String
+  loginUrl    String?
+  tags        String[]
+  remote      Boolean      @default(true)
+  rustLevel   RustLevel    @default(NONE)
+  atsProvider String?
+  companyType CompanyType?
+  isHiring    Boolean      @default(true)
+  lastHiringCheckAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @default(now()) @updatedAt
+
+  userStates UserCompanyState[]
+
+  @@index([name])
+  @@index([remote])
+  @@index([rustLevel])
+  @@index([isHiring])
+  @@map("companies")
+}
+
+// ─── User Company State ───────────────────────────────────────────────────────
+
+enum UserCompanyStatus {
+  NOT_APPLIED
+  SAVED
   APPLIED
   OA
   RECRUITER_CALL
@@ -101,37 +120,42 @@ enum ApplicationStatus {
   OFFER
   REJECTED
   GHOSTED
+  NO_OPENINGS
+  HIRING_FREEZE
+  NOT_INTERESTED
 }
 
-model Application {
-  id            String            @id @default(cuid())
-  userId        String
-  companyId     String
-  status        ApplicationStatus @default(WISHLIST)
-  appliedAt     DateTime?
-  notes         String?           @db.Text
-  recruiterName String?
-  salary        String?
-  reminderDate  DateTime?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, companyId])
-  @@map("applications")
-}
-
-model SavedCompany {
-  id        String   @id @default(cuid())
+model UserCompanyState {
+  id        String            @id @default(cuid())
   userId    String
   companyId String
+
+  status UserCompanyStatus @default(NOT_APPLIED)
+
+  appliedAt         DateTime?
+  rejectedAt        DateTime?
+  offerReceivedAt   DateTime?
+  lastCheckedAt     DateTime?
+  lastOpeningSeenAt DateTime?
+  followUpAt        DateTime?
+  remindAfterDays   Int?
+
+  recruiterName     String?
+  notes             String?   @db.Text
+  salaryExpectation String?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@unique([userId, companyId])
-  @@map("saved_companies")
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, appliedAt])
+  @@index([userId, lastCheckedAt])
+  @@index([userId, followUpAt])
+  @@index([userId, updatedAt])
+  @@map("user_company_states")
 }

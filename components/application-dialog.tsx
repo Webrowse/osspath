@@ -21,13 +21,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { upsertApplication, deleteApplication } from "@/actions/company"
-import { ApplicationStatus } from "@/lib/generated/prisma"
+import { upsertCompanyState, removeCompanyState } from "@/actions/company"
+import type { UserCompanyStatus } from "@/lib/generated/prisma"
 import { STATUS_LABELS } from "@/types"
 import { Trash2 } from "lucide-react"
 
-const STATUSES: ApplicationStatus[] = [
-  "WISHLIST",
+const STATUSES: UserCompanyStatus[] = [
+  "SAVED",
   "APPLIED",
   "OA",
   "RECRUITER_CALL",
@@ -36,78 +36,84 @@ const STATUSES: ApplicationStatus[] = [
   "OFFER",
   "REJECTED",
   "GHOSTED",
+  "NO_OPENINGS",
+  "HIRING_FREEZE",
+  "NOT_INTERESTED",
 ]
 
 interface ApplicationDialogProps {
   companyId: string
   companyName: string
-  application?: {
+  userState?: {
     status: string
     appliedAt?: Date | null
+    rejectedAt?: Date | null
+    followUpAt?: Date | null
+    lastCheckedAt?: Date | null
     notes?: string | null
-    salary?: string | null
     recruiterName?: string | null
-    reminderDate?: Date | null
+    salaryExpectation?: string | null
   } | null
   trigger: React.ReactNode
   onSuccess?: () => void
 }
 
+function toDateInput(d: Date | null | undefined) {
+  return d ? new Date(d).toISOString().split("T")[0] : ""
+}
+
 export function ApplicationDialog({
   companyId,
   companyName,
-  application,
+  userState,
   trigger,
   onSuccess,
 }: ApplicationDialogProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const [status, setStatus] = useState<ApplicationStatus>(
-    (application?.status as ApplicationStatus) ?? "WISHLIST"
+
+  const [status, setStatus] = useState<UserCompanyStatus>(
+    (userState?.status as UserCompanyStatus) ?? "SAVED",
   )
-  const [notes, setNotes] = useState(application?.notes ?? "")
-  const [recruiterName, setRecruiterName] = useState(application?.recruiterName ?? "")
-  const [salary, setSalary] = useState(application?.salary ?? "")
-  const [appliedAt, setAppliedAt] = useState(
-    application?.appliedAt
-      ? new Date(application.appliedAt).toISOString().split("T")[0]
-      : ""
-  )
-  const [reminderDate, setReminderDate] = useState(
-    application?.reminderDate
-      ? new Date(application.reminderDate).toISOString().split("T")[0]
-      : ""
-  )
+  const [appliedAt, setAppliedAt] = useState(toDateInput(userState?.appliedAt))
+  const [rejectedAt, setRejectedAt] = useState(toDateInput(userState?.rejectedAt))
+  const [followUpAt, setFollowUpAt] = useState(toDateInput(userState?.followUpAt))
+  const [lastCheckedAt, setLastCheckedAt] = useState(toDateInput(userState?.lastCheckedAt))
+  const [recruiterName, setRecruiterName] = useState(userState?.recruiterName ?? "")
+  const [salaryExpectation, setSalaryExpectation] = useState(userState?.salaryExpectation ?? "")
+  const [notes, setNotes] = useState(userState?.notes ?? "")
 
   const handleSave = () => {
     startTransition(async () => {
       try {
-        await upsertApplication(companyId, {
+        await upsertCompanyState(companyId, {
           status,
           appliedAt: appliedAt || null,
-          notes: notes || null,
+          rejectedAt: rejectedAt || null,
+          followUpAt: followUpAt || null,
+          lastCheckedAt: lastCheckedAt || null,
           recruiterName: recruiterName || null,
-          salary: salary || null,
-          reminderDate: reminderDate || null,
+          salaryExpectation: salaryExpectation || null,
+          notes: notes || null,
         })
-        toast.success("Application saved")
+        toast.success("Saved")
         setOpen(false)
         onSuccess?.()
       } catch {
-        toast.error("Failed to save application")
+        toast.error("Failed to save")
       }
     })
   }
 
-  const handleDelete = () => {
+  const handleRemove = () => {
     startTransition(async () => {
       try {
-        await deleteApplication(companyId)
-        toast.success("Application removed")
+        await removeCompanyState(companyId)
+        toast.success("Removed")
         setOpen(false)
         onSuccess?.()
       } catch {
-        toast.error("Failed to remove application")
+        toast.error("Failed to remove")
       }
     })
   }
@@ -123,7 +129,7 @@ export function ApplicationDialog({
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as ApplicationStatus)}>
+            <Select value={status} onValueChange={(v) => setStatus(v as UserCompanyStatus)}>
               <SelectTrigger className="h-8 text-sm bg-white/5 border-white/10">
                 <SelectValue />
               </SelectTrigger>
@@ -148,11 +154,32 @@ export function ApplicationDialog({
               />
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Reminder</Label>
+              <Label className="text-xs text-muted-foreground">Follow-up date</Label>
               <Input
                 type="date"
-                value={reminderDate}
-                onChange={(e) => setReminderDate(e.target.value)}
+                value={followUpAt}
+                onChange={(e) => setFollowUpAt(e.target.value)}
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Last checked</Label>
+              <Input
+                type="date"
+                value={lastCheckedAt}
+                onChange={(e) => setLastCheckedAt(e.target.value)}
+                className="h-8 text-sm bg-white/5 border-white/10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs text-muted-foreground">Rejected date</Label>
+              <Input
+                type="date"
+                value={rejectedAt}
+                onChange={(e) => setRejectedAt(e.target.value)}
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
             </div>
@@ -171,8 +198,8 @@ export function ApplicationDialog({
             <div className="space-y-1.5">
               <Label className="text-xs text-muted-foreground">Salary / comp</Label>
               <Input
-                value={salary}
-                onChange={(e) => setSalary(e.target.value)}
+                value={salaryExpectation}
+                onChange={(e) => setSalaryExpectation(e.target.value)}
                 placeholder="$180k + equity"
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
@@ -191,11 +218,11 @@ export function ApplicationDialog({
         </div>
 
         <div className="flex items-center justify-between gap-2 pt-2">
-          {application && (
+          {userState && (
             <Button
               size="sm"
               variant="ghost"
-              onClick={handleDelete}
+              onClick={handleRemove}
               disabled={isPending}
               className="text-red-400 hover:text-red-300 hover:bg-red-950/30 h-8"
             >
