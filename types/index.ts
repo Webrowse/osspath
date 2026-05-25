@@ -1,4 +1,4 @@
-import { UserCompanyStatus, RustLevel, CompanyType } from "@/lib/generated/prisma"
+import { UserCompanyStatus, RustLevel, CompanyType } from "@prisma/client"
 
 export type { UserCompanyStatus, RustLevel, CompanyType }
 

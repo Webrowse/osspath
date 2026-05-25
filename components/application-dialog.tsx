@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { upsertCompanyState, removeCompanyState } from "@/actions/company"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 import { STATUS_LABELS } from "@/types"
 import { Trash2 } from "lucide-react"
 

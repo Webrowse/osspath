@@ -4,7 +4,7 @@ import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { ACTIVE_PIPELINE_STATUSES } from "@/types"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Applied" }

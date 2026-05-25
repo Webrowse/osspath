@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import { revalidatePath } from "next/cache"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 
 async function requireUser() {
   const session = await getSession()

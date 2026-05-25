@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
 import type { CompanyFilters, TimeFilter } from "@/types"
 import { PAGE_SIZE } from "@/types"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 
 // ─── Where clause builders ────────────────────────────────────────────────────
 

@@ -4,7 +4,7 @@ import { Layers } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { DASHBOARD_STATUS_ORDER, STATUS_LABELS } from "@/types"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Dashboard" }

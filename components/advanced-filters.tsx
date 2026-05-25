@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 import type { CompanyFilters, TimeFilter } from "@/types"
 import { STATUS_LABELS, TIME_FILTER_LABELS, ALL_TAGS } from "@/types"
 import type { StatusCounts } from "@/lib/companies"

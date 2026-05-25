@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { STATUS_LABELS, STATUS_COLORS } from "@/types"
-import type { UserCompanyStatus } from "@/lib/generated/prisma"
+import type { UserCompanyStatus } from "@prisma/client"
 import { cn } from "@/lib/utils"
 
 interface StatusBadgeProps {
