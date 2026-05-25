@@ -9,13 +9,13 @@ import { CompanyRow } from "@/components/company-row"
 import { CompanyCard } from "@/components/company-card"
 import { Pagination } from "@/components/pagination"
 import { useCompanies } from "@/hooks/use-companies"
-import type { CompanyListResult } from "@/lib/companies"
+import type { CompaniesClientData } from "@/lib/companies"
 import type { CompanyFilters } from "@/types"
 import { parseFilters } from "@/types"
 
 interface CompaniesShellProps {
   initialFilters: CompanyFilters
-  initialData: CompanyListResult
+  initialData: CompaniesClientData
   isAuthenticated: boolean
 }
 
@@ -40,11 +40,15 @@ export function CompaniesShell({
 }: CompaniesShellProps) {
   const [filters, setFilters] = useState<CompanyFilters>(initialFilters)
   const [view, setView] = useState<ViewMode>("list")
+  // searchValue mirrors filters.q for the input — kept separate so the input
+  // updates on every keystroke while filters update immediately (no debounce needed)
   const [searchValue, setSearchValue] = useState(initialFilters.q)
   const { data, loading } = useCompanies(filters, initialData)
   const searchRef = useRef<HTMLInputElement>(null)
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const urlSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Ref holds current filters so callbacks never capture stale closures
+  const filtersRef = useRef(filters)
+  filtersRef.current = filters
 
   // "/" shortcut focuses search
   useEffect(() => {
@@ -60,7 +64,7 @@ export function CompaniesShell({
     return () => document.removeEventListener("keydown", handler)
   }, [])
 
-  // Debounced URL sync — doesn't trigger Next.js re-render
+  // Debounced URL sync only — doesn't trigger re-render or data fetch
   const syncUrl = useCallback((f: CompanyFilters) => {
     if (urlSyncTimer.current) clearTimeout(urlSyncTimer.current)
     urlSyncTimer.current = setTimeout(() => {
@@ -97,26 +101,24 @@ export function CompaniesShell({
     [syncUrl],
   )
 
+  // No debounce — filtering is instant (client-side). Uses ref to avoid stale closure.
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value)
-      if (searchTimer.current) clearTimeout(searchTimer.current)
-      searchTimer.current = setTimeout(() => {
-        const next = { ...filters, q: value, page: 1 }
-        setFilters(next)
-        syncUrl(next)
-      }, 250)
+      const next = { ...filtersRef.current, q: value, page: 1 }
+      setFilters(next)
+      syncUrl(next)
     },
-    [filters, syncUrl],
+    [syncUrl],
   )
 
   const handlePageChange = useCallback(
     (page: number) => {
-      const next = { ...filters, page }
+      const next = { ...filtersRef.current, page }
       setFilters(next)
       syncUrl(next)
     },
-    [filters, syncUrl],
+    [syncUrl],
   )
 
   const { companies, total, page, totalPages } = data

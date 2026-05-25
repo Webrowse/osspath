@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
@@ -32,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/companies?status=SAVED", label: "Saved", icon: <Bookmark size={14} />, exact: false },
 ]
 
-export function AppSidebar({
+export const AppSidebar = memo(function AppSidebar({
   filters,
   onFiltersChange,
   isAuthenticated,
@@ -293,4 +294,4 @@ export function AppSidebar({
       </div>
     </aside>
   )
-}
+})

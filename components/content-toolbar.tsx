@@ -1,6 +1,6 @@
 "use client"
 
-import { type RefObject } from "react"
+import { memo, type RefObject } from "react"
 import { Search, X, List, LayoutGrid } from "lucide-react"
 import { useUIPreferences } from "@/lib/theme"
 
@@ -16,7 +16,7 @@ interface ContentToolbarProps {
   loading?: boolean
 }
 
-export function ContentToolbar({
+export const ContentToolbar = memo(function ContentToolbar({
   searchValue,
   onSearchChange,
   searchRef,
@@ -181,7 +181,7 @@ export function ContentToolbar({
       </div>
     </div>
   )
-}
+})
 
 function ToolbarBtn({
   active,

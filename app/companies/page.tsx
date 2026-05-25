@@ -1,5 +1,5 @@
 import { getSession } from "@/lib/auth"
-import { getCompanies } from "@/lib/companies"
+import { getAllCompaniesForClient } from "@/lib/companies"
 import { CompaniesShell } from "@/components/companies-shell"
 import { parseFilters } from "@/types"
 import type { Metadata } from "next"
@@ -26,12 +26,15 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const isAuthenticated = !!session
   const userId = session?.user?.id
 
-  const filters = parseFilters(rawParams)
-  const initialData = await getCompanies(filters, userId)
+  // Parse filters for initial UI state (URL → sidebar/toolbar state)
+  const initialFilters = parseFilters(rawParams)
+
+  // Load all companies + all user states in two parallel DB queries
+  const initialData = await getAllCompaniesForClient(userId)
 
   return (
     <CompaniesShell
-      initialFilters={filters}
+      initialFilters={initialFilters}
       initialData={initialData}
       isAuthenticated={isAuthenticated}
     />

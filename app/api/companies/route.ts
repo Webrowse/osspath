@@ -20,5 +20,15 @@ export async function GET(req: NextRequest) {
   const filters = parseFilters(params)
   const result = await getCompanies(filters, userId)
 
-  return NextResponse.json(result)
+  // Authenticated responses must not be cached publicly
+  if (userId) {
+    return NextResponse.json(result, {
+      headers: { "Cache-Control": "private, no-store" },
+    })
+  }
+
+  // Unauthenticated: short public cache — safe because no user data
+  return NextResponse.json(result, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+  })
 }

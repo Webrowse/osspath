@@ -138,8 +138,22 @@ export type CompanyListResult = {
   statusCounts?: StatusCounts
 }
 
-// ─── Cached base query (no user state) ───────────────────────────────────────
+// Full dataset for client-side filtering — loaded once on initial page render
+export type CompaniesClientData = {
+  allCompanies: CompanyListItem[]
+  statusCounts?: StatusCounts
+}
 
+// ─── Cached base queries ──────────────────────────────────────────────────────
+
+// Full company list — no user data, cached 5 min. Used for client-side filtering.
+const fetchAllCompaniesBase = unstable_cache(
+  async () => prisma.company.findMany({ orderBy: { name: "asc" } }),
+  ["companies-all"],
+  { revalidate: 300 },
+)
+
+// Paginated + filtered base query — for server-side pagination fallback
 const fetchBaseCompanies = unstable_cache(
   async (whereJson: string, skip: number, take: number) => {
     const where = JSON.parse(whereJson)
@@ -151,6 +165,31 @@ const fetchBaseCompanies = unstable_cache(
   },
   ["companies-base"],
   { revalidate: 60 },
+)
+
+// All user states for a given user — lightweight (users track <200 companies)
+const fetchAllUserStates = unstable_cache(
+  async (userId: string) => {
+    return prisma.userCompanyState.findMany({
+      where: { userId },
+      select: {
+        companyId: true,
+        status: true,
+        appliedAt: true,
+        rejectedAt: true,
+        offerReceivedAt: true,
+        lastCheckedAt: true,
+        lastOpeningSeenAt: true,
+        followUpAt: true,
+        notes: true,
+        recruiterName: true,
+        salaryExpectation: true,
+        updatedAt: true,
+      },
+    })
+  },
+  ["user-states-all"],
+  { revalidate: 30 },
 )
 
 // Fetch user states only for a specific set of company IDs
@@ -249,6 +288,28 @@ export async function getCompanies(
     page: filters.page,
     pageSize: PAGE_SIZE,
     totalPages: Math.ceil(total / PAGE_SIZE),
+    statusCounts: userId ? statusCounts : undefined,
+  }
+}
+
+// ─── Client-side data load (all companies + all user states, parallel) ────────
+
+export async function getAllCompaniesForClient(userId?: string): Promise<CompaniesClientData> {
+  const [baseCompanies, userStateRows] = await Promise.all([
+    fetchAllCompaniesBase(),
+    userId ? fetchAllUserStates(userId) : Promise.resolve([]),
+  ])
+
+  const stateMap = new Map(userStateRows.map((r) => [r.companyId, r as CompanyState]))
+
+  // Compute statusCounts from in-memory rows — no extra DB round trip
+  const statusCounts: StatusCounts = {}
+  for (const r of userStateRows) {
+    statusCounts[r.status] = (statusCounts[r.status] ?? 0) + 1
+  }
+
+  return {
+    allCompanies: mergeCompanies(baseCompanies, stateMap),
     statusCounts: userId ? statusCounts : undefined,
   }
 }
