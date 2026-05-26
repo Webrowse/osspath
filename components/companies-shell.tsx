@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { usePostHog } from "posthog-js/react"
 import { Building2, X } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
 import { AdvancedFilters } from "@/components/advanced-filters"
@@ -232,10 +233,31 @@ export function CompaniesShell({
   const { data, loading } = useCompanies(filters, initialData)
   const searchRef = useRef<HTMLInputElement>(null)
   const urlSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const filterTrackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isFirstMount = useRef(true)
   const filtersRef = useRef(filters)
   filtersRef.current = filters
+  const ph = usePostHog()
 
   const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters])
+
+  // Debounced filter analytics — fires 2s after the last filter change
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false
+      return
+    }
+    if (filterTrackTimer.current) clearTimeout(filterTrackTimer.current)
+    filterTrackTimer.current = setTimeout(() => {
+      const activeCount = countActiveFilters(filters)
+      if (activeCount > 0) {
+        ph?.capture("filter_applied", { active_filter_count: activeCount })
+      }
+    }, 2000)
+    return () => {
+      if (filterTrackTimer.current) clearTimeout(filterTrackTimer.current)
+    }
+  }, [filters, ph])
 
   // Close filter drawer when viewport goes desktop-wide
   useEffect(() => {
@@ -371,6 +393,39 @@ export function CompaniesShell({
 
         {/* Active filter chips — shows when any filter is active */}
         <ActiveFilterChips filters={filters} onFiltersChange={handleFiltersChange} />
+
+        {/* First-run hint — visible while user has no tracked companies */}
+        {isAuthenticated && data.statusCounts !== undefined && Object.keys(data.statusCounts).length === 0 && (
+          <div
+            style={{
+              padding: "7px 16px",
+              borderBottom: "1px solid var(--line-soft)",
+              background: "var(--d-accent-soft)",
+              fontSize: 12,
+              color: "var(--fg-2)",
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 10,
+                color: "var(--d-accent)",
+                background: "var(--d-accent-soft)",
+                border: "1px solid var(--d-accent-line)",
+                padding: "1px 6px",
+                borderRadius: 4,
+                flexShrink: 0,
+              }}
+            >
+              tip
+            </span>
+            Click any company, then <strong style={{ color: "var(--fg-1)", fontWeight: 500 }}>Start tracking</strong> to add it to your pipeline.
+          </div>
+        )}
 
         <main style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
           {/* Page header */}

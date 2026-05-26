@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react"
 import type React from "react"
 import { toast } from "sonner"
+import { usePostHog } from "posthog-js/react"
 import {
   Dialog,
   DialogContent,
@@ -71,6 +72,7 @@ export function ApplicationDialog({
 }: ApplicationDialogProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const ph = usePostHog()
 
   const [status, setStatus] = useState<UserCompanyStatus>(
     (userState?.status as UserCompanyStatus) ?? "SAVED",
@@ -96,6 +98,13 @@ export function ApplicationDialog({
           salaryExpectation: salaryExpectation || null,
           notes: notes || null,
         })
+        ph?.capture("company_tracked", {
+          company_id: companyId,
+          company_name: companyName,
+          status,
+          is_new: !userState,
+          had_follow_up: !!followUpAt,
+        })
         toast.success("Saved")
         setOpen(false)
         onSuccess?.()
@@ -109,6 +118,7 @@ export function ApplicationDialog({
     startTransition(async () => {
       try {
         await removeCompanyState(companyId)
+        ph?.capture("company_untracked", { company_id: companyId, company_name: companyName })
         toast.success("Removed")
         setOpen(false)
         onSuccess?.()

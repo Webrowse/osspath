@@ -1,6 +1,6 @@
 import { getDashboardData } from "@/lib/companies"
 import { ApplicationRow } from "@/components/application-row"
-import { Layers } from "lucide-react"
+import { ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { DASHBOARD_STATUS_ORDER, STATUS_LABELS } from "@/types"
@@ -14,73 +14,165 @@ export default async function DashboardPage() {
 
   if (!data || data.states.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/5 mb-4">
-          <Layers className="h-7 w-7 text-muted-foreground/40" />
+      <div className="flex flex-col items-start py-12 max-w-sm">
+        <h1 className="text-lg font-bold text-foreground mb-1">Pipeline</h1>
+        <p className="text-xs text-muted-foreground mb-8">Nothing tracked yet</p>
+
+        <div className="w-full space-y-3 mb-8">
+          {[
+            "Browse companies — find ones worth your attention",
+            "Click any card → \"Start tracking\" to add to your pipeline",
+            "Set status and follow-up date after applying",
+            "Return here to see the full picture across all applications",
+          ].map((text, i) => (
+            <div key={i} className="flex items-start gap-3">
+              <span
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 10,
+                  color: "var(--d-accent)",
+                  background: "var(--d-accent-soft)",
+                  border: "1px solid var(--d-accent-line)",
+                  borderRadius: 4,
+                  padding: "1px 6px",
+                  flexShrink: 0,
+                  marginTop: 2,
+                }}
+              >
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <p className="text-sm text-muted-foreground leading-relaxed">{text}</p>
+            </div>
+          ))}
         </div>
-        <p className="text-sm font-medium text-muted-foreground">Nothing tracked yet</p>
-        <p className="text-xs text-muted-foreground/60 mt-1 max-w-xs">
-          Start tracking applications from the companies directory
-        </p>
-        <Link href="/companies" className={buttonVariants({ size: "sm", variant: "secondary" }) + " mt-4"}>
+
+        <Link
+          href="/companies"
+          className={buttonVariants({ size: "sm" }) + " gap-1.5"}
+        >
           Browse companies
+          <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
     )
   }
 
-  const grouped = data.states.reduce(
+  const { states, metrics } = data
+
+  const grouped = states.reduce(
     (acc: any, s: any) => {
       const key = s.status as UserCompanyStatus
       if (!acc[key]) acc[key] = []
       acc[key].push(s)
       return acc
     },
-    {} as Record<UserCompanyStatus, typeof data.states>,
+    {} as Record<UserCompanyStatus, typeof states>,
   )
 
   const orderedKeys = DASHBOARD_STATUS_ORDER.filter((s: any) => grouped[s]?.length > 0)
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-bold text-foreground">All Applications</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">{data.states.length} tracked</p>
+      {/* Pipeline metrics strip */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 1,
+          background: "var(--line-soft)",
+          borderRadius: 8,
+          overflow: "hidden",
+          border: "1px solid var(--line-soft)",
+        }}
+      >
+        {[
+          { label: "Tracked", value: metrics.total, sub: "in pipeline", color: "var(--fg-0)" },
+          { label: "Active", value: metrics.activePipeline, sub: "in progress", color: "var(--d-accent)" },
+          {
+            label: "Follow-up",
+            value: metrics.followUpsDue,
+            sub: metrics.followUpsDue === 1 ? "overdue" : "overdue",
+            color: metrics.followUpsDue > 0 ? "var(--d-warn)" : "var(--fg-3)",
+          },
+        ].map((stat) => (
+          <div
+            key={stat.label}
+            style={{ padding: "10px 14px", background: "var(--bg-1)" }}
+          >
+            <div
+              style={{
+                fontFamily: "var(--font-mono)",
+                fontSize: 9,
+                color: "var(--fg-3)",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                marginBottom: 4,
+              }}
+            >
+              {stat.label}
+            </div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+              <span
+                style={{
+                  fontSize: 22,
+                  fontWeight: 600,
+                  color: stat.color,
+                  fontVariantNumeric: "tabular-nums",
+                  lineHeight: 1,
+                }}
+              >
+                {stat.value}
+              </span>
+              <span style={{ fontSize: 11, color: "var(--fg-3)" }}>{stat.sub}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
-      {orderedKeys.map((status: any) => (
-        <div key={status}>
-          <div className="flex items-center gap-2 mb-2">
-            <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {STATUS_LABELS[status as UserCompanyStatus]}
-            </h2>
-            <span className="text-xs text-muted-foreground/60">{grouped[status as UserCompanyStatus].length}</span>
-          </div>
-          <div className="rounded-lg border border-border bg-card px-4">
-            {grouped[status as UserCompanyStatus].map((s: any) => (
-              <ApplicationRow
-                key={s.id}
-                companyId={s.company.id}
-                companyName={s.company.name}
-                companySlug={s.company.slug}
-                companyLogoUrl={s.company.logoUrl}
-                careersUrl={s.company.careersUrl}
-                loginUrl={s.company.loginUrl}
-                userState={{
-                  status: s.status as UserCompanyStatus,
-                  appliedAt: s.appliedAt,
-                  rejectedAt: s.rejectedAt,
-                  followUpAt: s.followUpAt,
-                  lastCheckedAt: s.lastCheckedAt,
-                  notes: s.notes,
-                  salaryExpectation: s.salaryExpectation,
-                  recruiterName: s.recruiterName,
-                }}
-              />
-            ))}
-          </div>
+      {/* Application groups */}
+      <div>
+        <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+          All Applications
+        </h1>
+
+        <div className="space-y-6">
+          {orderedKeys.map((status: any) => (
+            <div key={status}>
+              <div className="flex items-center gap-2 mb-2">
+                <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  {STATUS_LABELS[status as UserCompanyStatus]}
+                </h2>
+                <span className="text-xs text-muted-foreground/60">
+                  {grouped[status as UserCompanyStatus].length}
+                </span>
+              </div>
+              <div className="rounded-lg border border-border bg-card px-4">
+                {grouped[status as UserCompanyStatus].map((s: any) => (
+                  <ApplicationRow
+                    key={s.id}
+                    companyId={s.company.id}
+                    companyName={s.company.name}
+                    companySlug={s.company.slug}
+                    companyLogoUrl={s.company.logoUrl}
+                    careersUrl={s.company.careersUrl}
+                    loginUrl={s.company.loginUrl}
+                    userState={{
+                      status: s.status as UserCompanyStatus,
+                      appliedAt: s.appliedAt,
+                      rejectedAt: s.rejectedAt,
+                      followUpAt: s.followUpAt,
+                      lastCheckedAt: s.lastCheckedAt,
+                      notes: s.notes,
+                      salaryExpectation: s.salaryExpectation,
+                      recruiterName: s.recruiterName,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      </div>
     </div>
   )
 }

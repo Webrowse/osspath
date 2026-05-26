@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner"
 import { SessionProvider } from "@/components/session-provider"
 import { UIPreferencesProvider } from "@/lib/theme"
 import { CommandPaletteMount } from "@/components/command-palette"
+import { PostHogProvider } from "@/components/posthog-provider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -70,10 +71,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SessionProvider>
-          <UIPreferencesProvider>
-            {children}
-            <CommandPaletteMount />
-          </UIPreferencesProvider>
+          <PostHogProvider>
+            <UIPreferencesProvider>
+              {children}
+              <CommandPaletteMount />
+            </UIPreferencesProvider>
+          </PostHogProvider>
         </SessionProvider>
         <Toaster />
       </body>

@@ -4,6 +4,7 @@ import Google from "next-auth/providers/google"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { prisma } from "@/lib/prisma"
 import { cache } from "react"
+import { captureServerEvent } from "@/lib/analytics"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -25,6 +26,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     session({ session, user }) {
       session.user.id = user.id
       return session
+    },
+  },
+  events: {
+    async signIn({ user, account, isNewUser }) {
+      if (!user.id) return
+      await captureServerEvent(user.id, {
+        event: "sign_in",
+        props: {
+          provider: account?.provider ?? "unknown",
+          is_new_user: isNewUser ?? false,
+        },
+      })
     },
   },
 })

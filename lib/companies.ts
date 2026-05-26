@@ -203,6 +203,21 @@ export async function getRelatedCompanies(
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
+const ACTIVE_PIPELINE_STATUSES = [
+  "APPLIED",
+  "OA",
+  "RECRUITER_CALL",
+  "INTERVIEWING",
+  "FINAL_ROUND",
+  "OFFER",
+] as const
+
+export type DashboardMetrics = {
+  total: number
+  activePipeline: number
+  followUpsDue: number
+}
+
 export async function getDashboardData() {
   const session = await getSession()
   if (!session?.user?.id) return null
@@ -216,5 +231,19 @@ export async function getDashboardData() {
     orderBy: { updatedAt: "desc" },
   })
 
-  return { states }
+  // End of today in UTC — followUpAt dates on or before this are overdue
+  const now = new Date()
+  const todayEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 23, 59, 59))
+
+  const metrics: DashboardMetrics = {
+    total: states.length,
+    activePipeline: states.filter((s) =>
+      (ACTIVE_PIPELINE_STATUSES as readonly string[]).includes(s.status)
+    ).length,
+    followUpsDue: states.filter(
+      (s) => s.followUpAt && new Date(s.followUpAt) <= todayEnd
+    ).length,
+  }
+
+  return { states, metrics }
 }
