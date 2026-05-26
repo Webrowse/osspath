@@ -19,7 +19,7 @@ const STEPS = [
     n: "02",
     label: "Track",
     tagline: "Move companies through your pipeline",
-    body: "Add any company to your personal pipeline. Set status (Interested → Applied → Interviewing → Offer / Rejected), leave notes, attach a resume version, set a follow-up date.",
+    body: "Add any company to your personal pipeline. Set status (Saved → Applied → Interviewing → Offer / Rejected), leave notes, and set a follow-up date.",
     detail: "All state is yours — private, per-user. No recruiter sees it. No company sees it.",
     preview: <TrackPreview />,
   },
@@ -348,8 +348,8 @@ function TrackPreview() {
       >
         <MiniField label="Applied" value="May 18, 2026" />
         <MiniField label="Follow-up" value="Jun 1, 2026" />
-        <MiniField label="Resume" value="v3-systems.pdf" />
-        <MiniField label="Contact" value="@glauber" />
+        <MiniField label="Comp" value="$185k" />
+        <MiniField label="Recruiter" value="Glauber Costa" />
       </div>
       <div
         style={{
@@ -372,7 +372,7 @@ function MonitorPreview() {
     { label: "Tracked", value: "24", color: "var(--fg-0)" },
     { label: "Interviewing", value: "3", color: "var(--d-rust)" },
     { label: "Follow-up due", value: "5", color: "var(--d-warn)" },
-    { label: "New openings", value: "8", color: "var(--d-ok)" },
+    { label: "Applied", value: "8", color: "var(--d-accent)" },
   ]
   return (
     <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
@@ -388,7 +388,7 @@ function MonitorPreview() {
         {[
           { name: "Fly.io", status: "Interviewing", badge: "active", badgeColor: "var(--d-rust)" },
           { name: "Cloudflare", status: "Applied", badge: "stale 14d", badgeColor: "var(--d-warn)" },
-          { name: "Modal", status: "Interested", badge: "now hiring", badgeColor: "var(--d-ok)" },
+          { name: "Modal", status: "Saved", badge: "now hiring", badgeColor: "var(--d-ok)" },
         ].map((r: any) => (
           <div key={r.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 16, height: 16, borderRadius: 4, background: "var(--bg-3)", flexShrink: 0 }} />

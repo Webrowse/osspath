@@ -75,7 +75,7 @@ const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }
 const ROADMAP_ITEMS = [
   {
     stage: "Now", title: "Companies + tracking",
-    desc: "412 companies, 5-state tracking, sidebar filters, saved views.",
+    desc: "Full company database, 13-status pipeline tracking, sidebar filters, quick filter presets.",
     color: "var(--d-ok)",
   },
   {
@@ -103,18 +103,23 @@ const FILTER_FEATURES = [
   },
   {
     icon: <Target size={14} />,
-    title: "Saved views",
-    desc: "Pin your power-user stack. Switch contexts in one tap.",
+    title: "Quick filters",
+    desc: "One-tap presets for active pipeline, overdue follow-ups, and recently saved.",
   },
   {
     icon: <Sparkles size={14} />,
-    title: "Smart queues",
-    desc: "Resurface companies you saved but never followed up on.",
+    title: "Follow-up tracking",
+    desc: "Set follow-up dates when you apply. Surface everything overdue in one filter.",
   },
 ]
 
 export default async function HomePage() {
-  const [session, companyCount] = await Promise.all([getSession(), prisma.company.count()])
+  const [session, companyCount, remoteCount, hiringCount] = await Promise.all([
+    getSession(),
+    prisma.company.count(),
+    prisma.company.count({ where: { remote: true } }),
+    prisma.company.count({ where: { isHiring: true } }),
+  ])
 
   return (
     <>
@@ -265,7 +270,7 @@ export default async function HomePage() {
                 }}
               >
                 <Users size={13} style={{ color: "var(--fg-2)" }} />
-                {session ? "Open dashboard" : "Request invite"}
+                {session ? "Open dashboard" : "Sign in"}
               </Link>
               <span
                 style={{
@@ -291,9 +296,9 @@ export default async function HomePage() {
               }}
             >
               {[
-                { k: String(companyCount), l: "companies tracked", c: "var(--fg-0)" },
-                { k: "1,180+", l: "open roles indexed", c: "var(--d-rust)" },
-                { k: "97%", l: "remote-first listings", c: "var(--d-accent)" },
+                { k: String(companyCount), l: "companies indexed", c: "var(--fg-0)" },
+                { k: String(hiringCount), l: "actively hiring now", c: "var(--d-rust)" },
+                { k: `${Math.round((remoteCount / companyCount) * 100)}%`, l: "remote-first", c: "var(--d-accent)" },
               ].map((x, i) => (
                 <div key={i}>
                   <div
@@ -317,7 +322,7 @@ export default async function HomePage() {
 
           {/* Right: HeroPreview */}
           <div className="landing-hero-preview">
-            <HeroPreview />
+            <HeroPreview companyCount={companyCount} />
           </div>
         </section>
 
@@ -803,7 +808,7 @@ function PreviewCard({
 
 // ── HeroPreview ──────────────────────────────────────────────────────────────
 
-function HeroPreview() {
+function HeroPreview({ companyCount }: { companyCount: number }) {
   return (
     <div
       style={{
@@ -880,10 +885,9 @@ function HeroPreview() {
           }}
         >
           {[
-            { l: "Companies", a: true, n: 412 },
+            { l: "Companies", a: true, n: companyCount },
             { l: "Tracking", n: 18 },
-            { l: "Inbox", n: 3 },
-            { l: "Saved", n: 24 },
+            { l: "Saved", n: 7 },
           ].map((x, i) => (
             <div
               key={i}
@@ -923,9 +927,9 @@ function HeroPreview() {
           {[
             { l: "Applied", dot: "var(--d-accent)" },
             { l: "Interviewing", dot: "var(--d-rust)", on: true },
-            { l: "Follow-up", dot: "var(--d-warn)", on: true },
-            { l: "Hiring", dot: "var(--d-ok)" },
-            { l: "Remote · EU", dot: "var(--fg-2)" },
+            { l: "Follow-up due", dot: "var(--d-warn)", on: true },
+            { l: "Actively hiring", dot: "var(--d-ok)" },
+            { l: "Remote only", dot: "var(--fg-2)" },
           ].map((f, i) => (
             <div
               key={i}
@@ -1558,8 +1562,8 @@ function DashboardPreview() {
               {[
                 { l: "TRACKED", v: "18", s: "across pipeline", c: "var(--fg-0)" },
                 { l: "INTERVIEWING", v: "2", s: "active", c: "var(--d-rust)" },
-                { l: "FOLLOW-UP", v: "5", s: "this week", c: "var(--d-warn)" },
-                { l: "NEW", v: "12", s: "since visit", c: "var(--d-ok)" },
+                { l: "FOLLOW-UP", v: "5", s: "overdue", c: "var(--d-warn)" },
+                { l: "APPLIED", v: "9", s: "awaiting reply", c: "var(--d-accent)" },
               ].map((s, i) => (
                 <div
                   key={i}
