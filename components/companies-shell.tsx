@@ -22,8 +22,8 @@ interface CompaniesShellProps {
 function filtersToSearchParams(filters: CompanyFilters): string {
   const p = new URLSearchParams()
   if (filters.q) p.set("q", filters.q)
-  filters.statuses.forEach((s) => p.append("status", s))
-  filters.tags.forEach((t) => p.append("tag", t))
+  filters.statuses.forEach((s: any) => p.append("status", s))
+  filters.tags.forEach((t: any) => p.append("tag", t))
   if (filters.remoteOnly) p.set("remote", "1")
   if (filters.rustOnly) p.set("rust", "1")
   if (filters.companyType) p.set("company_type", filters.companyType)
@@ -210,11 +210,11 @@ export function CompaniesShell({
                 cursor: "pointer",
                 fontFamily: "var(--font-sans)",
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={(e: any) => {
                 e.currentTarget.style.background = "var(--bg-2)"
                 e.currentTarget.style.color = "var(--fg-0)"
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={(e: any) => {
                 e.currentTarget.style.background = "transparent"
                 e.currentTarget.style.color = "var(--fg-2)"
               }}
@@ -237,8 +237,8 @@ export function CompaniesShell({
                 fontFamily: "var(--font-sans)",
                 fontWeight: 500,
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+              onMouseEnter={(e: any) => (e.currentTarget.style.opacity = "0.85")}
+              onMouseLeave={(e: any) => (e.currentTarget.style.opacity = "1")}
             >
               + Track company
             </button>
@@ -276,7 +276,7 @@ export function CompaniesShell({
                 overflow: "hidden",
               }}
             >
-              {companies.map((company) => (
+              {companies.map((company: any) => (
                 <CompanyRow
                   key={company.id}
                   company={company}
@@ -293,7 +293,7 @@ export function CompaniesShell({
                 padding: "16px 20px",
               }}
             >
-              {companies.map((company) => (
+              {companies.map((company: any) => (
                 <CompanyCard
                   key={company.id}
                   company={company}

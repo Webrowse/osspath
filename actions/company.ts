@@ -2,8 +2,8 @@
 
 import { prisma } from "@/lib/prisma"
 import { getSession } from "@/lib/auth"
-import { revalidatePath } from "next/cache"
-import type { UserCompanyStatus } from "@prisma/client"
+import { revalidatePath, revalidateTag } from "next/cache"
+import type { UserCompanyStatus } from "@/lib/company-status"
 
 async function requireUser() {
   const session = await getSession()
@@ -12,6 +12,7 @@ async function requireUser() {
 }
 
 function revalidateAll() {
+  revalidateTag("user-states")
   revalidatePath("/dashboard")
   revalidatePath("/companies")
 }

@@ -53,7 +53,7 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
             defaultValue={page}
             key={page}
             onKeyDown={handleInputKey}
-            onBlur={(e) => {
+            onBlur={(e: any) => {
               const v = parseInt(e.target.value, 10)
               if (!isNaN(v)) go(v)
             }}

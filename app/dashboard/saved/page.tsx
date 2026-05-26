@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Saved" }
 export default async function SavedPage() {
   const [data, session] = await Promise.all([getDashboardData(), getSession()])
 
-  const saved = data?.states.filter((s) => s.status === "SAVED") ?? []
+  const saved = data?.states.filter((s: any) => s.status === "SAVED") ?? []
 
   if (saved.length === 0) {
     return (
@@ -31,7 +31,7 @@ export default async function SavedPage() {
     )
   }
 
-  const companies: CompanyListItem[] = saved.map((s) => ({
+  const companies: CompanyListItem[] = saved.map((s: any) => ({
     id: s.company.id,
     name: s.company.name,
     slug: s.company.slug,
@@ -68,7 +68,7 @@ export default async function SavedPage() {
         <p className="text-xs text-muted-foreground mt-0.5">{companies.length} saved</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        {companies.map((company) => (
+        {companies.map((company: any) => (
           <CompanyCard key={company.id} company={company} isAuthenticated={!!session} />
         ))}
       </div>

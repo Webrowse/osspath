@@ -55,7 +55,7 @@ export const ContentToolbar = memo(function ContentToolbar({
         <input
           ref={searchRef}
           value={searchValue}
-          onChange={(e) => onSearchChange(e.target.value)}
+          onChange={(e: any) => onSearchChange(e.target.value)}
           placeholder="Search companies…"
           style={{
             width: "100%",
@@ -69,8 +69,8 @@ export const ContentToolbar = memo(function ContentToolbar({
             color: "var(--fg-0)",
             fontFamily: "var(--font-sans)",
           }}
-          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--line)")}
-          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--line-soft)")}
+          onFocus={(e: any) => (e.currentTarget.style.borderColor = "var(--line)")}
+          onBlur={(e: any) => (e.currentTarget.style.borderColor = "var(--line-soft)")}
         />
         {searchValue ? (
           <button

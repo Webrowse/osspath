@@ -74,7 +74,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
     if (isSaved) {
       setLocalState(null)
     } else {
-      setLocalState((s) => ({ ...(s ?? ({} as CompanyState)), status: "SAVED" }))
+      setLocalState((s: any) => ({ ...(s ?? ({} as CompanyState)), status: "SAVED" }))
     }
     try {
       if (isSaved) {
@@ -98,7 +98,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
     const prev = localState
     const already = currentStatus === "APPLIED"
     const next = already ? ("SAVED" as const) : ("APPLIED" as const)
-    setLocalState((s) => ({ ...(s ?? ({} as CompanyState)), status: next }))
+    setLocalState((s: any) => ({ ...(s ?? ({} as CompanyState)), status: next }))
     try {
       await markCompanyStatus(company.id, next)
       toast.success(already ? "Moved to saved" : "Marked as applied")
@@ -155,7 +155,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
       <div style={{ width: 170, flexShrink: 0, minWidth: 0, overflow: "hidden" }}>
         <Link
           href={`/companies/${company.slug}`}
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e: any) => e.stopPropagation()}
           style={{
             display: "block",
             fontWeight: 600,
@@ -215,7 +215,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
           overflow: "hidden",
         }}
       >
-        {visibleTags.map((tag) => (
+        {visibleTags.map((tag: any) => (
           <span
             key={tag}
             style={{
@@ -268,7 +268,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
           )
         ) : (
           <button
-            onClick={(e) => { e.stopPropagation(); handleMarkApplied() }}
+            onClick={(e: any) => { e.stopPropagation(); handleMarkApplied() }}
             style={{
               ...actionBtnStyle,
               opacity: hovered || isApplied ? 1 : 0,
@@ -289,7 +289,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
           href={company.careersUrl}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e: any) => e.stopPropagation()}
           style={{
             display: "flex",
             alignItems: "center",
@@ -315,7 +315,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
         </span>
 
         <button
-          onClick={(e) => { e.stopPropagation(); handleToggleSave() }}
+          onClick={(e: any) => { e.stopPropagation(); handleToggleSave() }}
           style={{
             display: "flex",
             alignItems: "center",

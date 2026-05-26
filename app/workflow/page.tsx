@@ -265,7 +265,7 @@ function DiscoverPreview() {
         <FilterChip label="Rust only" active />
         <FilterChip label="Remote" active={false} />
       </div>
-      {rows.map((r) => (
+      {rows.map((r: any) => (
         <div
           key={r.name}
           style={{
@@ -302,7 +302,7 @@ function DiscoverPreview() {
               hiring
             </span>
           )}
-          {r.tags.map((t) => (
+          {r.tags.map((t: any) => (
             <span
               key={t}
               style={{
@@ -373,7 +373,7 @@ function MonitorPreview() {
   return (
     <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 8 }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 1, background: "var(--line-soft)", borderRadius: 6, overflow: "hidden" }}>
-        {stats.map((s) => (
+        {stats.map((s: any) => (
           <div key={s.label} style={{ background: "var(--bg-1)", padding: "8px 10px" }}>
             <div style={{ fontSize: 16, fontWeight: 700, color: s.color, fontFamily: "var(--font-mono)" }}>{s.value}</div>
             <div style={{ fontSize: 9, color: "var(--fg-3)", marginTop: 2 }}>{s.label}</div>
@@ -385,7 +385,7 @@ function MonitorPreview() {
           { name: "Fly.io", status: "Interviewing", badge: "active", badgeColor: "var(--d-rust)" },
           { name: "Cloudflare", status: "Applied", badge: "stale 14d", badgeColor: "var(--d-warn)" },
           { name: "Modal", status: "Interested", badge: "now hiring", badgeColor: "var(--d-ok)" },
-        ].map((r) => (
+        ].map((r: any) => (
           <div key={r.name} style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <div style={{ width: 16, height: 16, borderRadius: 4, background: "var(--bg-3)", flexShrink: 0 }} />
             <span style={{ fontSize: 11, fontWeight: 500, color: "var(--fg-0)", flex: 1 }}>{r.name}</span>
@@ -410,7 +410,7 @@ function FollowUpPreview() {
         <span style={{ fontSize: 11, fontWeight: 600, color: "var(--fg-0)" }}>Follow-up due</span>
         <span style={{ fontSize: 10, fontFamily: "var(--font-mono)", color: "var(--d-warn)", background: "color-mix(in oklch, var(--d-warn), transparent 85%)", padding: "1px 5px", borderRadius: 4 }}>5 this week</span>
       </div>
-      {items.map((item) => (
+      {items.map((item: any) => (
         <div
           key={item.name}
           style={{

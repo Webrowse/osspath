@@ -27,7 +27,7 @@ export function CompanyAvatar({ name, logoUrl, size = 36 }: CompanyAvatarProps) 
   const initials = name
     .trim()
     .split(/\s+/)
-    .map((w) => w[0] ?? "")
+    .map((w: any) => w[0] ?? "")
     .slice(0, 2)
     .join("")
     .toUpperCase()

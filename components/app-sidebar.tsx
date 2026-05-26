@@ -69,8 +69,8 @@ export const AppSidebar = memo(function AppSidebar({
           flexShrink: 0,
           textDecoration: "none",
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.background = "var(--bg-2)")}
-        onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+        onMouseEnter={(e: any) => (e.currentTarget.style.background = "var(--bg-2)")}
+        onMouseLeave={(e: any) => (e.currentTarget.style.background = "transparent")}
       >
         {/* j. gradient logo */}
         <div
@@ -119,7 +119,7 @@ export const AppSidebar = memo(function AppSidebar({
 
       {/* Nav */}
       <nav style={{ padding: "8px 8px 0", flexShrink: 0 }}>
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item: any) => {
           const active = pathname === item.href || (!item.exact && pathname.startsWith(item.href.split("?")[0]))
           return item.soon ? (
             <div
@@ -170,13 +170,13 @@ export const AppSidebar = memo(function AppSidebar({
                 marginBottom: 1,
                 fontWeight: active ? 500 : 400,
               }}
-              onMouseEnter={(e) => {
+              onMouseEnter={(e: any) => {
                 if (!active) {
                   e.currentTarget.style.background = "var(--bg-2)"
                   e.currentTarget.style.color = "var(--fg-0)"
                 }
               }}
-              onMouseLeave={(e) => {
+              onMouseLeave={(e: any) => {
                 if (!active) {
                   e.currentTarget.style.background = "transparent"
                   e.currentTarget.style.color = "var(--fg-2)"
@@ -255,8 +255,8 @@ export const AppSidebar = memo(function AppSidebar({
                 cursor: "pointer",
               }}
               title="Sign out"
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-3)")}
+              onMouseEnter={(e: any) => (e.currentTarget.style.color = "var(--fg-1)")}
+              onMouseLeave={(e: any) => (e.currentTarget.style.color = "var(--fg-3)")}
             >
               <LogOut size={13} />
             </button>
@@ -278,11 +278,11 @@ export const AppSidebar = memo(function AppSidebar({
               cursor: "pointer",
               transition: "background 100ms, color 100ms",
             }}
-            onMouseEnter={(e) => {
+            onMouseEnter={(e: any) => {
               e.currentTarget.style.background = "var(--bg-2)"
               e.currentTarget.style.color = "var(--fg-0)"
             }}
-            onMouseLeave={(e) => {
+            onMouseLeave={(e: any) => {
               e.currentTarget.style.background = "transparent"
               e.currentTarget.style.color = "var(--fg-2)"
             }}

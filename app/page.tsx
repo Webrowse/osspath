@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { getSession } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
-import { SessionProvider } from "@/components/session-provider"
 import { Navbar } from "@/components/navbar"
 import {
   ArrowRight,
@@ -22,7 +21,7 @@ function hashColor(name: string): string {
 }
 
 function getInitials(name: string): string {
-  return name.trim().split(/\s+/).map((w) => w[0] ?? "").slice(0, 2).join("").toUpperCase()
+  return name.trim().split(/\s+/).map((w: any) => w[0] ?? "").slice(0, 2).join("").toUpperCase()
 }
 
 // Demo data for preview sections
@@ -118,7 +117,7 @@ export default async function HomePage() {
   const [session, companyCount] = await Promise.all([getSession(), prisma.company.count()])
 
   return (
-    <SessionProvider>
+    <>
       <Navbar />
       <div
         style={{
@@ -340,7 +339,7 @@ export default async function HomePage() {
               marginTop: 28,
             }}
           >
-            {DEMO_COMPANIES.slice(0, 6).map((c) => (
+            {DEMO_COMPANIES.slice(0, 6).map((c: any) => (
               <PreviewCard key={c.id} company={c} />
             ))}
           </div>
@@ -607,7 +606,7 @@ export default async function HomePage() {
           </div>
         </footer>
       </div>
-    </SessionProvider>
+    </>
   )
 }
 
@@ -764,7 +763,7 @@ function PreviewCard({
         {company.desc}
       </div>
       <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
-        {company.tags.slice(0, 3).map((t) => (
+        {company.tags.slice(0, 3).map((t: any) => (
           <span
             key={t}
             style={{
@@ -992,7 +991,7 @@ function HeroPreview() {
               14
             </span>
             <span style={{ fontSize: 11, color: "var(--fg-3)" }}>results</span>
-            {["interviewing", "follow-up due"].map((chip) => (
+            {["interviewing", "follow-up due"].map((chip: any) => (
               <span
                 key={chip}
                 style={{
@@ -1019,7 +1018,7 @@ function HeroPreview() {
               marginTop: 4,
             }}
           >
-            {DEMO_COMPANIES.slice(0, 4).map((c) => {
+            {DEMO_COMPANIES.slice(0, 4).map((c: any) => {
               const color = hashColor(c.name)
               const initials = getInitials(c.name)
               return (
@@ -1083,7 +1082,7 @@ function HeroPreview() {
                     {c.desc}
                   </div>
                   <div style={{ display: "flex", gap: 4, marginTop: 2 }}>
-                    {c.tags.slice(0, 2).map((t) => (
+                    {c.tags.slice(0, 2).map((t: any) => (
                       <span
                         key={t}
                         style={{
@@ -1113,7 +1112,7 @@ function HeroPreview() {
 
 function FiltersPreview() {
   const filtered = DEMO_COMPANIES.filter(
-    (c) => c.hiring === "actively-hiring" && c.status !== "none"
+    (c: any) => c.hiring === "actively-hiring" && c.status !== "none"
   ).slice(0, 3)
 
   return (
@@ -1237,7 +1236,7 @@ function FiltersPreview() {
             ))}
           </div>
 
-          {filtered.map((c) => {
+          {filtered.map((c: any) => {
             const color = hashColor(c.name)
             const initials = getInitials(c.name)
             const st = STATUS_COLORS[c.status] ?? STATUS_COLORS.none
@@ -1420,7 +1419,7 @@ function DashboardPreview() {
             gap: 6,
           }}
         >
-          {[0, 1, 2, 3, 4, 5].map((i) => (
+          {[0, 1, 2, 3, 4, 5].map((i: any) => (
             <div
               key={i}
               style={{
@@ -1499,7 +1498,7 @@ function DashboardPreview() {
                 border: "1px solid var(--line-soft)",
               }}
             >
-              {[0, 1, 2].map((i) => (
+              {[0, 1, 2].map((i: any) => (
                 <span
                   key={i}
                   style={{
@@ -1594,7 +1593,7 @@ function DashboardPreview() {
                 gap: 10,
               }}
             >
-              {DEMO_COMPANIES.map((c) => {
+              {DEMO_COMPANIES.map((c: any) => {
                 const color = hashColor(c.name)
                 const initials = getInitials(c.name)
                 const st = STATUS_COLORS[c.status] ?? STATUS_COLORS.none

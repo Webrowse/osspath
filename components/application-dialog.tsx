@@ -22,7 +22,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { upsertCompanyState, removeCompanyState } from "@/actions/company"
-import type { UserCompanyStatus } from "@prisma/client"
+import type { UserCompanyStatus } from "@/lib/company-status"
 import { STATUS_LABELS } from "@/types"
 import { Trash2 } from "lucide-react"
 
@@ -129,7 +129,7 @@ export function ApplicationDialog({
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Status</Label>
-            <Select value={status} onValueChange={(v) => setStatus(v as UserCompanyStatus)}>
+            <Select value={status} onValueChange={(v: string | null) => v && setStatus(v as UserCompanyStatus)}>
               <SelectTrigger className="h-8 text-sm bg-white/5 border-white/10">
                 <SelectValue />
               </SelectTrigger>
@@ -149,7 +149,7 @@ export function ApplicationDialog({
               <Input
                 type="date"
                 value={appliedAt}
-                onChange={(e) => setAppliedAt(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAppliedAt(e.target.value)}
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
             </div>
@@ -158,7 +158,7 @@ export function ApplicationDialog({
               <Input
                 type="date"
                 value={followUpAt}
-                onChange={(e) => setFollowUpAt(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFollowUpAt(e.target.value)}
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
             </div>
@@ -170,7 +170,7 @@ export function ApplicationDialog({
               <Input
                 type="date"
                 value={lastCheckedAt}
-                onChange={(e) => setLastCheckedAt(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setLastCheckedAt(e.target.value)}
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
             </div>
@@ -179,7 +179,7 @@ export function ApplicationDialog({
               <Input
                 type="date"
                 value={rejectedAt}
-                onChange={(e) => setRejectedAt(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRejectedAt(e.target.value)}
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
             </div>
@@ -190,7 +190,7 @@ export function ApplicationDialog({
               <Label className="text-xs text-muted-foreground">Recruiter name</Label>
               <Input
                 value={recruiterName}
-                onChange={(e) => setRecruiterName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRecruiterName(e.target.value)}
                 placeholder="Jane Smith"
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
@@ -199,7 +199,7 @@ export function ApplicationDialog({
               <Label className="text-xs text-muted-foreground">Salary / comp</Label>
               <Input
                 value={salaryExpectation}
-                onChange={(e) => setSalaryExpectation(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSalaryExpectation(e.target.value)}
                 placeholder="$180k + equity"
                 className="h-8 text-sm bg-white/5 border-white/10"
               />
@@ -210,7 +210,7 @@ export function ApplicationDialog({
             <Label className="text-xs text-muted-foreground">Notes</Label>
             <Textarea
               value={notes}
-              onChange={(e) => setNotes(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNotes(e.target.value)}
               placeholder="Interview notes, recruiter feedback, follow-ups..."
               className="text-sm bg-white/5 border-white/10 resize-none min-h-[80px]"
             />

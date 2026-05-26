@@ -122,7 +122,7 @@ export default async function CompanyPage({ params }: PageProps) {
               Not actively hiring
             </Badge>
           )}
-          {c.tags.map((tag) => (
+          {c.tags.map((tag: string) => (
             <Badge
               key={tag}
               variant="secondary"
@@ -277,7 +277,7 @@ export default async function CompanyPage({ params }: PageProps) {
               Related companies
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
-              {related.map((rel) => (
+              {related.map((rel: any) => (
                 <Link
                   key={rel.id}
                   href={`/companies/${rel.slug}`}

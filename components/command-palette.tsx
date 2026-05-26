@@ -18,7 +18,7 @@ function getInitials(name: string): string {
   return name
     .trim()
     .split(/\s+/)
-    .map((w) => w[0] ?? "")
+    .map((w: any) => w[0] ?? "")
     .slice(0, 2)
     .join("")
     .toUpperCase()
@@ -103,7 +103,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       )
       if (!res.ok) return
       const data: { companies: CompanyListItem[] } = await res.json()
-      const items: CmdItem[] = (data.companies ?? []).slice(0, 8).map((c) => ({
+      const items: CmdItem[] = (data.companies ?? []).slice(0, 8).map((c: any) => ({
         id: `c-${c.id}`,
         kind: "company" as const,
         label: c.name,
@@ -126,7 +126,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   }, [q, fetchCompanies])
 
   const filteredActions = q
-    ? ACTIONS.filter((a) => a.label.toLowerCase().includes(q.toLowerCase()))
+    ? ACTIONS.filter((a: any) => a.label.toLowerCase().includes(q.toLowerCase()))
     : ACTIONS
 
   const displayItems: CmdItem[] = [...filteredActions, ...companies]
@@ -147,10 +147,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "ArrowDown") {
       e.preventDefault()
-      setIdx((i) => Math.min(displayItems.length - 1, i + 1))
+      setIdx((i: any) => Math.min(displayItems.length - 1, i + 1))
     } else if (e.key === "ArrowUp") {
       e.preventDefault()
-      setIdx((i) => Math.max(0, i - 1))
+      setIdx((i: any) => Math.max(0, i - 1))
     } else if (e.key === "Enter") {
       e.preventDefault()
       if (displayItems[idx]) choose(displayItems[idx])
@@ -177,7 +177,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       onClick={onClose}
     >
       <div
-        onClick={(e) => e.stopPropagation()}
+        onClick={(e: any) => e.stopPropagation()}
         style={{
           width: "min(620px, 92vw)",
           background: "var(--bg-1)",
@@ -202,7 +202,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           <input
             ref={inputRef}
             value={q}
-            onChange={(e) => setQ(e.target.value)}
+            onChange={(e: any) => setQ(e.target.value)}
             onKeyDown={onKeyDown}
             placeholder="Search companies, run a command…"
             style={{

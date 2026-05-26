@@ -37,7 +37,7 @@ export function filterCompanies(
     if (filters.statuses.length > 0) {
       const currentStatus = company.userState?.status ?? null
       const hasNotApplied = filters.statuses.includes("NOT_APPLIED")
-      const others = filters.statuses.filter((s) => s !== "NOT_APPLIED") as string[]
+      const others: string[] = filters.statuses.filter((s) => s !== "NOT_APPLIED")
 
       if (hasNotApplied && others.length === 0) {
         if (currentStatus !== null && currentStatus !== "NOT_APPLIED") return false

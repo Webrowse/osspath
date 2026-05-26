@@ -61,7 +61,7 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
     if (isSaved) {
       setLocalState(null)
     } else {
-      setLocalState((s) => ({ ...(s ?? ({} as CompanyState)), status: "SAVED" }))
+      setLocalState((s: any) => ({ ...(s ?? ({} as CompanyState)), status: "SAVED" }))
     }
     try {
       if (isSaved) {
@@ -85,7 +85,7 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
     const prev = localState
     const already = currentStatus === "APPLIED"
     const next = already ? ("SAVED" as const) : ("APPLIED" as const)
-    setLocalState((s) => ({ ...(s ?? ({} as CompanyState)), status: next }))
+    setLocalState((s: any) => ({ ...(s ?? ({} as CompanyState)), status: next }))
     try {
       await markCompanyStatus(company.id, next)
       toast.success(already ? "Moved to saved" : "Marked as applied")
@@ -202,7 +202,7 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
 
       {/* Tags */}
       <div className="flex flex-wrap gap-1">
-        {displayedTags.map((tag) => (
+        {displayedTags.map((tag: any) => (
           <span
             key={tag}
             style={{
@@ -223,7 +223,7 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
         ))}
         {!tagsExpanded && extraTags > 0 && (
           <button
-            onClick={(e) => {
+            onClick={(e: any) => {
               e.stopPropagation()
               setTagsExpanded(true)
             }}

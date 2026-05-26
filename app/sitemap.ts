@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     { url: "https://jobs.adarshrust.com", lastModified: new Date() },
     { url: "https://jobs.adarshrust.com/companies", lastModified: new Date() },
-    ...companies.map((c) => ({
+    ...companies.map((c: any) => ({
       url: `https://jobs.adarshrust.com/companies/${c.slug}`,
       lastModified: c.createdAt,
     })),

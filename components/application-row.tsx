@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { removeCompanyState } from "@/actions/company"
-import type { UserCompanyStatus } from "@prisma/client"
+import type { UserCompanyStatus } from "@/lib/company-status"
 
 interface ApplicationRowProps {
   companyId: string

@@ -130,7 +130,7 @@ export function Navbar() {
             flex: 1,
           }}
         >
-          {NAV_LINKS.map((link) => {
+          {NAV_LINKS.map((link: any) => {
             const active = link.match(pathname)
             return (
               <Link
@@ -151,13 +151,13 @@ export function Navbar() {
                   transition: "color 100ms, background 100ms",
                   whiteSpace: "nowrap",
                 }}
-                onMouseEnter={(e) => {
+                onMouseEnter={(e: any) => {
                   if (!active) {
                     e.currentTarget.style.color = "var(--fg-0)"
                     e.currentTarget.style.background = "var(--bg-2)"
                   }
                 }}
-                onMouseLeave={(e) => {
+                onMouseLeave={(e: any) => {
                   if (!active) {
                     e.currentTarget.style.color = "var(--fg-2)"
                     e.currentTarget.style.background = "transparent"
@@ -329,8 +329,8 @@ export function Navbar() {
                   transition: "color 100ms",
                   fontFamily: "var(--font-sans)",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-0)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-2)")}
+                onMouseEnter={(e: any) => (e.currentTarget.style.color = "var(--fg-0)")}
+                onMouseLeave={(e: any) => (e.currentTarget.style.color = "var(--fg-2)")}
               >
                 Sign in
               </button>
@@ -357,8 +357,8 @@ export function Navbar() {
                     : "none",
                   ...(isOnLanding ? {} : { color: "var(--fg-0)" }),
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.85")}
-                onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+                onMouseEnter={(e: any) => (e.currentTarget.style.opacity = "0.85")}
+                onMouseLeave={(e: any) => (e.currentTarget.style.opacity = "1")}
               >
                 {isOnLanding ? (
                   <>

@@ -4,7 +4,7 @@ import { Layers } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { DASHBOARD_STATUS_ORDER, STATUS_LABELS } from "@/types"
-import type { UserCompanyStatus } from "@prisma/client"
+import type { UserCompanyStatus } from "@/lib/company-status"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Dashboard" }
@@ -30,7 +30,7 @@ export default async function DashboardPage() {
   }
 
   const grouped = data.states.reduce(
-    (acc, s) => {
+    (acc: any, s: any) => {
       const key = s.status as UserCompanyStatus
       if (!acc[key]) acc[key] = []
       acc[key].push(s)
@@ -39,7 +39,7 @@ export default async function DashboardPage() {
     {} as Record<UserCompanyStatus, typeof data.states>,
   )
 
-  const orderedKeys = DASHBOARD_STATUS_ORDER.filter((s) => grouped[s]?.length > 0)
+  const orderedKeys = DASHBOARD_STATUS_ORDER.filter((s: any) => grouped[s]?.length > 0)
 
   return (
     <div className="space-y-6">
@@ -48,16 +48,16 @@ export default async function DashboardPage() {
         <p className="text-xs text-muted-foreground mt-0.5">{data.states.length} tracked</p>
       </div>
 
-      {orderedKeys.map((status) => (
+      {orderedKeys.map((status: any) => (
         <div key={status}>
           <div className="flex items-center gap-2 mb-2">
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              {STATUS_LABELS[status]}
+              {STATUS_LABELS[status as UserCompanyStatus]}
             </h2>
-            <span className="text-xs text-muted-foreground/60">{grouped[status].length}</span>
+            <span className="text-xs text-muted-foreground/60">{grouped[status as UserCompanyStatus].length}</span>
           </div>
           <div className="rounded-lg border border-border bg-card px-4">
-            {grouped[status].map((s) => (
+            {grouped[status as UserCompanyStatus].map((s: any) => (
               <ApplicationRow
                 key={s.id}
                 companyId={s.company.id}

@@ -127,7 +127,7 @@ export default function ChangelogPage() {
 
         {/* Entries */}
         <div style={{ display: "flex", flexDirection: "column", gap: 40 }}>
-          {CHANGELOG.map((entry) => (
+          {CHANGELOG.map((entry: any) => (
             <ChangelogEntry key={entry.version} entry={entry} />
           ))}
         </div>

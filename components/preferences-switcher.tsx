@@ -28,7 +28,7 @@ export function PreferencesSwitcher() {
             Theme
           </p>
           <div className="grid grid-cols-2 gap-1">
-            {THEMES.map((t) => (
+            {THEMES.map((t: any) => (
               <button
                 key={t.id}
                 onClick={() => setTheme(t.id)}
@@ -52,7 +52,7 @@ export function PreferencesSwitcher() {
             Density
           </p>
           <div className="grid grid-cols-2 gap-1">
-            {DENSITIES.map((d) => (
+            {DENSITIES.map((d: any) => (
               <button
                 key={d.id}
                 onClick={() => setDensity(d.id)}

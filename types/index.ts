@@ -1,5 +1,5 @@
-import { UserCompanyStatus, RustLevel, CompanyType } from "@prisma/client"
-
+import type { UserCompanyStatus } from "@/lib/company-status"
+import { RustLevel, CompanyType } from "@prisma/client"
 export type { UserCompanyStatus, RustLevel, CompanyType }
 
 // ─── Status metadata ──────────────────────────────────────────────────────────
@@ -155,8 +155,12 @@ export function parseFilters(params: Record<string, string | string[] | undefine
     tags: arr("tag"),
     remoteOnly: raw("remote") === "1",
     rustOnly: raw("rust") === "1",
-    companyType: (raw("company_type") as CompanyType) ?? null,
-    timeFilter: (raw("time") as TimeFilter) ?? null,
+    companyType: (Object.keys(COMPANY_TYPE_LABELS).includes(raw("company_type") as string)
+      ? raw("company_type") as CompanyType
+      : null),
+    timeFilter: (Object.keys(TIME_FILTER_LABELS).includes(raw("time") as string)
+      ? raw("time") as TimeFilter
+      : null),
     hideNotInterested: raw("hide_ni") === "1",
     page: Math.max(1, parseInt((raw("page") as string) ?? "1", 10) || 1),
   }

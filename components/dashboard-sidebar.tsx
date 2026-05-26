@@ -18,7 +18,7 @@ export function DashboardSidebar() {
       <div className="md:sticky md:top-22">
         <p className="text-xs font-medium text-muted-foreground px-2 mb-2">Applications</p>
         <nav className="space-y-0.5">
-          {SIDEBAR_LINKS.map((link) => {
+          {SIDEBAR_LINKS.map((link: any) => {
             const isActive = link.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(link.href)

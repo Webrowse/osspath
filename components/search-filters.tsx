@@ -30,7 +30,7 @@ export function SearchFilters({ search = "", tags = [], remoteOnly = false, rust
           params.delete(key)
         } else if (Array.isArray(value)) {
           params.delete(key)
-          value.forEach((v) => params.append(key, v))
+          value.forEach((v: any) => params.append(key, v))
         } else {
           params.set(key, String(value))
         }
@@ -51,7 +51,7 @@ export function SearchFilters({ search = "", tags = [], remoteOnly = false, rust
 
   const toggleTag = useCallback(
     (tag: string) => {
-      const newTags = tags.includes(tag) ? tags.filter((t) => t !== tag) : [...tags, tag]
+      const newTags = tags.includes(tag) ? tags.filter((t: any) => t !== tag) : [...tags, tag]
       updateParams({ tag: newTags })
     },
     [tags, updateParams]
@@ -66,7 +66,7 @@ export function SearchFilters({ search = "", tags = [], remoteOnly = false, rust
         <Input
           placeholder="Search companies..."
           defaultValue={search}
-          onChange={(e) => {
+          onChange={(e: any) => {
             const timeout = setTimeout(() => handleSearch(e.target.value), 300)
             return () => clearTimeout(timeout)
           }}
@@ -98,7 +98,7 @@ export function SearchFilters({ search = "", tags = [], remoteOnly = false, rust
           🦀 Rust
         </button>
 
-        {ALL_TAGS.slice(0, 8).map((tag) => (
+        {ALL_TAGS.slice(0, 8).map((tag: any) => (
           <button
             key={tag}
             onClick={() => toggleTag(tag)}

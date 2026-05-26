@@ -4,7 +4,7 @@ import { CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { buttonVariants } from "@/components/ui/button"
 import { ACTIVE_PIPELINE_STATUSES } from "@/types"
-import type { UserCompanyStatus } from "@prisma/client"
+import type { UserCompanyStatus } from "@/lib/company-status"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = { title: "Applied" }
@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Applied" }
 export default async function AppliedPage() {
   const data = await getDashboardData()
 
-  const active = data?.states.filter((s) =>
+  const active = data?.states.filter((s: any) =>
     ACTIVE_PIPELINE_STATUSES.includes(s.status as UserCompanyStatus),
   ) ?? []
 
@@ -40,7 +40,7 @@ export default async function AppliedPage() {
         <p className="text-xs text-muted-foreground mt-0.5">{active.length} in pipeline</p>
       </div>
       <div className="rounded-lg border border-border bg-card px-4">
-        {active.map((s) => (
+        {active.map((s: any) => (
           <ApplicationRow
             key={s.id}
             companyId={s.company.id}

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
-import type { UserCompanyStatus } from "@prisma/client"
+import type { UserCompanyStatus } from "@/lib/company-status"
 import type { CompanyFilters, TimeFilter } from "@/types"
 import { STATUS_LABELS, TIME_FILTER_LABELS, ALL_TAGS } from "@/types"
 import type { StatusCounts } from "@/lib/companies"
@@ -77,14 +77,14 @@ export function AdvancedFilters({
 
   const toggleStatus = (status: UserCompanyStatus) => {
     const next = filters.statuses.includes(status)
-      ? filters.statuses.filter((s) => s !== status)
+      ? filters.statuses.filter((s: any) => s !== status)
       : [...filters.statuses, status]
     patch({ statuses: next })
   }
 
   const toggleTag = (tag: string) => {
     const next = filters.tags.includes(tag)
-      ? filters.tags.filter((t) => t !== tag)
+      ? filters.tags.filter((t: any) => t !== tag)
       : [...filters.tags, tag]
     patch({ tags: next })
   }
@@ -114,7 +114,7 @@ export function AdvancedFilters({
   }
 
   const toggleGroup = (key: keyof typeof openGroups) =>
-    setOpenGroups((g) => ({ ...g, [key]: !g[key] }))
+    setOpenGroups((g: any) => ({ ...g, [key]: !g[key] }))
 
   const visibleTags = showAllTags ? ALL_TAGS : ALL_TAGS.slice(0, 10)
 
@@ -160,12 +160,12 @@ export function AdvancedFilters({
         >
           {TRACKING_STATUSES.map((status) => {
             const active = filters.statuses.includes(status)
-            const count = statusCounts?.[status]
-            const dot = STATUS_DOT[status]
+            const count = statusCounts?.[status as UserCompanyStatus]
+            const dot = STATUS_DOT[status as UserCompanyStatus]
             return (
               <FilterCheckRow
                 key={status}
-                label={STATUS_LABELS[status] ?? status}
+                label={STATUS_LABELS[status as UserCompanyStatus] ?? status}
                 active={active}
                 dot={dot}
                 count={count}
@@ -211,7 +211,7 @@ export function AdvancedFilters({
           {TIME_FILTERS.map((tf) => (
             <FilterCheckRow
               key={tf}
-              label={TIME_FILTER_LABELS[tf]}
+              label={TIME_FILTER_LABELS[tf as TimeFilter]}
               active={filters.timeFilter === tf}
               onToggle={() =>
                 patch({ timeFilter: filters.timeFilter === tf ? null : tf })
@@ -227,7 +227,7 @@ export function AdvancedFilters({
         open={openGroups.tags}
         onToggle={() => toggleGroup("tags")}
       >
-        {visibleTags.map((tag) => (
+        {visibleTags.map((tag: any) => (
           <FilterCheckRow
             key={tag}
             label={tag}
@@ -236,7 +236,7 @@ export function AdvancedFilters({
           />
         ))}
         <button
-          onClick={() => setShowAllTags((v) => !v)}
+          onClick={() => setShowAllTags((v: any) => !v)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -250,10 +250,10 @@ export function AdvancedFilters({
             cursor: "pointer",
             width: "100%",
           }}
-          onMouseEnter={(e) =>
+          onMouseEnter={(e: any) =>
             (e.currentTarget.style.color = "var(--fg-1)")
           }
-          onMouseLeave={(e) =>
+          onMouseLeave={(e: any) =>
             (e.currentTarget.style.color = "var(--fg-3)")
           }
         >
