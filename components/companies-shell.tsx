@@ -17,8 +17,10 @@ import {
   STATUS_LABELS,
   TIME_FILTER_LABELS,
   COMPANY_TYPE_LABELS,
+  SORT_LABELS,
   parseFilters,
 } from "@/types"
+import type { SortOption } from "@/types"
 
 interface CompaniesShellProps {
   initialFilters: CompanyFilters
@@ -36,6 +38,7 @@ function filtersToSearchParams(filters: CompanyFilters): string {
   if (filters.companyType) p.set("company_type", filters.companyType)
   if (filters.timeFilter) p.set("time", filters.timeFilter)
   if (filters.hideNotInterested) p.set("hide_ni", "1")
+  if (filters.sort && filters.sort !== "name_asc") p.set("sort", filters.sort)
   if (filters.page > 1) p.set("page", String(filters.page))
   return p.toString()
 }
@@ -79,6 +82,7 @@ const EMPTY_FILTERS: CompanyFilters = {
   companyType: null,
   timeFilter: null,
   hideNotInterested: false,
+  sort: "name_asc",
   page: 1,
 }
 
@@ -377,7 +381,11 @@ export function CompaniesShell({
 
       {/* Main area */}
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        <StatStrip statusCounts={data.statusCounts} isAuthenticated={isAuthenticated} />
+        <StatStrip
+          statusCounts={data.statusCounts}
+          allCompanies={initialData.allCompanies}
+          isAuthenticated={isAuthenticated}
+        />
 
         <ContentToolbar
           searchValue={searchValue}
@@ -461,6 +469,17 @@ export function CompaniesShell({
             >
               {total}
             </span>
+            <div style={{ flex: 1 }} />
+            <select
+              value={filters.sort ?? "name_asc"}
+              onChange={(e) => handleFiltersChange({ ...filters, sort: e.target.value as SortOption, page: 1 })}
+              className="sort-select"
+              aria-label="Sort companies"
+            >
+              {(Object.entries(SORT_LABELS) as [SortOption, string][]).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
 
           {companies.length === 0 ? (

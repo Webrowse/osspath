@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { ChevronDown } from "lucide-react"
+import { usePostHog } from "posthog-js/react"
 import type { UserCompanyStatus } from "@/lib/company-status"
 import type { CompanyFilters, TimeFilter } from "@/types"
 import { STATUS_LABELS, TIME_FILTER_LABELS, ALL_TAGS } from "@/types"
@@ -62,6 +63,7 @@ const EMPTY_FILTERS: CompanyFilters = {
   companyType: null,
   timeFilter: null,
   hideNotInterested: false,
+  sort: "name_asc",
   page: 1,
 }
 
@@ -93,6 +95,7 @@ export function AdvancedFilters({
   loading,
   statusCounts,
 }: AdvancedFiltersProps) {
+  const ph = usePostHog()
   const [showAllTags, setShowAllTags] = useState(false)
   const [openGroups, setOpenGroups] = useState({
     pipeline: true,
@@ -220,7 +223,10 @@ export function AdvancedFilters({
               <PresetBtn
                 key={preset.label}
                 label={preset.label}
-                onClick={() => onChange({ ...EMPTY_FILTERS, ...preset.filters })}
+                onClick={() => {
+                  ph?.capture("preset_applied", { preset_name: preset.label })
+                  onChange({ ...EMPTY_FILTERS, ...preset.filters })
+                }}
               />
             ))}
           </div>

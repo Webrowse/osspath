@@ -36,20 +36,9 @@ function UserIdentifier() {
   return null
 }
 
+// PostHog is initialized via instrumentation-client.ts (Next.js 15.3+).
+// This provider only supplies the React context for usePostHog() hooks.
 export function PostHogProvider({ children }: { children: React.ReactNode }) {
-  useEffect(() => {
-    const key = process.env.NEXT_PUBLIC_POSTHOG_KEY
-    if (!key || key.startsWith("phc_placeholder")) return
-
-    posthog.init(key, {
-      api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
-      capture_pageview: false,   // manual via PageViewTracker
-      capture_pageleave: false,
-      autocapture: false,        // too noisy; explicit events only
-      persistence: "localStorage+cookie",
-    })
-  }, [])
-
   return (
     <PHProvider client={posthog}>
       <PageViewTracker />

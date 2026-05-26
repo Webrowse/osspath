@@ -4,6 +4,7 @@ import { useTransition } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { toast } from "sonner"
+import { format } from "date-fns"
 import { ExternalLink, MoreHorizontal } from "lucide-react"
 import { StatusBadge } from "@/components/status-badge"
 import { ApplicationDialog } from "@/components/application-dialog"
@@ -90,7 +91,7 @@ export function ApplicationRow({
         <div className="flex items-center gap-3 mt-0.5">
           {userState.appliedAt && (
             <span className="text-xs text-muted-foreground">
-              Applied {new Date(userState.appliedAt).toLocaleDateString()}
+              Applied {format(new Date(userState.appliedAt), "d MMM yyyy")}
             </span>
           )}
           {userState.recruiterName && (
@@ -101,7 +102,7 @@ export function ApplicationRow({
           )}
           {userState.followUpAt && (
             <span className="text-xs text-yellow-500/70">
-              Follow-up {new Date(userState.followUpAt).toLocaleDateString()}
+              Follow-up {format(new Date(userState.followUpAt), "d MMM yyyy")}
             </span>
           )}
         </div>

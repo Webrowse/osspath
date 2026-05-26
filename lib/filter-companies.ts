@@ -2,6 +2,8 @@ import type { CompanyListItem } from "@/lib/companies"
 import type { CompanyFilters } from "@/types"
 import { PAGE_SIZE } from "@/types"
 
+const RUST_RANK: Record<string, number> = { CORE: 4, HEAVY: 3, PARTIAL: 2, NONE: 1 }
+
 export type FilteredResult = {
   companies: CompanyListItem[]
   total: number
@@ -115,6 +117,21 @@ export function filterCompanies(
 
     return true
   })
+
+  // Sort
+  const sort = filters.sort ?? "name_asc"
+  if (sort === "rust_desc") {
+    filtered.sort((a, b) => (RUST_RANK[b.rustLevel] ?? 1) - (RUST_RANK[a.rustLevel] ?? 1) || a.name.localeCompare(b.name))
+  } else if (sort === "hiring_first") {
+    filtered.sort((a, b) => Number(b.isHiring) - Number(a.isHiring) || a.name.localeCompare(b.name))
+  } else if (sort === "verified_recent") {
+    filtered.sort((a, b) => {
+      const at = a.lastHiringCheckAt ? new Date(a.lastHiringCheckAt).getTime() : 0
+      const bt = b.lastHiringCheckAt ? new Date(b.lastHiringCheckAt).getTime() : 0
+      return bt - at || a.name.localeCompare(b.name)
+    })
+  }
+  // name_asc is the default order from the DB query (already sorted by name)
 
   const total = filtered.length
   const skip = (filters.page - 1) * PAGE_SIZE

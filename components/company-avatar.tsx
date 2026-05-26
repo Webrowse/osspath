@@ -18,26 +18,28 @@ interface CompanyAvatarProps {
 }
 
 export function CompanyAvatar({ name, logoUrl, size = 36 }: CompanyAvatarProps) {
-  const [imgError, setImgError] = useState(false)
+  // Track whether the external logo loaded successfully.
+  // Start with 'idle' so initials render immediately; logo fades in on success.
+  const [logoState, setLogoState] = useState<"idle" | "loaded" | "error">("idle")
 
   const color = hashColor(name)
   const radius = size >= 44 ? 10 : size >= 36 ? 8 : 6
   const fontSize = size >= 44 ? 14 : size >= 36 ? 12 : 10
+  const dim = `${size}px`
 
   const initials = name
     .trim()
     .split(/\s+/)
-    .map((w: any) => w[0] ?? "")
+    .map((w: string) => w[0] ?? "")
     .slice(0, 2)
     .join("")
     .toUpperCase()
-
-  const dim = `${size}px`
 
   return (
     <div
       className="flex-shrink-0 overflow-hidden flex items-center justify-center"
       style={{
+        position: "relative",
         width: dim,
         height: dim,
         borderRadius: `${radius}px`,
@@ -45,7 +47,28 @@ export function CompanyAvatar({ name, logoUrl, size = 36 }: CompanyAvatarProps) 
         boxShadow: "0 1px 0 oklch(1 0 0 / 0.15) inset, 0 1px 8px -2px oklch(0 0 0 / 0.4)",
       }}
     >
-      {logoUrl && !imgError ? (
+      {/* Initials — always rendered as the base layer */}
+      <span
+        aria-hidden
+        className="select-none"
+        style={{
+          position: "absolute",
+          inset: 0,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: "var(--font-mono)",
+          fontWeight: 600,
+          fontSize,
+          color: "oklch(0.99 0 0)",
+          letterSpacing: "0.02em",
+        }}
+      >
+        {initials}
+      </span>
+
+      {/* Logo — overlaid, starts invisible, fades in only on successful load */}
+      {logoUrl && logoState !== "error" && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={logoUrl}
@@ -53,22 +76,19 @@ export function CompanyAvatar({ name, logoUrl, size = 36 }: CompanyAvatarProps) 
           aria-hidden
           width={size}
           height={size}
-          onError={() => setImgError(true)}
-          className="h-full w-full object-contain p-1"
-        />
-      ) : (
-        <span
-          className="select-none"
+          onLoad={() => setLogoState("loaded")}
+          onError={() => setLogoState("error")}
           style={{
-            fontFamily: "var(--font-mono)",
-            fontWeight: 600,
-            fontSize,
-            color: "oklch(0.99 0 0)",
-            letterSpacing: "0.02em",
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+            padding: "12.5%",
+            opacity: logoState === "loaded" ? 1 : 0,
+            transition: logoState === "loaded" ? "opacity 120ms ease-in" : "none",
           }}
-        >
-          {initials}
-        </span>
+        />
       )}
     </div>
   )

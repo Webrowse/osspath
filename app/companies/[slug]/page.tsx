@@ -1,14 +1,17 @@
 import { notFound } from "next/navigation"
 import Link from "next/link"
+import { format } from "date-fns"
 import { getSession } from "@/lib/auth"
 import { getCompanyBySlug, getRelatedCompanies } from "@/lib/companies"
+import { captureServerEvent } from "@/lib/analytics"
 import { Navbar } from "@/components/navbar"
 import { StatusBadge } from "@/components/status-badge"
 import { ApplicationDialog } from "@/components/application-dialog"
 import { CompanyAvatar } from "@/components/company-avatar"
+import { CareersLink } from "@/components/careers-link"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
-import { ArrowLeft, ExternalLink, Globe } from "lucide-react"
+import { ArrowLeft, Globe } from "lucide-react"
 import { RUST_LEVEL_LABELS } from "@/types"
 import type { Metadata } from "next"
 
@@ -59,6 +62,13 @@ export default async function CompanyPage({ params }: PageProps) {
   ])
 
   const c = companyWithState ?? company
+
+  if (session?.user?.id) {
+    captureServerEvent(session.user.id, {
+      event: "company_viewed",
+      props: { company_id: c.id, company_name: c.name, company_slug: slug, is_authenticated: true },
+    }).catch(() => {})
+  }
 
   const pageUrl = `https://jobs.adarshrust.com/companies/${slug}`
   const jsonLd = {
@@ -144,15 +154,7 @@ export default async function CompanyPage({ params }: PageProps) {
           <div className="space-y-4">
             {/* Action links */}
             <div className="flex flex-wrap gap-2">
-              <a
-                href={c.careersUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ size: "sm" }) + " h-8"}
-              >
-                <ExternalLink className="mr-1.5 h-3.5 w-3.5" />
-                Careers page
-              </a>
+              <CareersLink href={c.careersUrl} companyId={c.id} companyName={c.name} />
               {c.loginUrl && (
                 <a
                   href={c.loginUrl}
@@ -176,11 +178,18 @@ export default async function CompanyPage({ params }: PageProps) {
               <MetaRow
                 label="Hiring status"
                 value={
-                  c.isHiring ? (
-                    <span className="text-green-400">Actively hiring</span>
-                  ) : (
-                    <span className="text-muted-foreground">Not currently hiring</span>
-                  )
+                  <span className="flex items-center gap-1.5">
+                    {c.isHiring ? (
+                      <span className="text-green-400">Actively hiring</span>
+                    ) : (
+                      <span className="text-muted-foreground">Not currently hiring</span>
+                    )}
+                    {c.lastHiringCheckAt && (
+                      <span className="text-muted-foreground/50">
+                        · verified {format(new Date(c.lastHiringCheckAt), "d MMM")}
+                      </span>
+                    )}
+                  </span>
                 }
               />
             </div>
@@ -198,7 +207,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       {c.userState.appliedAt && (
                         <MetaRow
                           label="Applied"
-                          value={new Date(c.userState.appliedAt).toLocaleDateString()}
+                          value={format(new Date(c.userState.appliedAt), "d MMM yyyy")}
                         />
                       )}
                       {c.userState.recruiterName && (
@@ -212,7 +221,7 @@ export default async function CompanyPage({ params }: PageProps) {
                           label="Follow-up"
                           value={
                             <span className="text-yellow-400">
-                              {new Date(c.userState.followUpAt).toLocaleDateString()}
+                              {format(new Date(c.userState.followUpAt), "d MMM yyyy")}
                             </span>
                           }
                         />
@@ -220,7 +229,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       {c.userState.lastCheckedAt && (
                         <MetaRow
                           label="Last checked"
-                          value={new Date(c.userState.lastCheckedAt).toLocaleDateString()}
+                          value={format(new Date(c.userState.lastCheckedAt), "d MMM yyyy")}
                         />
                       )}
                     </div>

@@ -123,6 +123,17 @@ export const ALL_TAGS = [
 
 export type Tag = (typeof ALL_TAGS)[number]
 
+// ─── Sort ─────────────────────────────────────────────────────────────────────
+
+export type SortOption = "name_asc" | "rust_desc" | "hiring_first" | "verified_recent"
+
+export const SORT_LABELS: Record<SortOption, string> = {
+  name_asc: "Name A–Z",
+  rust_desc: "Rust intensity",
+  hiring_first: "Hiring first",
+  verified_recent: "Recently verified",
+}
+
 // ─── Filter params ────────────────────────────────────────────────────────────
 
 export interface CompanyFilters {
@@ -134,6 +145,7 @@ export interface CompanyFilters {
   companyType: CompanyType | null
   timeFilter: TimeFilter | null
   hideNotInterested: boolean
+  sort: SortOption
   page: number
 }
 
@@ -162,6 +174,9 @@ export function parseFilters(params: Record<string, string | string[] | undefine
       ? raw("time") as TimeFilter
       : null),
     hideNotInterested: raw("hide_ni") === "1",
+    sort: (Object.keys(SORT_LABELS).includes(raw("sort") as string)
+      ? raw("sort") as SortOption
+      : "name_asc"),
     page: Math.max(1, parseInt((raw("page") as string) ?? "1", 10) || 1),
   }
 }

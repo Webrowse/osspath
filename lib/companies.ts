@@ -33,6 +33,7 @@ export type CompanyListItem = {
   atsProvider: string | null
   companyType: string | null
   isHiring: boolean
+  lastHiringCheckAt: Date | null
   createdAt: Date
   userState: CompanyState | null
 }
@@ -106,6 +107,7 @@ function mergeCompanies(
     atsProvider: c.atsProvider,
     companyType: c.companyType,
     isHiring: c.isHiring,
+    lastHiringCheckAt: c.lastHiringCheckAt,
     createdAt: c.createdAt,
     userState: stateMap.get(c.id) ?? null,
   }))
@@ -164,6 +166,7 @@ export async function getCompanyBySlug(slug: string, userId?: string) {
     atsProvider: company.atsProvider,
     companyType: company.companyType,
     isHiring: company.isHiring,
+    lastHiringCheckAt: company.lastHiringCheckAt,
     createdAt: company.createdAt,
     userState: state ?? null,
   }
@@ -196,6 +199,7 @@ export async function getRelatedCompanies(
     atsProvider: c.atsProvider,
     companyType: c.companyType,
     isHiring: c.isHiring,
+    lastHiringCheckAt: c.lastHiringCheckAt,
     createdAt: c.createdAt,
     userState: null,
   }))

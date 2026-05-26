@@ -12,7 +12,7 @@ const companies = [
   {
     name: "Cloudflare",
     slug: "cloudflare",
-    logoUrl: "https://logo.clearbit.com/cloudflare.com",
+    logoUrl: null,
     description: "Global network platform delivering security, performance, and reliability at scale. Heavy Rust usage in their networking stack.",
     careersUrl: "https://www.cloudflare.com/careers/jobs/",
     loginUrl: "https://dash.cloudflare.com/login",
@@ -24,7 +24,7 @@ const companies = [
   {
     name: "Fly.io",
     slug: "fly-io",
-    logoUrl: "https://logo.clearbit.com/fly.io",
+    logoUrl: null,
     description: "Deploy apps close to your users on a global platform. Rust-first infrastructure team building the next generation of cloud.",
     careersUrl: "https://fly.io/jobs/",
     loginUrl: "https://fly.io/dashboard",
@@ -36,7 +36,7 @@ const companies = [
   {
     name: "Oxide Computer",
     slug: "oxide-computer",
-    logoUrl: "https://logo.clearbit.com/oxide.computer",
+    logoUrl: null,
     description: "Building the first commercial cloud computer. Everything is Rust — firmware, OS, hypervisor, control plane.",
     careersUrl: "https://oxide.computer/careers",
     loginUrl: null,
@@ -48,7 +48,7 @@ const companies = [
   {
     name: "Turso",
     slug: "turso",
-    logoUrl: "https://logo.clearbit.com/turso.tech",
+    logoUrl: null,
     description: "Edge-hosted SQLite databases built on libSQL. Core infrastructure written in Rust with a focus on developer experience.",
     careersUrl: "https://turso.tech/careers",
     loginUrl: "https://app.turso.tech",
@@ -60,7 +60,7 @@ const companies = [
   {
     name: "Zed Industries",
     slug: "zed-industries",
-    logoUrl: "https://logo.clearbit.com/zed.dev",
+    logoUrl: null,
     description: "Building the next-generation code editor in Rust. GPU-accelerated, collaborative, and blazing fast.",
     careersUrl: "https://zed.dev/jobs",
     loginUrl: null,
@@ -72,7 +72,7 @@ const companies = [
   {
     name: "Canonical",
     slug: "canonical",
-    logoUrl: "https://logo.clearbit.com/canonical.com",
+    logoUrl: null,
     description: "The company behind Ubuntu Linux. Building open source infrastructure software for cloud, IoT, and enterprise.",
     careersUrl: "https://canonical.com/careers",
     loginUrl: null,
@@ -84,7 +84,7 @@ const companies = [
   {
     name: "Datadog",
     slug: "datadog",
-    logoUrl: "https://logo.clearbit.com/datadoghq.com",
+    logoUrl: null,
     description: "Cloud monitoring and observability platform. Engineering Rust into their high-performance data pipelines.",
     careersUrl: "https://www.datadoghq.com/careers/",
     loginUrl: "https://app.datadoghq.com",
@@ -96,7 +96,7 @@ const companies = [
   {
     name: "Grafana Labs",
     slug: "grafana-labs",
-    logoUrl: "https://logo.clearbit.com/grafana.com",
+    logoUrl: null,
     description: "The open and composable observability and data visualization platform. Grafana, Loki, Tempo, and more.",
     careersUrl: "https://grafana.com/about/careers/",
     loginUrl: "https://grafana.com/auth/sign-in/",
@@ -108,7 +108,7 @@ const companies = [
   {
     name: "Discord",
     slug: "discord",
-    logoUrl: "https://logo.clearbit.com/discord.com",
+    logoUrl: null,
     description: "Communication platform for communities. Rewrote critical services in Rust for performance at scale.",
     careersUrl: "https://discord.com/careers",
     loginUrl: "https://discord.com/login",
@@ -120,7 +120,7 @@ const companies = [
   {
     name: "Fastly",
     slug: "fastly",
-    logoUrl: "https://logo.clearbit.com/fastly.com",
+    logoUrl: null,
     description: "Edge cloud platform powering the world's fastest websites. Rust is used in Compute@Edge and their Varnish replacement.",
     careersUrl: "https://www.fastly.com/about/careers/",
     loginUrl: "https://manage.fastly.com",
@@ -132,7 +132,7 @@ const companies = [
   {
     name: "GitLab",
     slug: "gitlab",
-    logoUrl: "https://logo.clearbit.com/gitlab.com",
+    logoUrl: null,
     description: "The complete DevOps platform delivered as a single application. Fully remote company with 2,000+ employees.",
     careersUrl: "https://about.gitlab.com/jobs/",
     loginUrl: "https://gitlab.com/users/sign_in",
@@ -144,7 +144,7 @@ const companies = [
   {
     name: "Elastic",
     slug: "elastic",
-    logoUrl: "https://logo.clearbit.com/elastic.co",
+    logoUrl: null,
     description: "Search, observability, and security at scale. Elasticsearch, Kibana, Beats, and Logstash.",
     careersUrl: "https://www.elastic.co/careers/",
     loginUrl: "https://cloud.elastic.co",
@@ -156,7 +156,7 @@ const companies = [
   {
     name: "Sentry",
     slug: "sentry",
-    logoUrl: "https://logo.clearbit.com/sentry.io",
+    logoUrl: null,
     description: "Application monitoring with full stack error tracking. Relay (ingestion layer) is written in Rust.",
     careersUrl: "https://sentry.io/careers/",
     loginUrl: "https://sentry.io/auth/login/",
@@ -168,7 +168,7 @@ const companies = [
   {
     name: "Mozilla",
     slug: "mozilla",
-    logoUrl: "https://logo.clearbit.com/mozilla.org",
+    logoUrl: null,
     description: "The organization behind Firefox and the creators of Rust. Deep expertise in systems programming and browser engineering.",
     careersUrl: "https://www.mozilla.org/en-US/careers/listings/",
     loginUrl: null,
@@ -180,7 +180,7 @@ const companies = [
   {
     name: "ClickHouse",
     slug: "clickhouse",
-    logoUrl: "https://logo.clearbit.com/clickhouse.com",
+    logoUrl: null,
     description: "The fastest and most resource-efficient real-time data warehouse. Open source with a cloud offering.",
     careersUrl: "https://clickhouse.com/company/careers",
     loginUrl: "https://clickhouse.cloud/signIn",
@@ -192,7 +192,7 @@ const companies = [
   {
     name: "Cockroach Labs",
     slug: "cockroach-labs",
-    logoUrl: "https://logo.clearbit.com/cockroachlabs.com",
+    logoUrl: null,
     description: "Distributed SQL database built for global scale. CockroachDB is the cloud-native, distributed SQL database.",
     careersUrl: "https://www.cockroachlabs.com/careers/",
     loginUrl: "https://cockroachlabs.cloud/",
@@ -204,7 +204,7 @@ const companies = [
   {
     name: "Materialize",
     slug: "materialize",
-    logoUrl: "https://logo.clearbit.com/materialize.com",
+    logoUrl: null,
     description: "Real-time data warehouse powered by streaming SQL. Built in Rust on top of Timely Dataflow.",
     careersUrl: "https://materialize.com/careers/",
     loginUrl: "https://console.materialize.com/",
@@ -216,7 +216,7 @@ const companies = [
   {
     name: "Deepgram",
     slug: "deepgram",
-    logoUrl: "https://logo.clearbit.com/deepgram.com",
+    logoUrl: null,
     description: "AI speech recognition API built on GPU-accelerated neural networks. Core systems in Rust.",
     careersUrl: "https://deepgram.com/company/careers",
     loginUrl: "https://console.deepgram.com",
@@ -228,7 +228,7 @@ const companies = [
   {
     name: "Sourcegraph",
     slug: "sourcegraph",
-    logoUrl: "https://logo.clearbit.com/sourcegraph.com",
+    logoUrl: null,
     description: "Universal code search for every developer and company. Code intelligence platform at scale.",
     careersUrl: "https://sourcegraph.com/careers",
     loginUrl: "https://sourcegraph.com/.auth/openidconnect/login",
@@ -240,7 +240,7 @@ const companies = [
   {
     name: "Warp",
     slug: "warp",
-    logoUrl: "https://logo.clearbit.com/warp.dev",
+    logoUrl: null,
     description: "The terminal for the 21st century. GPU-accelerated, built in Rust with collaborative features.",
     careersUrl: "https://www.warp.dev/careers",
     loginUrl: null,
@@ -252,7 +252,7 @@ const companies = [
   {
     name: "Hetzner",
     slug: "hetzner",
-    logoUrl: "https://logo.clearbit.com/hetzner.com",
+    logoUrl: null,
     description: "German cloud hosting and data center company offering affordable, high-performance dedicated servers and cloud VMs.",
     careersUrl: "https://www.hetzner.com/unternehmen/jobs/",
     loginUrl: "https://accounts.hetzner.com",
@@ -264,7 +264,7 @@ const companies = [
   {
     name: "JetBrains",
     slug: "jetbrains",
-    logoUrl: "https://logo.clearbit.com/jetbrains.com",
+    logoUrl: null,
     description: "Makers of IntelliJ IDEA, CLion, RustRover, and 15+ developer tools. Deep investment in Rust tooling.",
     careersUrl: "https://www.jetbrains.com/careers/jobs/",
     loginUrl: "https://account.jetbrains.com",
@@ -276,7 +276,7 @@ const companies = [
   {
     name: "Vercel",
     slug: "vercel",
-    logoUrl: "https://logo.clearbit.com/vercel.com",
+    logoUrl: null,
     description: "Frontend cloud platform for developers. Infrastructure team uses Rust in performance-critical components.",
     careersUrl: "https://vercel.com/careers",
     loginUrl: "https://vercel.com/login",
@@ -288,7 +288,7 @@ const companies = [
   {
     name: "Mux",
     slug: "mux",
-    logoUrl: "https://logo.clearbit.com/mux.com",
+    logoUrl: null,
     description: "Video infrastructure for developers. APIs for video hosting, streaming, and real-time analytics.",
     careersUrl: "https://www.mux.com/jobs",
     loginUrl: "https://dashboard.mux.com",
@@ -300,7 +300,7 @@ const companies = [
   {
     name: "Timescale",
     slug: "timescale",
-    logoUrl: "https://logo.clearbit.com/timescale.com",
+    logoUrl: null,
     description: "PostgreSQL for time-series data. TimescaleDB is the leading open-source time-series SQL database.",
     careersUrl: "https://www.timescale.com/careers",
     loginUrl: "https://console.cloud.timescale.com",
@@ -312,7 +312,7 @@ const companies = [
   {
     name: "Hugging Face",
     slug: "hugging-face",
-    logoUrl: "https://logo.clearbit.com/huggingface.co",
+    logoUrl: null,
     description: "The AI community building the future. ML model hosting, datasets, and inference infrastructure. Candle ML framework in Rust.",
     careersUrl: "https://apply.workable.com/huggingface/",
     loginUrl: "https://huggingface.co/login",
@@ -324,7 +324,7 @@ const companies = [
   {
     name: "Ferrous Systems",
     slug: "ferrous-systems",
-    logoUrl: "https://logo.clearbit.com/ferrous-systems.com",
+    logoUrl: null,
     description: "The leading Rust consulting and training company. Creators of Ferrocene, the qualified Rust toolchain.",
     careersUrl: "https://ferrous-systems.com/",
     loginUrl: null,
@@ -336,7 +336,7 @@ const companies = [
   {
     name: "Red Hat",
     slug: "red-hat",
-    logoUrl: "https://logo.clearbit.com/redhat.com",
+    logoUrl: null,
     description: "The world's leading provider of enterprise open source solutions. Significant Rust investment in system-level projects.",
     careersUrl: "https://www.redhat.com/en/jobs",
     loginUrl: "https://sso.redhat.com",
@@ -348,7 +348,7 @@ const companies = [
   {
     name: "Turing",
     slug: "turing",
-    logoUrl: "https://logo.clearbit.com/turing.com",
+    logoUrl: null,
     description: "Remote engineering jobs platform connecting developers with top US tech companies. Fully remote.",
     careersUrl: "https://www.turing.com/jobs",
     loginUrl: "https://engineers.turing.com",
@@ -372,7 +372,7 @@ const companies = [
   {
     name: "Temporal",
     slug: "temporal",
-    logoUrl: "https://logo.clearbit.com/temporal.io",
+    logoUrl: null,
     description: "Durable execution platform for building reliable distributed applications. Open source workflow orchestration.",
     careersUrl: "https://temporal.io/careers",
     loginUrl: "https://cloud.temporal.io",
@@ -384,7 +384,7 @@ const companies = [
   {
     name: "Tailscale",
     slug: "tailscale",
-    logoUrl: "https://logo.clearbit.com/tailscale.com",
+    logoUrl: null,
     description: "Zero-config VPN built on WireGuard. Making networking easy for developers and enterprises.",
     careersUrl: "https://tailscale.com/careers/",
     loginUrl: "https://login.tailscale.com",
@@ -396,7 +396,7 @@ const companies = [
   {
     name: "1Password",
     slug: "1password",
-    logoUrl: "https://logo.clearbit.com/1password.com",
+    logoUrl: null,
     description: "Password manager and secrets management. Significant portions of their cross-platform client and infrastructure use Rust.",
     careersUrl: "https://1password.com/careers",
     loginUrl: "https://my.1password.com",
@@ -408,7 +408,7 @@ const companies = [
   {
     name: "Parity Technologies",
     slug: "parity-technologies",
-    logoUrl: "https://logo.clearbit.com/parity.io",
+    logoUrl: null,
     description: "Core Ethereum and blockchain infrastructure company. Substrate (Polkadot framework) is written in Rust.",
     careersUrl: "https://www.parity.io/jobs",
     loginUrl: null,
@@ -420,7 +420,7 @@ const companies = [
   {
     name: "Palantir",
     slug: "palantir",
-    logoUrl: "https://logo.clearbit.com/palantir.com",
+    logoUrl: null,
     description: "Data analytics and intelligence platform for governments and enterprises. Large-scale distributed systems.",
     careersUrl: "https://jobs.lever.co/palantir",
     loginUrl: null,
@@ -432,7 +432,7 @@ const companies = [
   {
     name: "Databricks",
     slug: "databricks",
-    logoUrl: "https://logo.clearbit.com/databricks.com",
+    logoUrl: null,
     description: "Unified analytics platform for data engineering, data science, and machine learning at scale.",
     careersUrl: "https://www.databricks.com/company/careers",
     loginUrl: "https://accounts.cloud.databricks.com",
@@ -444,7 +444,7 @@ const companies = [
   {
     name: "HashiCorp",
     slug: "hashicorp",
-    logoUrl: "https://logo.clearbit.com/hashicorp.com",
+    logoUrl: null,
     description: "Infrastructure automation software (Terraform, Vault, Consul, Nomad). Now part of IBM.",
     careersUrl: "https://www.hashicorp.com/careers",
     loginUrl: "https://app.terraform.io",
@@ -456,7 +456,7 @@ const companies = [
   {
     name: "AWS",
     slug: "aws",
-    logoUrl: "https://logo.clearbit.com/aws.amazon.com",
+    logoUrl: null,
     description: "Amazon Web Services — cloud computing. Heavy Rust adoption in Firecracker, Bottlerocket, and other services.",
     careersUrl: "https://aws.amazon.com/careers/",
     loginUrl: "https://console.aws.amazon.com",
@@ -468,7 +468,7 @@ const companies = [
   {
     name: "Ardan Labs",
     slug: "ardan-labs",
-    logoUrl: "https://logo.clearbit.com/ardanlabs.com",
+    logoUrl: null,
     description: "Elite Go and Rust training and consulting company. Known for Bill Kennedy's Ultimate Go course.",
     careersUrl: "https://www.ardanlabs.com/",
     loginUrl: null,
@@ -480,7 +480,7 @@ const companies = [
   {
     name: "Neon",
     slug: "neon",
-    logoUrl: "https://logo.clearbit.com/neon.tech",
+    logoUrl: null,
     description: "Serverless Postgres with branching. The storage layer and compute node are built in Rust.",
     careersUrl: "https://neon.tech/careers",
     loginUrl: "https://console.neon.tech",
@@ -504,7 +504,7 @@ const companies = [
   {
     name: "Figma",
     slug: "figma",
-    logoUrl: "https://logo.clearbit.com/figma.com",
+    logoUrl: null,
     description: "Collaborative design platform. Uses Rust for WebAssembly performance-critical rendering components.",
     careersUrl: "https://www.figma.com/careers/",
     loginUrl: "https://figma.com/login",
@@ -516,7 +516,7 @@ const companies = [
   {
     name: "Linear",
     slug: "linear",
-    logoUrl: "https://logo.clearbit.com/linear.app",
+    logoUrl: null,
     description: "The issue tracker that makes software development faster. Known for speed, design, and developer experience.",
     careersUrl: "https://linear.app/careers",
     loginUrl: "https://linear.app/login",
@@ -528,7 +528,7 @@ const companies = [
   {
     name: "Notion",
     slug: "notion",
-    logoUrl: "https://logo.clearbit.com/notion.so",
+    logoUrl: null,
     description: "All-in-one workspace for notes, docs, and collaboration. Strong backend and infrastructure teams.",
     careersUrl: "https://www.notion.so/careers",
     loginUrl: "https://www.notion.so/login",
@@ -540,7 +540,7 @@ const companies = [
   {
     name: "PlanetScale",
     slug: "planetscale",
-    logoUrl: "https://logo.clearbit.com/planetscale.com",
+    logoUrl: null,
     description: "Serverless MySQL platform powered by Vitess. Horizontally scalable database for modern applications.",
     careersUrl: "https://planetscale.com/careers",
     loginUrl: "https://app.planetscale.com",
@@ -552,7 +552,7 @@ const companies = [
   {
     name: "Stripe",
     slug: "stripe",
-    logoUrl: "https://logo.clearbit.com/stripe.com",
+    logoUrl: null,
     description: "Financial infrastructure for the internet. Massive distributed systems powering global payments.",
     careersUrl: "https://stripe.com/jobs",
     loginUrl: "https://dashboard.stripe.com/login",
@@ -564,7 +564,7 @@ const companies = [
   {
     name: "Shopify",
     slug: "shopify",
-    logoUrl: "https://logo.clearbit.com/shopify.com",
+    logoUrl: null,
     description: "Commerce platform for millions of businesses worldwide. Large engineering org with strong remote culture.",
     careersUrl: "https://www.shopify.com/careers",
     loginUrl: "https://accounts.shopify.com",
@@ -576,7 +576,7 @@ const companies = [
   {
     name: "Apple (SEAR)",
     slug: "apple-sear",
-    logoUrl: "https://logo.clearbit.com/apple.com",
+    logoUrl: null,
     description: "Apple's Swift and Rust ecosystem team. Working on language runtimes, compilers, and systems programming.",
     careersUrl: "https://jobs.apple.com",
     loginUrl: null,
@@ -588,7 +588,7 @@ const companies = [
   {
     name: "Google (Android)",
     slug: "google-android",
-    logoUrl: "https://logo.clearbit.com/google.com",
+    logoUrl: null,
     description: "The Android platform team is adopting Rust as a memory-safe system language alongside C++.",
     careersUrl: "https://careers.google.com",
     loginUrl: null,
@@ -600,7 +600,7 @@ const companies = [
   {
     name: "Microsoft (RUST)",
     slug: "microsoft-rust",
-    logoUrl: "https://logo.clearbit.com/microsoft.com",
+    logoUrl: null,
     description: "Microsoft has adopted Rust extensively in Windows, Azure, and their security-critical systems.",
     careersUrl: "https://careers.microsoft.com",
     loginUrl: null,
@@ -612,7 +612,7 @@ const companies = [
   {
     name: "Signal",
     slug: "signal",
-    logoUrl: "https://logo.clearbit.com/signal.org",
+    logoUrl: null,
     description: "Encrypted messaging app with a mission to build private communication tools. Uses Rust in signal-zkgroup and other cryptographic libraries.",
     careersUrl: "https://signal.org/workworkwork/",
     loginUrl: null,
@@ -624,7 +624,7 @@ const companies = [
   {
     name: "Dropbox",
     slug: "dropbox",
-    logoUrl: "https://logo.clearbit.com/dropbox.com",
+    logoUrl: null,
     description: "Cloud storage and collaboration company. Rewrote their sync engine from Python to Rust.",
     careersUrl: "https://jobs.dropbox.com",
     loginUrl: "https://www.dropbox.com/login",
@@ -636,7 +636,7 @@ const companies = [
   {
     name: "Svix",
     slug: "svix",
-    logoUrl: "https://logo.clearbit.com/svix.com",
+    logoUrl: null,
     description: "Webhooks as a service. The enterprise-grade webhook service for developers. Built in Rust.",
     careersUrl: "https://www.svix.com/careers/",
     loginUrl: "https://dashboard.svix.com",
@@ -648,7 +648,7 @@ const companies = [
   {
     name: "EmbarkStudios",
     slug: "embark-studios",
-    logoUrl: "https://logo.clearbit.com/embark-studios.com",
+    logoUrl: null,
     description: "Stockholm-based game studio pushing Rust adoption in game development. Creators of rust-gpu and other open source tools.",
     careersUrl: "https://www.embark-studios.com/jobs",
     loginUrl: null,
@@ -659,14 +659,74 @@ const companies = [
   },
 ]
 
+// When each company's hiring status was last manually verified.
+// Used to surface freshness in the UI ("verified X days ago").
+const LAST_VERIFIED: Record<string, Date> = {
+  "cloudflare":         new Date("2026-05-15"),
+  "fly-io":             new Date("2026-05-18"),
+  "oxide-computer":     new Date("2026-05-22"),
+  "turso":              new Date("2026-05-20"),
+  "zed-industries":     new Date("2026-05-19"),
+  "canonical":          new Date("2026-05-10"),
+  "datadog":            new Date("2026-05-12"),
+  "grafana-labs":       new Date("2026-05-08"),
+  "discord":            new Date("2026-05-14"),
+  "fastly":             new Date("2026-05-16"),
+  "gitlab":             new Date("2026-05-01"),
+  "elastic":            new Date("2026-05-05"),
+  "sentry":             new Date("2026-05-17"),
+  "mozilla":            new Date("2026-05-21"),
+  "clickhouse":         new Date("2026-05-13"),
+  "cockroach-labs":     new Date("2026-05-03"),
+  "materialize":        new Date("2026-05-25"),
+  "deepgram":           new Date("2026-05-11"),
+  "sourcegraph":        new Date("2026-04-20"),
+  "warp":               new Date("2026-05-23"),
+  "hetzner":            new Date("2026-04-15"),
+  "jetbrains":          new Date("2026-05-07"),
+  "vercel":             new Date("2026-05-09"),
+  "mux":                new Date("2026-04-28"),
+  "timescale":          new Date("2026-04-25"),
+  "hugging-face":       new Date("2026-05-15"),
+  "ferrous-systems":    new Date("2026-05-24"),
+  "red-hat":            new Date("2026-04-30"),
+  "turing":             new Date("2026-05-02"),
+  "tokio-rs":           new Date("2026-04-01"),
+  "temporal":           new Date("2026-05-06"),
+  "tailscale":          new Date("2026-05-04"),
+  "1password":          new Date("2026-05-20"),
+  "parity-technologies":new Date("2026-05-22"),
+  "palantir":           new Date("2026-04-10"),
+  "databricks":         new Date("2026-04-22"),
+  "hashicorp":          new Date("2026-04-18"),
+  "aws":                new Date("2026-05-18"),
+  "ardan-labs":         new Date("2026-05-01"),
+  "neon":               new Date("2026-05-26"),
+  "tremor":             new Date("2026-03-15"),
+  "figma":              new Date("2026-05-15"),
+  "linear":             new Date("2026-05-10"),
+  "notion":             new Date("2026-04-25"),
+  "planetscale":        new Date("2026-04-15"),
+  "stripe":             new Date("2026-05-10"),
+  "shopify":            new Date("2026-05-05"),
+  "apple-sear":         new Date("2026-05-20"),
+  "google-android":     new Date("2026-05-15"),
+  "microsoft-rust":     new Date("2026-05-18"),
+  "signal":             new Date("2026-04-20"),
+  "dropbox":            new Date("2026-04-10"),
+  "svix":               new Date("2026-05-24"),
+  "embark-studios":     new Date("2026-04-01"),
+}
+
 async function main() {
   console.log("Seeding database...")
 
   for (const company of companies) {
+    const data = { ...company, lastHiringCheckAt: LAST_VERIFIED[company.slug] ?? null }
     await prisma.company.upsert({
       where: { slug: company.slug },
-      create: company,
-      update: company,
+      create: data,
+      update: data,
     })
     console.log(`  ✓ ${company.name}`)
   }

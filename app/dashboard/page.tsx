@@ -7,6 +7,9 @@ import { DASHBOARD_STATUS_ORDER, STATUS_LABELS } from "@/types"
 import type { UserCompanyStatus } from "@/lib/company-status"
 import type { Metadata } from "next"
 
+const ACTIVE_STATUSES_QS =
+  "status=APPLIED&status=OA&status=RECRUITER_CALL&status=INTERVIEWING&status=FINAL_ROUND&status=OFFER"
+
 export const metadata: Metadata = { title: "Dashboard" }
 
 export default async function DashboardPage() {
@@ -86,47 +89,60 @@ export default async function DashboardPage() {
         }}
       >
         {[
-          { label: "Tracked", value: metrics.total, sub: "in pipeline", color: "var(--fg-0)" },
-          { label: "Active", value: metrics.activePipeline, sub: "in progress", color: "var(--d-accent)" },
+          { label: "Tracked", value: metrics.total, sub: "in pipeline", color: "var(--fg-0)", href: `/companies?${ACTIVE_STATUSES_QS}&status=SAVED&status=REJECTED&status=GHOSTED&status=NO_OPENINGS&status=HIRING_FREEZE` },
+          { label: "Active", value: metrics.activePipeline, sub: "in progress", color: "var(--d-accent)", href: `/companies?${ACTIVE_STATUSES_QS}` },
           {
             label: "Follow-up",
             value: metrics.followUpsDue,
-            sub: metrics.followUpsDue === 1 ? "overdue" : "overdue",
+            sub: "overdue",
             color: metrics.followUpsDue > 0 ? "var(--d-warn)" : "var(--fg-3)",
+            href: "/companies?time=follow_up_due",
           },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            style={{ padding: "10px 14px", background: "var(--bg-1)" }}
-          >
-            <div
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: 9,
-                color: "var(--fg-3)",
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
-                marginBottom: 4,
-              }}
-            >
-              {stat.label}
-            </div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-              <span
+        ].map((stat) =>
+          stat.value > 0 ? (
+            <Link key={stat.label} href={stat.href} className="stat-tile">
+              <div
                 style={{
-                  fontSize: 22,
-                  fontWeight: 600,
-                  color: stat.color,
-                  fontVariantNumeric: "tabular-nums",
-                  lineHeight: 1,
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  color: "var(--fg-3)",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
                 }}
               >
-                {stat.value}
-              </span>
-              <span style={{ fontSize: 11, color: "var(--fg-3)" }}>{stat.sub}</span>
+                {stat.label}
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontSize: 22, fontWeight: 600, color: stat.color, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+                  {stat.value}
+                </span>
+                <span style={{ fontSize: 11, color: "var(--fg-3)" }}>{stat.sub}</span>
+              </div>
+            </Link>
+          ) : (
+            <div key={stat.label} className="stat-tile">
+              <div
+                style={{
+                  fontFamily: "var(--font-mono)",
+                  fontSize: 9,
+                  color: "var(--fg-3)",
+                  letterSpacing: "0.06em",
+                  textTransform: "uppercase",
+                  marginBottom: 4,
+                }}
+              >
+                {stat.label}
+              </div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontSize: 22, fontWeight: 600, color: stat.color, fontVariantNumeric: "tabular-nums", lineHeight: 1 }}>
+                  {stat.value}
+                </span>
+                <span style={{ fontSize: 11, color: "var(--fg-3)" }}>{stat.sub}</span>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        )}
       </div>
 
       {/* Application groups */}

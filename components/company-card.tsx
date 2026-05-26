@@ -4,7 +4,9 @@ import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { usePostHog } from "posthog-js/react"
 import { ExternalLink, Bookmark, BookmarkCheck } from "lucide-react"
+import { formatDistanceToNowStrict, format } from "date-fns"
 import { StatusBadge } from "@/components/status-badge"
 import { ApplicationDialog } from "@/components/application-dialog"
 import { CompanyAvatar } from "@/components/company-avatar"
@@ -39,6 +41,7 @@ interface CompanyCardProps {
 
 export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
   const router = useRouter()
+  const ph = usePostHog()
   const [localState, setLocalState] = useState(company.userState)
   const [tagsExpanded, setTagsExpanded] = useState(false)
   const [hovered, setHovered] = useState(false)
@@ -66,9 +69,11 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
     try {
       if (isSaved) {
         await markCompanyStatus(company.id, "NOT_APPLIED")
+        ph?.capture("company_unsaved", { company_id: company.id, company_name: company.name })
         toast.success("Removed from saved")
       } else {
         await markCompanyStatus(company.id, "SAVED")
+        ph?.capture("company_saved", { company_id: company.id, company_name: company.name })
         toast.success("Saved")
       }
     } catch {
@@ -88,6 +93,9 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
     setLocalState((s: any) => ({ ...(s ?? ({} as CompanyState)), status: next }))
     try {
       await markCompanyStatus(company.id, next)
+      if (!already) {
+        ph?.capture("company_applied_quick", { company_id: company.id, company_name: company.name })
+      }
       toast.success(already ? "Moved to saved" : "Marked as applied")
     } catch {
       setLocalState(prev)
@@ -254,9 +262,14 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
           color: "var(--fg-2)",
         }}
       >
-        <span className="inline-flex items-center gap-1.5">
+        <span className="inline-flex items-center gap-1.5" title={company.lastHiringCheckAt ? `Verified ${format(new Date(company.lastHiringCheckAt), "d MMM yyyy")}` : undefined}>
           <HiringPulse isHiring={company.isHiring} />
-          {company.isHiring ? "Hiring" : "No openings"}
+          <span>{company.isHiring ? "Hiring" : "No openings"}</span>
+          {company.lastHiringCheckAt && (
+            <span style={{ color: "var(--fg-3)", fontSize: 10 }}>
+              {formatDistanceToNowStrict(new Date(company.lastHiringCheckAt), { addSuffix: false }).replace(" days", "d").replace(" day", "d").replace(" months", "mo").replace(" month", "mo")} ago
+            </span>
+          )}
         </span>
 
         <span style={{ opacity: 0.4 }}>·</span>
@@ -265,6 +278,7 @@ export function CompanyCard({ company, isAuthenticated }: CompanyCardProps) {
           href={company.careersUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => ph?.capture("careers_page_clicked", { company_id: company.id, company_name: company.name, source: "card" })}
           className="inline-flex items-center gap-1 transition-opacity hover:opacity-70"
           style={{ color: "var(--fg-2)" }}
         >

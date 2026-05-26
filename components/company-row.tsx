@@ -3,7 +3,9 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { format } from "date-fns"
 import { toast } from "sonner"
+import { usePostHog } from "posthog-js/react"
 import { ExternalLink, Bookmark, BookmarkCheck } from "lucide-react"
 import { CompanyAvatar } from "@/components/company-avatar"
 import { StatusBadge } from "@/components/status-badge"
@@ -40,6 +42,7 @@ interface CompanyRowProps {
 
 export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
   const router = useRouter()
+  const ph = usePostHog()
   const [localState, setLocalState] = useState(company.userState)
   const [hovered, setHovered] = useState(false)
 
@@ -78,9 +81,11 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
     try {
       if (isSaved) {
         await markCompanyStatus(company.id, "NOT_APPLIED")
+        ph?.capture("company_unsaved", { company_id: company.id, company_name: company.name })
         toast.success("Removed from saved")
       } else {
         await markCompanyStatus(company.id, "SAVED")
+        ph?.capture("company_saved", { company_id: company.id, company_name: company.name })
         toast.success("Saved")
       }
     } catch {
@@ -98,6 +103,9 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
     setLocalState((s) => ({ ...(s ?? ({} as CompanyState)), status: next }))
     try {
       await markCompanyStatus(company.id, next)
+      if (!already) {
+        ph?.capture("company_applied_quick", { company_id: company.id, company_name: company.name })
+      }
       toast.success(already ? "Moved to saved" : "Marked as applied")
     } catch {
       setLocalState(prev)
@@ -238,6 +246,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
             fontSize: 11,
             color: company.isHiring ? "var(--fg-2)" : "var(--fg-3)",
           }}
+          title={company.lastHiringCheckAt ? `Verified ${format(new Date(company.lastHiringCheckAt), "d MMM yyyy")}` : undefined}
         >
           <HiringPulse isHiring={company.isHiring} />
           {company.isHiring ? "Hiring" : "No openings"}
@@ -277,7 +286,10 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
             href={company.careersUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation()
+              ph?.capture("careers_page_clicked", { company_id: company.id, company_name: company.name, source: "list_row" })
+            }}
             style={{
               display: "flex",
               alignItems: "center",
@@ -459,7 +471,10 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
               href={company.careersUrl}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                ph?.capture("careers_page_clicked", { company_id: company.id, company_name: company.name, source: "list_row" })
+              }}
               style={{
                 display: "flex",
                 alignItems: "center",

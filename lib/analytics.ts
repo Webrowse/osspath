@@ -24,6 +24,11 @@ export type AppEvent =
   | { event: "filter_applied"; props: { active_filter_count: number } }
   | { event: "preset_applied"; props: { preset_name: string } }
   | { event: "follow_up_set"; props: { company_id: string; days_from_now: number } }
+  | { event: "company_saved"; props: { company_id: string; company_name: string } }
+  | { event: "company_unsaved"; props: { company_id: string; company_name: string } }
+  | { event: "company_applied_quick"; props: { company_id: string; company_name: string } }
+  | { event: "company_viewed"; props: { company_id: string; company_name: string; company_slug: string; is_authenticated: boolean } }
+  | { event: "careers_page_clicked"; props: { company_id: string; company_name: string; source: "list_row" | "card" | "detail_page" } }
 
 // ─── Server-side capture ──────────────────────────────────────────────────────
 // Use in Server Actions and NextAuth callbacks.
@@ -34,7 +39,7 @@ export async function captureServerEvent(distinctId: string, ev: AppEvent): Prom
   if (!key || key.startsWith("phc_placeholder")) return
 
   const ph = new PostHog(key, {
-    host: process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com",
+    host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     flushAt: 1,
     flushInterval: 0,
   })

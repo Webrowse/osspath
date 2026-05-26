@@ -45,6 +45,7 @@ export default async function SavedPage() {
     atsProvider: s.company.atsProvider,
     companyType: s.company.companyType,
     isHiring: s.company.isHiring,
+    lastHiringCheckAt: s.company.lastHiringCheckAt ?? null,
     createdAt: s.company.createdAt,
     userState: {
       status: s.status,
