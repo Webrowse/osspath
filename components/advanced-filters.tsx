@@ -7,7 +7,7 @@ import type { CompanyFilters, TimeFilter } from "@/types"
 import { STATUS_LABELS, TIME_FILTER_LABELS, ALL_TAGS } from "@/types"
 import type { StatusCounts } from "@/lib/companies"
 
-const TRACKING_STATUSES: UserCompanyStatus[] = [
+const PIPELINE_STATUSES: UserCompanyStatus[] = [
   "SAVED",
   "APPLIED",
   "OA",
@@ -37,11 +37,16 @@ const STATUS_DOT: Partial<Record<UserCompanyStatus, string>> = {
   HIRING_FREEZE: "var(--fg-3)",
 }
 
-const TIME_FILTERS: TimeFilter[] = [
+// Exclusive calendar-day buckets — a company matches exactly one
+const TIMELINE_FILTERS: TimeFilter[] = [
   "applied_today",
   "applied_7d",
   "applied_30d",
   "applied_older_30d",
+]
+
+// Review freshness and follow-up — cumulative thresholds
+const ATTENTION_FILTERS: TimeFilter[] = [
   "follow_up_due",
   "not_checked_7d",
   "not_checked_14d",
@@ -67,9 +72,10 @@ export function AdvancedFilters({
 }: AdvancedFiltersProps) {
   const [showAllTags, setShowAllTags] = useState(false)
   const [openGroups, setOpenGroups] = useState({
-    tracking: true,
+    pipeline: true,
+    timeline: false,
+    attention: false,
     company: true,
-    time: false,
     tags: true,
   })
   const patch = (partial: Partial<CompanyFilters>) =>
@@ -77,17 +83,20 @@ export function AdvancedFilters({
 
   const toggleStatus = (status: UserCompanyStatus) => {
     const next = filters.statuses.includes(status)
-      ? filters.statuses.filter((s: any) => s !== status)
+      ? filters.statuses.filter((s) => s !== status)
       : [...filters.statuses, status]
     patch({ statuses: next })
   }
 
   const toggleTag = (tag: string) => {
     const next = filters.tags.includes(tag)
-      ? filters.tags.filter((t: any) => t !== tag)
+      ? filters.tags.filter((t) => t !== tag)
       : [...filters.tags, tag]
     patch({ tags: next })
   }
+
+  const setTimeFilter = (tf: TimeFilter) =>
+    patch({ timeFilter: filters.timeFilter === tf ? null : tf })
 
   const hasAnyFilter =
     !!filters.q ||
@@ -114,7 +123,7 @@ export function AdvancedFilters({
   }
 
   const toggleGroup = (key: keyof typeof openGroups) =>
-    setOpenGroups((g: any) => ({ ...g, [key]: !g[key] }))
+    setOpenGroups((g) => ({ ...g, [key]: !g[key] }))
 
   const visibleTags = showAllTags ? ALL_TAGS : ALL_TAGS.slice(0, 10)
 
@@ -151,21 +160,21 @@ export function AdvancedFilters({
         )}
       </div>
 
-      {/* Tracking */}
+      {/* Pipeline — multi-select checkboxes */}
       {isAuthenticated && (
         <FilterSection
-          title="Tracking"
-          open={openGroups.tracking}
-          onToggle={() => toggleGroup("tracking")}
+          title="Pipeline"
+          open={openGroups.pipeline}
+          onToggle={() => toggleGroup("pipeline")}
         >
-          {TRACKING_STATUSES.map((status) => {
+          {PIPELINE_STATUSES.map((status) => {
             const active = filters.statuses.includes(status)
-            const count = statusCounts?.[status as UserCompanyStatus]
-            const dot = STATUS_DOT[status as UserCompanyStatus]
+            const count = statusCounts?.[status]
+            const dot = STATUS_DOT[status]
             return (
               <FilterCheckRow
                 key={status}
-                label={STATUS_LABELS[status as UserCompanyStatus] ?? status}
+                label={STATUS_LABELS[status] ?? status}
                 active={active}
                 dot={dot}
                 count={count}
@@ -178,6 +187,44 @@ export function AdvancedFilters({
             active={filters.hideNotInterested}
             onToggle={() => patch({ hideNotInterested: !filters.hideNotInterested })}
           />
+        </FilterSection>
+      )}
+
+      {/* Timeline — exclusive calendar-day buckets */}
+      {isAuthenticated && (
+        <FilterSection
+          title="Timeline"
+          hint="choose one"
+          open={openGroups.timeline}
+          onToggle={() => toggleGroup("timeline")}
+        >
+          {TIMELINE_FILTERS.map((tf) => (
+            <FilterRadioRow
+              key={tf}
+              label={TIME_FILTER_LABELS[tf]}
+              active={filters.timeFilter === tf}
+              onToggle={() => setTimeFilter(tf)}
+            />
+          ))}
+        </FilterSection>
+      )}
+
+      {/* Needs Attention — review freshness + follow-up */}
+      {isAuthenticated && (
+        <FilterSection
+          title="Needs Attention"
+          hint="choose one"
+          open={openGroups.attention}
+          onToggle={() => toggleGroup("attention")}
+        >
+          {ATTENTION_FILTERS.map((tf) => (
+            <FilterRadioRow
+              key={tf}
+              label={TIME_FILTER_LABELS[tf]}
+              active={filters.timeFilter === tf}
+              onToggle={() => setTimeFilter(tf)}
+            />
+          ))}
         </FilterSection>
       )}
 
@@ -201,33 +248,13 @@ export function AdvancedFilters({
         />
       </FilterSection>
 
-      {/* Time */}
-      {isAuthenticated && (
-        <FilterSection
-          title="Time"
-          open={openGroups.time}
-          onToggle={() => toggleGroup("time")}
-        >
-          {TIME_FILTERS.map((tf) => (
-            <FilterCheckRow
-              key={tf}
-              label={TIME_FILTER_LABELS[tf as TimeFilter]}
-              active={filters.timeFilter === tf}
-              onToggle={() =>
-                patch({ timeFilter: filters.timeFilter === tf ? null : tf })
-              }
-            />
-          ))}
-        </FilterSection>
-      )}
-
       {/* Tags */}
       <FilterSection
         title="Tags"
         open={openGroups.tags}
         onToggle={() => toggleGroup("tags")}
       >
-        {visibleTags.map((tag: any) => (
+        {visibleTags.map((tag) => (
           <FilterCheckRow
             key={tag}
             label={tag}
@@ -236,7 +263,7 @@ export function AdvancedFilters({
           />
         ))}
         <button
-          onClick={() => setShowAllTags((v: any) => !v)}
+          onClick={() => setShowAllTags((v) => !v)}
           style={{
             display: "flex",
             alignItems: "center",
@@ -250,12 +277,8 @@ export function AdvancedFilters({
             cursor: "pointer",
             width: "100%",
           }}
-          onMouseEnter={(e: any) =>
-            (e.currentTarget.style.color = "var(--fg-1)")
-          }
-          onMouseLeave={(e: any) =>
-            (e.currentTarget.style.color = "var(--fg-3)")
-          }
+          onMouseEnter={(e) => (e.currentTarget.style.color = "var(--fg-1)")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--fg-3)")}
         >
           {showAllTags ? "Show less" : `+${ALL_TAGS.length - 10} more`}
         </button>
@@ -266,11 +289,13 @@ export function AdvancedFilters({
 
 function FilterSection({
   title,
+  hint,
   open,
   onToggle,
   children,
 }: {
   title: string
+  hint?: string
   open: boolean
   onToggle: () => void
   children: React.ReactNode
@@ -303,6 +328,19 @@ function FilterSection({
           }}
         />
         {title}
+        {hint && (
+          <span
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--fg-3)",
+              fontWeight: 400,
+              marginLeft: 2,
+            }}
+          >
+            · {hint}
+          </span>
+        )}
       </button>
       {open && (
         <div style={{ display: "flex", flexDirection: "column", gap: 1, marginTop: 4 }}>
@@ -348,7 +386,6 @@ function FilterCheckRow({
         transition: "background 100ms",
       }}
     >
-      {/* Custom checkbox */}
       <span
         style={{
           width: 13,
@@ -369,7 +406,6 @@ function FilterCheckRow({
           </svg>
         )}
       </span>
-      {/* Color dot */}
       {dot && (
         <span
           style={{
@@ -393,6 +429,67 @@ function FilterCheckRow({
           {count}
         </span>
       )}
+    </button>
+  )
+}
+
+function FilterRadioRow({
+  label,
+  active,
+  onToggle,
+}: {
+  label: string
+  active: boolean
+  onToggle: () => void
+}) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onToggle}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "5px 8px",
+        borderRadius: 5,
+        fontSize: 12.5,
+        color: active ? "var(--fg-0)" : "var(--fg-1)",
+        background: active ? "var(--bg-3)" : hovered ? "var(--bg-2)" : "transparent",
+        border: "none",
+        cursor: "pointer",
+        width: "100%",
+        textAlign: "left",
+        transition: "background 100ms",
+      }}
+    >
+      <span
+        style={{
+          width: 13,
+          height: 13,
+          borderRadius: 999,
+          flexShrink: 0,
+          border: `1.5px solid ${active ? "var(--d-accent)" : "var(--line)"}`,
+          background: "transparent",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transition: "all 120ms",
+        }}
+      >
+        {active && (
+          <span
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 999,
+              background: "var(--d-accent)",
+            }}
+          />
+        )}
+      </span>
+      <span style={{ flex: 1 }}>{label}</span>
     </button>
   )
 }

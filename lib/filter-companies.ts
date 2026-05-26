@@ -8,6 +8,15 @@ export type FilteredResult = {
   totalPages: number
 }
 
+// Dates are stored as UTC midnight ("YYYY-MM-DD" → new Date("YYYY-MM-DD")).
+// All calendar-day comparisons use UTC components so the offset is consistent
+// regardless of the server's local timezone.
+function calendarDaysAgo(now: Date, d: Date): number {
+  const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  const dUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  return Math.round((todayUTC - dUTC) / 86_400_000)
+}
+
 export function filterCompanies(
   all: CompanyListItem[],
   filters: CompanyFilters,
@@ -58,34 +67,49 @@ export function filterCompanies(
       const state = company.userState
       if (!state) return false
 
-      const daysAgo = (n: number) => new Date(now.getTime() - n * 86_400_000)
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-
       switch (filters.timeFilter) {
-        case "applied_today":
-          if (!state.appliedAt || state.appliedAt < today) return false
+        case "applied_today": {
+          if (!state.appliedAt) return false
+          if (calendarDaysAgo(now, state.appliedAt) !== 0) return false
           break
-        case "applied_7d":
-          if (!state.appliedAt || state.appliedAt < daysAgo(7)) return false
+        }
+        case "applied_7d": {
+          // Exclusive bucket: applied 1–7 calendar days ago (not today)
+          if (!state.appliedAt) return false
+          const d = calendarDaysAgo(now, state.appliedAt)
+          if (d < 1 || d > 7) return false
           break
-        case "applied_30d":
-          if (!state.appliedAt || state.appliedAt < daysAgo(30)) return false
+        }
+        case "applied_30d": {
+          // Exclusive bucket: applied 8–30 calendar days ago
+          if (!state.appliedAt) return false
+          const d = calendarDaysAgo(now, state.appliedAt)
+          if (d < 8 || d > 30) return false
           break
-        case "applied_older_30d":
-          if (!state.appliedAt || state.appliedAt >= daysAgo(30)) return false
+        }
+        case "applied_older_30d": {
+          if (!state.appliedAt) return false
+          if (calendarDaysAgo(now, state.appliedAt) <= 30) return false
           break
-        case "not_checked_7d":
-          if (state.lastCheckedAt && state.lastCheckedAt >= daysAgo(7)) return false
+        }
+        case "not_checked_7d": {
+          // Cumulative: never reviewed, or last review was 7+ days ago
+          if (state.lastCheckedAt && calendarDaysAgo(now, state.lastCheckedAt) < 7) return false
           break
-        case "not_checked_14d":
-          if (state.lastCheckedAt && state.lastCheckedAt >= daysAgo(14)) return false
+        }
+        case "not_checked_14d": {
+          // Cumulative: never reviewed, or last review was 14+ days ago
+          if (state.lastCheckedAt && calendarDaysAgo(now, state.lastCheckedAt) < 14) return false
           break
-        case "updated_7d":
-          if (state.updatedAt < daysAgo(7)) return false
+        }
+        case "updated_7d": {
+          if (calendarDaysAgo(now, state.updatedAt) > 7) return false
           break
-        case "follow_up_due":
+        }
+        case "follow_up_due": {
           if (!state.followUpAt || state.followUpAt > now) return false
           break
+        }
       }
     }
 

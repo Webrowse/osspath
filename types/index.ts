@@ -75,13 +75,13 @@ export type TimeFilter =
 
 export const TIME_FILTER_LABELS: Record<TimeFilter, string> = {
   applied_today: "Applied today",
-  applied_7d: "Applied last 7 days",
-  applied_30d: "Applied last 30 days",
+  applied_7d: "Applied 1–7 days ago",
+  applied_30d: "Applied 8–30 days ago",
   applied_older_30d: "Applied 30+ days ago",
-  not_checked_7d: "Not checked in 7 days",
-  not_checked_14d: "Not checked in 14 days",
-  updated_7d: "Updated last 7 days",
-  follow_up_due: "Follow-up due",
+  not_checked_7d: "Not reviewed in 7+ days",
+  not_checked_14d: "Not reviewed in 14+ days",
+  updated_7d: "Status changed this week",
+  follow_up_due: "Follow-up overdue",
 }
 
 // ─── Company metadata ─────────────────────────────────────────────────────────
