@@ -1,2 +1,2 @@
 [build]
-installCommand = "npm install"
+installCommand = "rm -f package-lock.json && npm install"
