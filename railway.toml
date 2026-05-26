@@ -1,2 +1,2 @@
 [build]
-installCommand = "rm -f package-lock.json && npm install"
+buildCommand = "npm install && npx prisma generate && npm run build"
