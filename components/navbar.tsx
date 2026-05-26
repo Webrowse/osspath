@@ -55,6 +55,7 @@ export function Navbar() {
       }}
     >
       <div
+        className="nav-inner"
         style={{
           maxWidth: 1240,
           margin: "0 auto",
@@ -123,6 +124,7 @@ export function Navbar() {
 
         {/* Nav */}
         <nav
+          className="nav-links"
           style={{
             display: "flex",
             alignItems: "center",
@@ -182,6 +184,9 @@ export function Navbar() {
           })}
         </nav>
 
+        {/* Spacer — pushes auth right when nav is hidden on mobile */}
+        <div style={{ flex: 1 }} />
+
         {/* Right side */}
         <div
           style={{
@@ -193,6 +198,7 @@ export function Navbar() {
         >
           {/* ⌘K hint */}
           <span
+            className="nav-cmd"
             style={{
               display: "flex",
               alignItems: "center",

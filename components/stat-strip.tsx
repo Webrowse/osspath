@@ -76,6 +76,7 @@ export function StatStrip({ statusCounts, isAuthenticated }: StatStripProps) {
 
   return (
     <div
+      className="stat-strip-grid"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr)",

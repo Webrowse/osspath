@@ -1,8 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Building2 } from "lucide-react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { Building2, X } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
+import { AdvancedFilters } from "@/components/advanced-filters"
 import { ContentToolbar, type ViewMode } from "@/components/content-toolbar"
 import { StatStrip } from "@/components/stat-strip"
 import { CompanyRow } from "@/components/company-row"
@@ -22,8 +23,8 @@ interface CompaniesShellProps {
 function filtersToSearchParams(filters: CompanyFilters): string {
   const p = new URLSearchParams()
   if (filters.q) p.set("q", filters.q)
-  filters.statuses.forEach((s: any) => p.append("status", s))
-  filters.tags.forEach((t: any) => p.append("tag", t))
+  filters.statuses.forEach((s) => p.append("status", s))
+  filters.tags.forEach((t) => p.append("tag", t))
   if (filters.remoteOnly) p.set("remote", "1")
   if (filters.rustOnly) p.set("rust", "1")
   if (filters.companyType) p.set("company_type", filters.companyType)
@@ -33,6 +34,31 @@ function filtersToSearchParams(filters: CompanyFilters): string {
   return p.toString()
 }
 
+function countActiveFilters(f: CompanyFilters): number {
+  let n = 0
+  if (f.q.trim()) n++
+  n += f.statuses.length
+  n += f.tags.length
+  if (f.remoteOnly) n++
+  if (f.rustOnly) n++
+  if (f.companyType) n++
+  if (f.timeFilter) n++
+  if (f.hideNotInterested) n++
+  return n
+}
+
+const EMPTY_FILTERS: CompanyFilters = {
+  q: "",
+  statuses: [],
+  tags: [],
+  remoteOnly: false,
+  rustOnly: false,
+  companyType: null,
+  timeFilter: null,
+  hideNotInterested: false,
+  page: 1,
+}
+
 export function CompaniesShell({
   initialFilters,
   initialData,
@@ -40,15 +66,34 @@ export function CompaniesShell({
 }: CompaniesShellProps) {
   const [filters, setFilters] = useState<CompanyFilters>(initialFilters)
   const [view, setView] = useState<ViewMode>("list")
-  // searchValue mirrors filters.q for the input — kept separate so the input
-  // updates on every keystroke while filters update immediately (no debounce needed)
   const [searchValue, setSearchValue] = useState(initialFilters.q)
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false)
+
   const { data, loading } = useCompanies(filters, initialData)
   const searchRef = useRef<HTMLInputElement>(null)
   const urlSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Ref holds current filters so callbacks never capture stale closures
   const filtersRef = useRef(filters)
   filtersRef.current = filters
+
+  const activeFilterCount = useMemo(() => countActiveFilters(filters), [filters])
+
+  // Close filter drawer when viewport goes desktop-wide
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)")
+    const handler = (e: MediaQueryListEvent) => { if (e.matches) setFilterDrawerOpen(false) }
+    mq.addEventListener("change", handler)
+    return () => mq.removeEventListener("change", handler)
+  }, [])
+
+  // Lock body scroll when drawer is open
+  useEffect(() => {
+    if (filterDrawerOpen) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = ""
+    }
+    return () => { document.body.style.overflow = "" }
+  }, [filterDrawerOpen])
 
   // "/" shortcut focuses search
   useEffect(() => {
@@ -64,7 +109,6 @@ export function CompaniesShell({
     return () => document.removeEventListener("keydown", handler)
   }, [])
 
-  // Debounced URL sync only — doesn't trigger re-render or data fetch
   const syncUrl = useCallback((f: CompanyFilters) => {
     if (urlSyncTimer.current) clearTimeout(urlSyncTimer.current)
     urlSyncTimer.current = setTimeout(() => {
@@ -73,7 +117,6 @@ export function CompaniesShell({
     }, 400)
   }, [])
 
-  // Sync browser back/forward navigation
   useEffect(() => {
     const onPop = () => {
       const params: Record<string, string | string[]> = {}
@@ -101,7 +144,6 @@ export function CompaniesShell({
     [syncUrl],
   )
 
-  // No debounce — filtering is instant (client-side). Uses ref to avoid stale closure.
   const handleSearchChange = useCallback(
     (value: string) => {
       setSearchValue(value)
@@ -121,6 +163,11 @@ export function CompaniesShell({
     [syncUrl],
   )
 
+  const clearFilters = useCallback(() => {
+    handleFiltersChange(EMPTY_FILTERS)
+    setSearchValue("")
+  }, [handleFiltersChange])
+
   const { companies, total, page, totalPages } = data
 
   return (
@@ -133,22 +180,22 @@ export function CompaniesShell({
         overflow: "hidden",
       }}
     >
-      {/* Sidebar */}
-      <AppSidebar
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        isAuthenticated={isAuthenticated}
-        total={total}
-        loading={loading}
-        statusCounts={data.statusCounts}
-      />
+      {/* Desktop sidebar — hidden on mobile via CSS */}
+      <div className="shell-sidebar" style={{ display: "flex" }}>
+        <AppSidebar
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          isAuthenticated={isAuthenticated}
+          total={total}
+          loading={loading}
+          statusCounts={data.statusCounts}
+        />
+      </div>
 
       {/* Main area */}
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
-        {/* KPI strip */}
         <StatStrip statusCounts={data.statusCounts} isAuthenticated={isAuthenticated} />
 
-        {/* Toolbar */}
         <ContentToolbar
           searchValue={searchValue}
           onSearchChange={handleSearchChange}
@@ -157,11 +204,12 @@ export function CompaniesShell({
           onViewChange={setView}
           total={total}
           loading={loading}
+          activeFilterCount={activeFilterCount}
+          onOpenFilters={() => setFilterDrawerOpen(true)}
         />
 
-        {/* Content */}
-        <main style={{ flex: 1, overflowY: "auto", padding: "12px 16px 16px" }}>
-          {/* Content header */}
+        <main style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
+          {/* Page header */}
           <div
             style={{
               display: "flex",
@@ -172,7 +220,7 @@ export function CompaniesShell({
           >
             <h1
               style={{
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: 600,
                 color: "var(--fg-0)",
                 margin: 0,
@@ -194,54 +242,6 @@ export function CompaniesShell({
             >
               {total}
             </span>
-            <div style={{ flex: 1 }} />
-            <button
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                height: 28,
-                padding: "0 10px",
-                borderRadius: 6,
-                border: "1px solid var(--line-soft)",
-                background: "transparent",
-                color: "var(--fg-2)",
-                fontSize: 12,
-                cursor: "pointer",
-                fontFamily: "var(--font-sans)",
-              }}
-              onMouseEnter={(e: any) => {
-                e.currentTarget.style.background = "var(--bg-2)"
-                e.currentTarget.style.color = "var(--fg-0)"
-              }}
-              onMouseLeave={(e: any) => {
-                e.currentTarget.style.background = "transparent"
-                e.currentTarget.style.color = "var(--fg-2)"
-              }}
-            >
-              Re-sync
-            </button>
-            <button
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 5,
-                height: 28,
-                padding: "0 10px",
-                borderRadius: 6,
-                border: "1px solid var(--d-accent-line)",
-                background: "var(--d-accent-soft)",
-                color: "var(--d-accent)",
-                fontSize: 12,
-                cursor: "pointer",
-                fontFamily: "var(--font-sans)",
-                fontWeight: 500,
-              }}
-              onMouseEnter={(e: any) => (e.currentTarget.style.opacity = "0.85")}
-              onMouseLeave={(e: any) => (e.currentTarget.style.opacity = "1")}
-            >
-              + Track company
-            </button>
           </div>
 
           {companies.length === 0 ? (
@@ -251,7 +251,7 @@ export function CompaniesShell({
                 flexDirection: "column",
                 alignItems: "center",
                 justifyContent: "center",
-                height: 300,
+                height: 260,
                 gap: 10,
                 color: "var(--fg-3)",
                 border: "1px solid var(--line-soft)",
@@ -266,6 +266,24 @@ export function CompaniesShell({
               <p style={{ fontSize: 12.5, color: "var(--fg-3)", margin: 0 }}>
                 Try adjusting your filters
               </p>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    marginTop: 4,
+                    padding: "6px 14px",
+                    borderRadius: 6,
+                    border: "1px solid var(--line-soft)",
+                    background: "transparent",
+                    color: "var(--fg-2)",
+                    fontSize: 12.5,
+                    cursor: "pointer",
+                    fontFamily: "var(--font-sans)",
+                  }}
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : view === "list" ? (
             <div
@@ -276,7 +294,7 @@ export function CompaniesShell({
                 overflow: "hidden",
               }}
             >
-              {companies.map((company: any) => (
+              {companies.map((company) => (
                 <CompanyRow
                   key={company.id}
                   company={company}
@@ -288,12 +306,11 @@ export function CompaniesShell({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
                 gap: 12,
-                padding: "16px 20px",
               }}
             >
-              {companies.map((company: any) => (
+              {companies.map((company) => (
                 <CompanyCard
                   key={company.id}
                   company={company}
@@ -303,7 +320,7 @@ export function CompaniesShell({
             </div>
           )}
 
-          <div style={{ padding: "0 0 16px" }}>
+          <div style={{ paddingTop: 4 }}>
             <Pagination
               page={page}
               totalPages={totalPages}
@@ -314,6 +331,143 @@ export function CompaniesShell({
           </div>
         </main>
       </div>
+
+      {/* Mobile filter drawer */}
+      {filterDrawerOpen && (
+        <div
+          className="filter-drawer-back"
+          onClick={() => setFilterDrawerOpen(false)}
+        >
+          <div
+            className="filter-drawer-sheet"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Drag handle */}
+            <div
+              style={{
+                width: 36,
+                height: 4,
+                borderRadius: 99,
+                background: "var(--line)",
+                margin: "12px auto 0",
+                flexShrink: 0,
+              }}
+            />
+
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                padding: "12px 16px 10px",
+                borderBottom: "1px solid var(--line-soft)",
+                flexShrink: 0,
+                gap: 8,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "var(--fg-0)",
+                  flex: 1,
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                Filters
+                {activeFilterCount > 0 && (
+                  <span
+                    style={{
+                      marginLeft: 8,
+                      fontFamily: "var(--font-mono)",
+                      fontSize: 11,
+                      color: "var(--d-accent)",
+                      fontWeight: 400,
+                    }}
+                  >
+                    {activeFilterCount} active
+                  </span>
+                )}
+              </span>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={clearFilters}
+                  style={{
+                    fontSize: 12,
+                    color: "var(--fg-3)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    fontFamily: "var(--font-sans)",
+                    padding: "4px 8px",
+                  }}
+                >
+                  Clear all
+                </button>
+              )}
+              <button
+                onClick={() => setFilterDrawerOpen(false)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 28,
+                  height: 28,
+                  borderRadius: 6,
+                  background: "var(--bg-2)",
+                  border: "1px solid var(--line-soft)",
+                  color: "var(--fg-2)",
+                  cursor: "pointer",
+                }}
+              >
+                <X size={13} />
+              </button>
+            </div>
+
+            {/* Scrollable filter content */}
+            <div style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
+              <AdvancedFilters
+                filters={filters}
+                onChange={handleFiltersChange}
+                isAuthenticated={isAuthenticated}
+                total={total}
+                loading={loading}
+                statusCounts={data.statusCounts}
+              />
+            </div>
+
+            {/* Footer — Done button */}
+            <div
+              style={{
+                padding: "12px 16px",
+                borderTop: "1px solid var(--line-soft)",
+                flexShrink: 0,
+              }}
+            >
+              <button
+                onClick={() => setFilterDrawerOpen(false)}
+                style={{
+                  width: "100%",
+                  height: 44,
+                  borderRadius: 10,
+                  border: "none",
+                  background: "var(--d-accent)",
+                  color: "oklch(0.99 0 0)",
+                  fontSize: 14,
+                  fontWeight: 600,
+                  cursor: "pointer",
+                  fontFamily: "var(--font-sans)",
+                  letterSpacing: "-0.01em",
+                }}
+              >
+                {total === 0
+                  ? "No results"
+                  : `Show ${total} ${total === 1 ? "company" : "companies"}`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

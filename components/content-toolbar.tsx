@@ -1,7 +1,7 @@
 "use client"
 
 import { memo, type RefObject } from "react"
-import { Search, X, List, LayoutGrid } from "lucide-react"
+import { Search, X, List, LayoutGrid, SlidersHorizontal } from "lucide-react"
 import { useUIPreferences } from "@/lib/theme"
 
 export type ViewMode = "list" | "grid"
@@ -14,6 +14,8 @@ interface ContentToolbarProps {
   onViewChange: (v: ViewMode) => void
   total: number
   loading?: boolean
+  activeFilterCount?: number
+  onOpenFilters?: () => void
 }
 
 export const ContentToolbar = memo(function ContentToolbar({
@@ -24,6 +26,8 @@ export const ContentToolbar = memo(function ContentToolbar({
   onViewChange,
   total,
   loading,
+  activeFilterCount = 0,
+  onOpenFilters,
 }: ContentToolbarProps) {
   const { density, setDensity } = useUIPreferences()
 
@@ -39,6 +43,31 @@ export const ContentToolbar = memo(function ContentToolbar({
         flexShrink: 0,
       }}
     >
+      {/* Mobile filter button — hidden on desktop via CSS */}
+      <button
+        className="m-only"
+        onClick={onOpenFilters}
+        style={{
+          alignItems: "center",
+          gap: 5,
+          height: 32,
+          padding: "0 10px",
+          borderRadius: 7,
+          border: `1px solid ${activeFilterCount > 0 ? "var(--d-accent-line)" : "var(--line-soft)"}`,
+          background: activeFilterCount > 0 ? "var(--d-accent-soft)" : "var(--bg-2)",
+          color: activeFilterCount > 0 ? "var(--d-accent)" : "var(--fg-2)",
+          fontSize: 12.5,
+          fontFamily: "var(--font-sans)",
+          fontWeight: 500,
+          cursor: "pointer",
+          flexShrink: 0,
+          whiteSpace: "nowrap",
+        }}
+      >
+        <SlidersHorizontal size={13} />
+        {activeFilterCount > 0 ? `${activeFilterCount}` : ""}
+      </button>
+
       {/* Search */}
       <div style={{ position: "relative", flex: 1, maxWidth: 360 }}>
         <Search
@@ -55,11 +84,11 @@ export const ContentToolbar = memo(function ContentToolbar({
         <input
           ref={searchRef}
           value={searchValue}
-          onChange={(e: any) => onSearchChange(e.target.value)}
+          onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search companies…"
           style={{
             width: "100%",
-            height: 30,
+            height: 32,
             padding: "0 28px 0 29px",
             borderRadius: 6,
             background: "var(--bg-2)",
@@ -69,8 +98,8 @@ export const ContentToolbar = memo(function ContentToolbar({
             color: "var(--fg-0)",
             fontFamily: "var(--font-sans)",
           }}
-          onFocus={(e: any) => (e.currentTarget.style.borderColor = "var(--line)")}
-          onBlur={(e: any) => (e.currentTarget.style.borderColor = "var(--line-soft)")}
+          onFocus={(e) => (e.currentTarget.style.borderColor = "var(--line)")}
+          onBlur={(e) => (e.currentTarget.style.borderColor = "var(--line-soft)")}
         />
         {searchValue ? (
           <button
@@ -86,13 +115,14 @@ export const ContentToolbar = memo(function ContentToolbar({
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
-              padding: 0,
+              padding: 2,
             }}
           >
             <X size={12} />
           </button>
         ) : (
           <span
+            className="nav-cmd"
             style={{
               position: "absolute",
               right: 8,
@@ -117,7 +147,7 @@ export const ContentToolbar = memo(function ContentToolbar({
           fontSize: 11.5,
           color: loading ? "var(--fg-3)" : "var(--fg-2)",
           transition: "color 120ms",
-          marginLeft: 4,
+          flexShrink: 0,
         }}
       >
         {total}
@@ -125,10 +155,10 @@ export const ContentToolbar = memo(function ContentToolbar({
 
       <div style={{ flex: 1 }} />
 
-      {/* Density toggle */}
+      {/* Density toggle — hidden on mobile */}
       <div
+        className="d-only"
         style={{
-          display: "flex",
           alignItems: "center",
           background: "var(--bg-2)",
           border: "1px solid var(--line-soft)",
@@ -202,8 +232,8 @@ function ToolbarBtn({
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        width: 28,
-        height: 28,
+        width: 30,
+        height: 30,
         background: active ? "var(--bg-3)" : "transparent",
         border: "none",
         cursor: "pointer",

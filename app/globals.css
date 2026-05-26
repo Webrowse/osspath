@@ -297,3 +297,99 @@
     @apply outline-none ring-2 ring-ring/50 ring-offset-1 ring-offset-background;
   }
 }
+
+/* ─── Mobile-first responsive utilities ──────────────────────────────────── */
+
+@keyframes d-slide-in-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Visibility helpers (mobile = ≤767px) */
+.m-only { display: none !important; }
+@media (max-width: 767px) {
+  .m-only { display: flex !important; }
+  .d-only { display: none !important; }
+}
+
+/* Companies workspace shell */
+@media (max-width: 767px) {
+  .shell-sidebar { display: none !important; }
+}
+
+/* Stat strip — 2 columns on mobile */
+@media (max-width: 767px) {
+  .stat-strip-grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* Company row — two render trees, one shown per viewport */
+.row-desktop { display: flex; align-items: center; }
+.row-mobile  { display: none; flex-direction: column; }
+
+@media (max-width: 767px) {
+  .row-desktop { display: none !important; }
+  .row-mobile  { display: flex !important; }
+  /* Reset the fixed-height outer wrapper on mobile */
+  .row-outer {
+    height: auto !important;
+    padding: 14px 14px 14px 18px !important;
+    align-items: stretch !important;
+    overflow: visible !important;
+  }
+}
+
+/* Navbar */
+@media (max-width: 639px) {
+  .nav-inner { padding: 0 16px !important; }
+  .nav-links  { display: none !important; }
+  .nav-cmd    { display: none !important; }
+}
+
+/* Pagination */
+@media (max-width: 639px) {
+  .pg-input-group { display: none !important; }
+  .pg-hide-mobile { display: none !important; }
+  .pg-show-mobile { display: inline !important; }
+}
+@media (min-width: 640px) {
+  .pg-show-mobile { display: none !important; }
+}
+
+/* Filter drawer (mobile-only overlay) */
+.filter-drawer-back {
+  position: fixed;
+  inset: 0;
+  background: oklch(0 0 0 / 0.6);
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  animation: d-fade-in 180ms ease-out;
+  overscroll-behavior: contain;
+}
+
+.filter-drawer-sheet {
+  width: 100%;
+  max-height: 88dvh;
+  background: var(--bg-0);
+  border-radius: 20px 20px 0 0;
+  border: 1px solid var(--line-soft);
+  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: d-slide-in-up 240ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Dashboard sidebar — horizontal tab bar on mobile */
+@media (max-width: 767px) {
+  .dash-sidebar-nav {
+    display: flex !important;
+    flex-direction: row !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .dash-sidebar-label { display: none !important; }
+  .dash-sidebar-link  { white-space: nowrap !important; flex-shrink: 0 !important; }
+}

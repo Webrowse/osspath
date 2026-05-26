@@ -16,9 +16,11 @@ export function DashboardSidebar() {
   return (
     <aside className="md:w-44 flex-shrink-0">
       <div className="md:sticky md:top-22">
-        <p className="text-xs font-medium text-muted-foreground px-2 mb-2">Applications</p>
-        <nav className="space-y-0.5">
-          {SIDEBAR_LINKS.map((link: any) => {
+        <p className="dash-sidebar-label text-xs font-medium text-muted-foreground px-2 mb-2">
+          Applications
+        </p>
+        <nav className="dash-sidebar-nav space-y-0.5">
+          {SIDEBAR_LINKS.map((link) => {
             const isActive = link.href === "/dashboard"
               ? pathname === "/dashboard"
               : pathname.startsWith(link.href)
@@ -27,9 +29,9 @@ export function DashboardSidebar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  "flex items-center gap-2 px-2 py-1.5 text-sm rounded-md transition-colors",
+                  "dash-sidebar-link flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors",
                   isActive
-                    ? "bg-white/10 text-foreground"
+                    ? "bg-white/10 text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground hover:bg-white/5"
                 )}
               >

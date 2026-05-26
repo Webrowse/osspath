@@ -31,20 +31,21 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
 
   return (
     <div className={cn("flex items-center justify-between pt-4", loading && "opacity-60")}>
-      <span className="text-xs text-muted-foreground">
+      <span className="pg-hide-mobile text-xs text-muted-foreground">
         Page {page} of {totalPages} · {total} companies
       </span>
       <div className="flex items-center gap-1.5">
         <button
           onClick={() => go(page - 1)}
           disabled={page <= 1}
-          className="inline-flex items-center h-7 px-2.5 text-xs rounded-md bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          style={{ minWidth: 72 }}
         >
-          <ChevronLeft className="h-3.5 w-3.5 mr-0.5" />
+          <ChevronLeft className="h-3.5 w-3.5 mr-1" />
           Prev
         </button>
 
-        <div className="flex items-center gap-1">
+        <div className="pg-input-group flex items-center gap-1">
           <input
             ref={inputRef}
             type="number"
@@ -53,7 +54,7 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
             defaultValue={page}
             key={page}
             onKeyDown={handleInputKey}
-            onBlur={(e: any) => {
+            onBlur={(e) => {
               const v = parseInt(e.target.value, 10)
               if (!isNaN(v)) go(v)
             }}
@@ -62,13 +63,26 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
           <span className="text-xs text-muted-foreground">/ {totalPages}</span>
         </div>
 
+        {/* Mobile page indicator — shown only on small screens */}
+        <span
+          className="pg-show-mobile"
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            color: "var(--fg-3)",
+          }}
+        >
+          {page}/{totalPages}
+        </span>
+
         <button
           onClick={() => go(page + 1)}
           disabled={page >= totalPages}
-          className="inline-flex items-center h-7 px-2.5 text-xs rounded-md bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          style={{ minWidth: 72 }}
         >
           Next
-          <ChevronRight className="h-3.5 w-3.5 ml-0.5" />
+          <ChevronRight className="h-3.5 w-3.5 ml-1" />
         </button>
       </div>
     </div>
