@@ -129,6 +129,7 @@ export default async function HomePage() {
         {/* ── Hero ──────────────────────────────────────────────────────────── */}
         <section
           id="hero"
+          className="landing-hero-grid"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -178,6 +179,7 @@ export default async function HomePage() {
 
             {/* Headline */}
             <h1
+              className="landing-h1"
               style={{
                 margin: "20px 0 0",
                 fontSize: 52,
@@ -219,6 +221,7 @@ export default async function HomePage() {
 
             {/* CTAs */}
             <div
+              className="landing-cta-row"
               style={{
                 display: "flex",
                 gap: 10,
@@ -313,12 +316,15 @@ export default async function HomePage() {
           </div>
 
           {/* Right: HeroPreview */}
-          <HeroPreview />
+          <div className="landing-hero-preview">
+            <HeroPreview />
+          </div>
         </section>
 
         {/* ── Companies Preview ─────────────────────────────────────────────── */}
         <section
           id="companies"
+          className="landing-companies-section"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -332,6 +338,7 @@ export default async function HomePage() {
           />
 
           <div
+            className="landing-companies-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
@@ -375,6 +382,7 @@ export default async function HomePage() {
           }}
         >
           <div
+            className="landing-filters-inner"
             style={{
               maxWidth: 1240,
               margin: "0 auto",
@@ -452,13 +460,16 @@ export default async function HomePage() {
               </ul>
             </div>
 
-            <FiltersPreview />
+            <div className="landing-filters-preview">
+              <FiltersPreview />
+            </div>
           </div>
         </section>
 
         {/* ── Dashboard Workspace ───────────────────────────────────────────── */}
         <section
           id="workspace"
+          className="landing-workspace-section"
           style={{
             maxWidth: 1240,
             margin: "0 auto",
@@ -472,7 +483,9 @@ export default async function HomePage() {
             centered
           />
 
-          <DashboardPreview />
+          <div className="landing-dash-preview">
+            <DashboardPreview />
+          </div>
 
           <div style={{ marginTop: 24, display: "flex", justifyContent: "center" }}>
             <Link
@@ -507,6 +520,7 @@ export default async function HomePage() {
           }}
         >
           <div
+            className="landing-roadmap-inner"
             style={{
               maxWidth: 1240,
               margin: "0 auto",
@@ -520,6 +534,7 @@ export default async function HomePage() {
             />
 
             <div
+              className="landing-roadmap-grid"
               style={{
                 marginTop: 32,
                 display: "grid",
@@ -588,8 +603,9 @@ export default async function HomePage() {
         </section>
 
         {/* ── Footer ───────────────────────────────────────────────────────── */}
-        <footer style={{ padding: "40px 32px 56px" }}>
+        <footer className="landing-footer" style={{ padding: "40px 32px 56px" }}>
           <div
+            className="landing-footer-inner"
             style={{
               maxWidth: 1240,
               margin: "0 auto",

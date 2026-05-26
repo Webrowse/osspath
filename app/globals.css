@@ -393,3 +393,55 @@
   .dash-sidebar-label { display: none !important; }
   .dash-sidebar-link  { white-space: nowrap !important; flex-shrink: 0 !important; }
 }
+
+/* ── Landing page — mobile responsive ───────────────────────────────────── */
+
+@media (max-width: 767px) {
+  /* Hero: single column, hide decorative preview */
+  .landing-hero-grid    { grid-template-columns: 1fr !important; padding: 40px 20px 32px !important; gap: 0 !important; }
+  .landing-hero-preview { display: none !important; }
+  .landing-h1           { font-size: clamp(28px, 8vw, 40px) !important; }
+  .landing-cta-row      { flex-wrap: wrap !important; }
+
+  /* Companies grid: 2 cols */
+  .landing-companies-section { padding: 32px 20px 48px !important; }
+  .landing-companies-grid    { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Filters section: single column, hide decorative preview */
+  .landing-filters-inner   {
+    padding: 40px 20px !important;
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+  .landing-filters-preview { display: none !important; }
+
+  /* Workspace section: reduce padding, hide complex preview */
+  .landing-workspace-section { padding: 40px 20px !important; }
+  .landing-dash-preview      { display: none !important; }
+
+  /* Roadmap: 2×2 grid */
+  .landing-roadmap-inner { padding: 40px 20px !important; }
+  .landing-roadmap-grid  { grid-template-columns: repeat(2, 1fr) !important; }
+
+  /* Footer: stack on mobile */
+  .landing-footer        { padding: 32px 20px 40px !important; }
+  .landing-footer-inner  { flex-direction: column !important; gap: 4px !important; align-items: flex-start !important; }
+}
+
+@media (max-width: 479px) {
+  .landing-companies-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ── Workflow page — mobile responsive ───────────────────────────────────── */
+
+@media (max-width: 767px) {
+  .workflow-header    { padding: 40px 20px 32px !important; }
+  .workflow-steps     { padding: 0 20px !important; }
+  .workflow-step-row  { grid-template-columns: 1fr !important; }
+  .workflow-step-meta {
+    border-right: none !important;
+    border-bottom: 1px solid var(--line-soft) !important;
+    padding: 18px 20px !important;
+  }
+  .workflow-step-body { padding: 20px !important; }
+}

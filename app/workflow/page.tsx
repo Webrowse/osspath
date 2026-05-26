@@ -54,6 +54,7 @@ export default function WorkflowPage() {
     >
       {/* Header */}
       <div
+        className="workflow-header"
         style={{
           maxWidth: 860,
           margin: "0 auto",
@@ -105,6 +106,7 @@ export default function WorkflowPage() {
 
       {/* Steps */}
       <div
+        className="workflow-steps"
         style={{
           maxWidth: 860,
           margin: "0 auto",
@@ -132,6 +134,7 @@ function StepRow({
 }) {
   return (
     <div
+      className="workflow-step-row"
       style={{
         display: "grid",
         gridTemplateColumns: "200px 1fr",
@@ -145,6 +148,7 @@ function StepRow({
     >
       {/* Left meta */}
       <div
+        className="workflow-step-meta"
         style={{
           padding: "32px 28px",
           borderRight: "1px solid var(--line-soft)",
@@ -185,7 +189,7 @@ function StepRow({
       </div>
 
       {/* Right content */}
-      <div style={{ padding: "32px 32px 32px 36px" }}>
+      <div className="workflow-step-body" style={{ padding: "32px 32px 32px 36px" }}>
         <p
           style={{
             fontSize: 14,
