@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
 
 export const metadata: Metadata = {
-  title: "Workflow · jobs.adarshrust",
-  description: "How jobs.adarshrust works — discover, track, monitor, follow up.",
+  title: "Workflow",
+  description: "How jobs.adarshrust.com works — discover remote engineering companies, track applications, monitor pipeline, and follow up without manual effort.",
 }
 
 const STEPS = [

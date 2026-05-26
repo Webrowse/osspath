@@ -7,13 +7,16 @@ import type { Metadata } from "next"
 export const metadata: Metadata = {
   title: "Companies",
   description:
-    "Browse 54 curated remote engineering companies hiring Rust, backend, systems, and infra engineers.",
+    "Browse curated remote engineering companies hiring Rust, backend, systems, and infra engineers. Filter by stack, hiring signal, and company type.",
   openGraph: {
     title: "Companies | jobs.adarshrust.com",
     description:
-      "Browse 54 curated remote engineering companies hiring Rust, backend, systems, and infra engineers.",
+      "Browse curated remote engineering companies hiring Rust, backend, systems, and infra engineers.",
     url: "https://jobs.adarshrust.com/companies",
     type: "website",
+  },
+  alternates: {
+    canonical: "https://jobs.adarshrust.com/companies",
   },
 }
 

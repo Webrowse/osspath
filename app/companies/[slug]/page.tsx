@@ -31,7 +31,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `https://jobs.adarshrust.com/companies/${slug}`,
       type: "website",
     },
-    twitter: { card: "summary", title, description },
+    twitter: { card: "summary_large_image", title, description },
+    alternates: {
+      canonical: `https://jobs.adarshrust.com/companies/${slug}`,
+    },
   }
 }
 
@@ -57,9 +60,11 @@ export default async function CompanyPage({ params }: PageProps) {
 
   const c = companyWithState ?? company
 
+  const pageUrl = `https://jobs.adarshrust.com/companies/${slug}`
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": pageUrl,
     name: c.name,
     description: c.description,
     url: c.careersUrl,

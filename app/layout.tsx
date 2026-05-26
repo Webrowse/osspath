@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://jobs.adarshrust.com"),
   title: {
     default: "jobs.adarshrust.com — Remote Engineering Job Tracker",
     template: "%s | jobs.adarshrust.com",
@@ -32,11 +33,13 @@ export const metadata: Metadata = {
     url: "https://jobs.adarshrust.com",
     siteName: "jobs.adarshrust.com",
     type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
     title: "jobs.adarshrust.com",
     description: "Remote engineering job tracker for Rust and systems engineers.",
+    images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
 }

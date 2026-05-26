@@ -2,8 +2,8 @@ import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
 
 export const metadata: Metadata = {
-  title: "Changelog · jobs.adarshrust",
-  description: "What's shipped in jobs.adarshrust.",
+  title: "Changelog",
+  description: "What's shipped in jobs.adarshrust.com — features, fixes, and improvements in reverse chronological order.",
 }
 
 type Entry = {
