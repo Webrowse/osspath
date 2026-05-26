@@ -305,6 +305,10 @@
   to   { transform: translateY(0); }
 }
 
+/* Scrollbar utilities */
+.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Visibility helpers (mobile = ≤767px) */
 .m-only { display: none !important; }
 @media (max-width: 767px) {

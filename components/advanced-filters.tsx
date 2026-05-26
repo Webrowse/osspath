@@ -53,6 +53,29 @@ const ATTENTION_FILTERS: TimeFilter[] = [
   "updated_7d",
 ]
 
+const EMPTY_FILTERS: CompanyFilters = {
+  q: "",
+  statuses: [],
+  tags: [],
+  remoteOnly: false,
+  rustOnly: false,
+  companyType: null,
+  timeFilter: null,
+  hideNotInterested: false,
+  page: 1,
+}
+
+// Quick-access presets replace all active filters with a single click
+const PRESETS: Array<{ label: string; filters: Partial<CompanyFilters> }> = [
+  {
+    label: "Active pipeline",
+    filters: { statuses: ["APPLIED", "OA", "RECRUITER_CALL", "INTERVIEWING", "FINAL_ROUND"] },
+  },
+  { label: "Follow-up due", filters: { timeFilter: "follow_up_due" } },
+  { label: "Not reviewed 7d", filters: { timeFilter: "not_checked_7d" } },
+  { label: "Saved", filters: { statuses: ["SAVED"] } },
+]
+
 interface AdvancedFiltersProps {
   filters: CompanyFilters
   onChange: (next: CompanyFilters) => void
@@ -73,8 +96,8 @@ export function AdvancedFilters({
   const [showAllTags, setShowAllTags] = useState(false)
   const [openGroups, setOpenGroups] = useState({
     pipeline: true,
-    timeline: false,
-    attention: false,
+    timeline: true,
+    attention: true,
     company: true,
     tags: true,
   })
@@ -108,24 +131,39 @@ export function AdvancedFilters({
     !!filters.timeFilter ||
     filters.hideNotInterested
 
-  const clearAll = () => {
-    onChange({
-      q: "",
-      statuses: [],
-      tags: [],
-      remoteOnly: false,
-      rustOnly: false,
-      companyType: null,
-      timeFilter: null,
-      hideNotInterested: false,
-      page: 1,
-    })
-  }
+  const clearAll = () => onChange(EMPTY_FILTERS)
 
   const toggleGroup = (key: keyof typeof openGroups) =>
     setOpenGroups((g) => ({ ...g, [key]: !g[key] }))
 
   const visibleTags = showAllTags ? ALL_TAGS : ALL_TAGS.slice(0, 10)
+
+  // Per-section active state for header indicators
+  const pipelineActive = filters.statuses.length > 0 || filters.hideNotInterested
+  const timelineActive = !!filters.timeFilter && TIMELINE_FILTERS.includes(filters.timeFilter)
+  const attentionActive = !!filters.timeFilter && ATTENTION_FILTERS.includes(filters.timeFilter)
+  const companyActive = filters.remoteOnly || filters.rustOnly || !!filters.companyType
+  const tagsActive = filters.tags.length > 0
+
+  const pipelineActiveLabel =
+    filters.statuses.length === 1
+      ? STATUS_LABELS[filters.statuses[0]]
+      : filters.statuses.length > 1
+      ? `${filters.statuses.length} stages`
+      : filters.hideNotInterested
+      ? "hiding NI"
+      : undefined
+
+  const timelineActiveLabel =
+    filters.timeFilter && timelineActive ? TIME_FILTER_LABELS[filters.timeFilter] : undefined
+  const attentionActiveLabel =
+    filters.timeFilter && attentionActive ? TIME_FILTER_LABELS[filters.timeFilter] : undefined
+  const tagsActiveLabel =
+    filters.tags.length === 1
+      ? filters.tags[0]
+      : filters.tags.length > 1
+      ? `${filters.tags.length} tags`
+      : undefined
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -152,7 +190,9 @@ export function AdvancedFilters({
               background: "none",
               border: "none",
               cursor: "pointer",
-              padding: 0,
+              padding: "2px 6px",
+              borderRadius: 4,
+              marginRight: -6,
             }}
           >
             clear
@@ -160,10 +200,39 @@ export function AdvancedFilters({
         )}
       </div>
 
+
+      {/* Quick-access presets — authenticated only */}
+      {isAuthenticated && (
+        <div>
+          <p
+            style={{
+              fontFamily: "var(--font-mono)",
+              fontSize: 10,
+              color: "var(--fg-3)",
+              letterSpacing: "0.05em",
+              margin: "0 0 6px 4px",
+            }}
+          >
+            QUICK FILTER
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+            {PRESETS.map((preset) => (
+              <PresetBtn
+                key={preset.label}
+                label={preset.label}
+                onClick={() => onChange({ ...EMPTY_FILTERS, ...preset.filters })}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Pipeline — multi-select checkboxes */}
       {isAuthenticated && (
         <FilterSection
           title="Pipeline"
+          hasActive={pipelineActive}
+          activeLabel={pipelineActiveLabel}
           open={openGroups.pipeline}
           onToggle={() => toggleGroup("pipeline")}
         >
@@ -195,17 +264,21 @@ export function AdvancedFilters({
         <FilterSection
           title="Timeline"
           hint="choose one"
+          hasActive={timelineActive}
+          activeLabel={timelineActiveLabel}
           open={openGroups.timeline}
           onToggle={() => toggleGroup("timeline")}
         >
-          {TIMELINE_FILTERS.map((tf) => (
-            <FilterRadioRow
-              key={tf}
-              label={TIME_FILTER_LABELS[tf]}
-              active={filters.timeFilter === tf}
-              onToggle={() => setTimeFilter(tf)}
-            />
-          ))}
+          <div role="radiogroup" aria-label="Timeline filter">
+            {TIMELINE_FILTERS.map((tf) => (
+              <FilterRadioRow
+                key={tf}
+                label={TIME_FILTER_LABELS[tf]}
+                active={filters.timeFilter === tf}
+                onToggle={() => setTimeFilter(tf)}
+              />
+            ))}
+          </div>
         </FilterSection>
       )}
 
@@ -214,23 +287,28 @@ export function AdvancedFilters({
         <FilterSection
           title="Needs Attention"
           hint="choose one"
+          hasActive={attentionActive}
+          activeLabel={attentionActiveLabel}
           open={openGroups.attention}
           onToggle={() => toggleGroup("attention")}
         >
-          {ATTENTION_FILTERS.map((tf) => (
-            <FilterRadioRow
-              key={tf}
-              label={TIME_FILTER_LABELS[tf]}
-              active={filters.timeFilter === tf}
-              onToggle={() => setTimeFilter(tf)}
-            />
-          ))}
+          <div role="radiogroup" aria-label="Needs Attention filter">
+            {ATTENTION_FILTERS.map((tf) => (
+              <FilterRadioRow
+                key={tf}
+                label={TIME_FILTER_LABELS[tf]}
+                active={filters.timeFilter === tf}
+                onToggle={() => setTimeFilter(tf)}
+              />
+            ))}
+          </div>
         </FilterSection>
       )}
 
       {/* Company */}
       <FilterSection
         title="Company"
+        hasActive={companyActive}
         open={openGroups.company}
         onToggle={() => toggleGroup("company")}
       >
@@ -251,6 +329,8 @@ export function AdvancedFilters({
       {/* Tags */}
       <FilterSection
         title="Tags"
+        hasActive={tagsActive}
+        activeLabel={tagsActiveLabel}
         open={openGroups.tags}
         onToggle={() => toggleGroup("tags")}
       >
@@ -287,23 +367,59 @@ export function AdvancedFilters({
   )
 }
 
+function PresetBtn({ label, onClick }: { label: string; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        height: 22,
+        padding: "0 8px",
+        borderRadius: 4,
+        border: `1px solid ${hovered ? "var(--line)" : "var(--line-soft)"}`,
+        background: hovered ? "var(--bg-3)" : "var(--bg-2)",
+        color: hovered ? "var(--fg-0)" : "var(--fg-2)",
+        fontSize: 11,
+        fontFamily: "var(--font-sans)",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+        transition: "all 100ms",
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
 function FilterSection({
   title,
   hint,
+  hasActive,
+  activeLabel,
   open,
   onToggle,
   children,
 }: {
   title: string
   hint?: string
+  hasActive?: boolean
+  activeLabel?: string
   open: boolean
   onToggle: () => void
   children: React.ReactNode
 }) {
+  // When active: show activeLabel (if any) in accent color; else fall back to hint
+  const subtitleText = hasActive && activeLabel ? activeLabel : !hasActive ? hint : undefined
+
   return (
     <div>
       <button
         onClick={onToggle}
+        aria-expanded={open}
         style={{
           display: "flex",
           alignItems: "center",
@@ -316,6 +432,7 @@ function FilterSection({
           fontSize: 12,
           fontWeight: 500,
           color: "var(--fg-1)",
+          minWidth: 0,
         }}
       >
         <ChevronDown
@@ -327,19 +444,35 @@ function FilterSection({
             flexShrink: 0,
           }}
         />
-        {title}
-        {hint && (
+        <span style={{ flexShrink: 0 }}>{title}</span>
+        {subtitleText && (
           <span
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 10,
-              color: "var(--fg-3)",
+              color: hasActive ? "var(--d-accent)" : "var(--fg-3)",
               fontWeight: 400,
-              marginLeft: 2,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              minWidth: 0,
             }}
           >
-            · {hint}
+            · {subtitleText}
           </span>
+        )}
+        {/* Dot signals active state when there's no text label to show */}
+        {hasActive && !activeLabel && (
+          <span
+            style={{
+              width: 5,
+              height: 5,
+              borderRadius: 999,
+              background: "var(--d-accent)",
+              flexShrink: 0,
+              marginLeft: 2,
+            }}
+          />
         )}
       </button>
       {open && (
@@ -368,6 +501,7 @@ function FilterCheckRow({
   return (
     <button
       onClick={onToggle}
+      aria-pressed={active}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -446,6 +580,8 @@ function FilterRadioRow({
   return (
     <button
       onClick={onToggle}
+      role="radio"
+      aria-checked={active}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{

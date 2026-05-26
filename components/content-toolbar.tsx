@@ -65,7 +65,7 @@ export const ContentToolbar = memo(function ContentToolbar({
         }}
       >
         <SlidersHorizontal size={13} />
-        {activeFilterCount > 0 ? `${activeFilterCount}` : ""}
+        {activeFilterCount > 0 ? `Filters · ${activeFilterCount}` : "Filters"}
       </button>
 
       {/* Search */}

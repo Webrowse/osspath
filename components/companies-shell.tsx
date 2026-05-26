@@ -11,8 +11,13 @@ import { CompanyCard } from "@/components/company-card"
 import { Pagination } from "@/components/pagination"
 import { useCompanies } from "@/hooks/use-companies"
 import type { CompaniesClientData } from "@/lib/companies"
-import type { CompanyFilters } from "@/types"
-import { parseFilters } from "@/types"
+import type { CompanyFilters, TimeFilter } from "@/types"
+import {
+  STATUS_LABELS,
+  TIME_FILTER_LABELS,
+  COMPANY_TYPE_LABELS,
+  parseFilters,
+} from "@/types"
 
 interface CompaniesShellProps {
   initialFilters: CompanyFilters
@@ -47,6 +52,23 @@ function countActiveFilters(f: CompanyFilters): number {
   return n
 }
 
+// Human-readable summary of what filters are currently active.
+// Used in the empty state to explain zero results.
+function describeFilters(f: CompanyFilters): string {
+  const parts: string[] = []
+  if (f.q.trim()) parts.push(`"${f.q.trim()}"`)
+  if (f.statuses.length === 1) parts.push(STATUS_LABELS[f.statuses[0]])
+  else if (f.statuses.length > 1) parts.push(`${f.statuses.length} pipeline stages`)
+  if (f.timeFilter) parts.push(TIME_FILTER_LABELS[f.timeFilter])
+  if (f.remoteOnly) parts.push("remote only")
+  if (f.rustOnly) parts.push("Rust only")
+  if (f.companyType) parts.push(COMPANY_TYPE_LABELS[f.companyType])
+  if (f.tags.length === 1) parts.push(f.tags[0])
+  else if (f.tags.length > 1) parts.push(`${f.tags.length} tags`)
+  if (f.hideNotInterested) parts.push("hiding not interested")
+  return parts.join(" · ")
+}
+
 const EMPTY_FILTERS: CompanyFilters = {
   q: "",
   statuses: [],
@@ -57,6 +79,144 @@ const EMPTY_FILTERS: CompanyFilters = {
   timeFilter: null,
   hideNotInterested: false,
   page: 1,
+}
+
+// One dismissible chip per active filter dimension.
+// Gives persistent, scannable visibility into active filters without
+// requiring the user to open the sidebar or filter drawer.
+function ActiveFilterChips({
+  filters,
+  onFiltersChange,
+}: {
+  filters: CompanyFilters
+  onFiltersChange: (f: CompanyFilters) => void
+}) {
+  const chips: Array<{ label: string; onRemove: () => void }> = []
+
+  if (filters.q.trim()) {
+    chips.push({
+      label: `"${filters.q.trim()}"`,
+      onRemove: () => onFiltersChange({ ...filters, q: "", page: 1 }),
+    })
+  }
+  if (filters.statuses.length === 1) {
+    chips.push({
+      label: STATUS_LABELS[filters.statuses[0]],
+      onRemove: () => onFiltersChange({ ...filters, statuses: [], page: 1 }),
+    })
+  } else if (filters.statuses.length > 1) {
+    chips.push({
+      label: `${filters.statuses.length} pipeline stages`,
+      onRemove: () => onFiltersChange({ ...filters, statuses: [], page: 1 }),
+    })
+  }
+  if (filters.timeFilter) {
+    chips.push({
+      label: TIME_FILTER_LABELS[filters.timeFilter as TimeFilter],
+      onRemove: () => onFiltersChange({ ...filters, timeFilter: null, page: 1 }),
+    })
+  }
+  if (filters.remoteOnly) {
+    chips.push({
+      label: "Remote only",
+      onRemove: () => onFiltersChange({ ...filters, remoteOnly: false, page: 1 }),
+    })
+  }
+  if (filters.rustOnly) {
+    chips.push({
+      label: "Rust only",
+      onRemove: () => onFiltersChange({ ...filters, rustOnly: false, page: 1 }),
+    })
+  }
+  if (filters.companyType) {
+    chips.push({
+      label: COMPANY_TYPE_LABELS[filters.companyType],
+      onRemove: () => onFiltersChange({ ...filters, companyType: null, page: 1 }),
+    })
+  }
+  if (filters.tags.length === 1) {
+    chips.push({
+      label: filters.tags[0],
+      onRemove: () => onFiltersChange({ ...filters, tags: [], page: 1 }),
+    })
+  } else if (filters.tags.length > 1) {
+    chips.push({
+      label: `${filters.tags.length} tags`,
+      onRemove: () => onFiltersChange({ ...filters, tags: [], page: 1 }),
+    })
+  }
+  if (filters.hideNotInterested) {
+    chips.push({
+      label: "Hiding not interested",
+      onRemove: () => onFiltersChange({ ...filters, hideNotInterested: false, page: 1 }),
+    })
+  }
+
+  if (chips.length === 0) return null
+
+  return (
+    <div
+      className="hide-scrollbar"
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "6px 16px",
+        overflowX: "auto",
+        flexShrink: 0,
+        borderBottom: "1px solid var(--line-soft)",
+      }}
+    >
+      {chips.map((chip) => (
+        <button
+          key={chip.label}
+          onClick={chip.onRemove}
+          title={`Remove: ${chip.label}`}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 5,
+            height: 24,
+            padding: "0 8px",
+            borderRadius: 6,
+            border: "1px solid var(--d-accent-line)",
+            background: "var(--d-accent-soft)",
+            color: "var(--d-accent)",
+            fontSize: 11.5,
+            fontFamily: "var(--font-sans)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          {chip.label}
+          <X size={10} strokeWidth={2.5} />
+        </button>
+      ))}
+      {chips.length > 1 && (
+        <button
+          onClick={() => onFiltersChange(EMPTY_FILTERS)}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            height: 24,
+            padding: "0 8px",
+            borderRadius: 6,
+            border: "1px solid var(--line-soft)",
+            background: "transparent",
+            color: "var(--fg-3)",
+            fontSize: 11.5,
+            fontFamily: "var(--font-sans)",
+            cursor: "pointer",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          Clear all
+        </button>
+      )}
+    </div>
+  )
 }
 
 export function CompaniesShell({
@@ -139,6 +299,7 @@ export function CompaniesShell({
   const handleFiltersChange = useCallback(
     (next: CompanyFilters) => {
       setFilters(next)
+      setSearchValue(next.q)  // keep search input in sync when chips or presets clear q
       syncUrl(next)
     },
     [syncUrl],
@@ -208,6 +369,9 @@ export function CompaniesShell({
           onOpenFilters={() => setFilterDrawerOpen(true)}
         />
 
+        {/* Active filter chips — shows when any filter is active */}
+        <ActiveFilterChips filters={filters} onFiltersChange={handleFiltersChange} />
+
         <main style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
           {/* Page header */}
           <div
@@ -257,32 +421,49 @@ export function CompaniesShell({
                 border: "1px solid var(--line-soft)",
                 borderRadius: 10,
                 background: "var(--bg-1)",
+                padding: "0 24px",
               }}
             >
               <Building2 size={28} style={{ opacity: 0.25 }} />
               <p style={{ fontSize: 14, fontWeight: 500, color: "var(--fg-2)", margin: 0 }}>
                 No companies matched
               </p>
-              <p style={{ fontSize: 12.5, color: "var(--fg-3)", margin: 0 }}>
-                Try adjusting your filters
-              </p>
-              {activeFilterCount > 0 && (
-                <button
-                  onClick={clearFilters}
-                  style={{
-                    marginTop: 4,
-                    padding: "6px 14px",
-                    borderRadius: 6,
-                    border: "1px solid var(--line-soft)",
-                    background: "transparent",
-                    color: "var(--fg-2)",
-                    fontSize: 12.5,
-                    cursor: "pointer",
-                    fontFamily: "var(--font-sans)",
-                  }}
-                >
-                  Clear filters
-                </button>
+              {activeFilterCount > 0 ? (
+                <>
+                  <p
+                    style={{
+                      fontSize: 11.5,
+                      color: "var(--fg-3)",
+                      margin: 0,
+                      textAlign: "center",
+                      maxWidth: 320,
+                      fontFamily: "var(--font-mono)",
+                      lineHeight: 1.5,
+                    }}
+                  >
+                    {describeFilters(filters)}
+                  </p>
+                  <button
+                    onClick={clearFilters}
+                    style={{
+                      marginTop: 4,
+                      padding: "6px 14px",
+                      borderRadius: 6,
+                      border: "1px solid var(--line-soft)",
+                      background: "transparent",
+                      color: "var(--fg-2)",
+                      fontSize: 12.5,
+                      cursor: "pointer",
+                      fontFamily: "var(--font-sans)",
+                    }}
+                  >
+                    Clear all filters
+                  </button>
+                </>
+              ) : (
+                <p style={{ fontSize: 12.5, color: "var(--fg-3)", margin: 0 }}>
+                  No companies in the database yet
+                </p>
               )}
             </div>
           ) : view === "list" ? (
@@ -451,17 +632,18 @@ export function CompaniesShell({
                   height: 44,
                   borderRadius: 10,
                   border: "none",
-                  background: "var(--d-accent)",
-                  color: "oklch(0.99 0 0)",
+                  background: total === 0 ? "var(--bg-3)" : "var(--d-accent)",
+                  color: total === 0 ? "var(--fg-3)" : "oklch(0.99 0 0)",
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: "pointer",
                   fontFamily: "var(--font-sans)",
                   letterSpacing: "-0.01em",
+                  transition: "background 150ms",
                 }}
               >
                 {total === 0
-                  ? "No results"
+                  ? "No results — try adjusting filters"
                   : `Show ${total} ${total === 1 ? "company" : "companies"}`}
               </button>
             </div>
