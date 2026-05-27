@@ -30,11 +30,6 @@ const NAV_LINKS = [
     match: (p: string) => false, // demo redirects; never shows as active
     isDemo: true,
   },
-  {
-    href: "/changelog",
-    label: "Changelog",
-    match: (p: string) => p === "/changelog",
-  },
 ]
 
 export function Navbar() {
