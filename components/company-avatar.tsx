@@ -43,8 +43,12 @@ export function CompanyAvatar({ name, logoUrl, size = 36 }: CompanyAvatarProps) 
         width: dim,
         height: dim,
         borderRadius: `${radius}px`,
-        background: `linear-gradient(135deg, ${color} 0%, color-mix(in oklch, ${color}, transparent 55%) 100%)`,
+        background: logoState === "loaded"
+          ? "var(--bg-2)"
+          : `linear-gradient(135deg, ${color} 0%, color-mix(in oklch, ${color}, transparent 55%) 100%)`,
         boxShadow: "0 1px 0 oklch(1 0 0 / 0.15) inset, 0 1px 8px -2px oklch(0 0 0 / 0.4)",
+        transition: "background 150ms ease-in",
+        border: logoState === "loaded" ? "1px solid var(--line-soft)" : "none",
       }}
     >
       {/* Initials — always rendered as the base layer */}
