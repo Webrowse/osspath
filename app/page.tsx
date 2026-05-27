@@ -8,7 +8,7 @@ import {
   Users,
   Zap,
   Target,
-  Sparkles,
+  Clock,
   Search,
 } from "lucide-react"
 
@@ -30,68 +30,37 @@ const DEMO_COMPANIES = [
     id: 1, name: "Cloudflare", domain: "cloudflare.com",
     desc: "Building the future of the internet with edge computing and zero-trust security.",
     tags: ["Rust", "Infrastructure", "Security"],
-    hiring: "actively-hiring" as const, openings: 14, status: "interviewing" as const,
+    isHiring: true,
   },
   {
     id: 2, name: "Fly.io", domain: "fly.io",
     desc: "Deploy full-stack apps and databases close to your users with globally distributed VMs.",
     tags: ["Rust", "Cloud", "DevOps"],
-    hiring: "actively-hiring" as const, openings: 8, status: "applied" as const,
+    isHiring: true,
   },
   {
     id: 3, name: "Oxide Computer", domain: "oxide.computer",
     desc: "Cloud computers for the datacenter — hardware and software co-designed from silicon up.",
     tags: ["Rust", "Systems", "Hardware"],
-    hiring: "selective" as const, openings: 3, status: "saved" as const,
+    isHiring: false,
   },
   {
     id: 4, name: "Turso", domain: "turso.tech",
     desc: "Edge SQLite databases built for the distributed-first world. Fast, embedded, consistent.",
     tags: ["Rust", "Databases", "Edge"],
-    hiring: "actively-hiring" as const, openings: 6, status: "none" as const,
+    isHiring: true,
   },
   {
     id: 5, name: "Zed Industries", domain: "zed.dev",
     desc: "A high-performance, collaborative code editor written from scratch in Rust.",
     tags: ["Rust", "DevTools", "Editor"],
-    hiring: "actively-hiring" as const, openings: 5, status: "none" as const,
+    isHiring: true,
   },
   {
     id: 6, name: "ClickHouse", domain: "clickhouse.com",
     desc: "Open-source column-oriented database for real-time analytics at petabyte scale.",
     tags: ["C++", "Databases", "Performance"],
-    hiring: "actively-hiring" as const, openings: 18, status: "applied" as const,
-  },
-]
-
-const STATUS_COLORS: Record<string, { color: string; bg: string; label: string }> = {
-  applied: { color: "var(--d-accent)", bg: "var(--d-accent-soft)", label: "Applied" },
-  interviewing: { color: "var(--d-rust)", bg: "var(--d-rust-soft)", label: "Interviewing" },
-  saved: { color: "var(--fg-2)", bg: "oklch(0.5 0 0 / 0.1)", label: "Saved" },
-  rejected: { color: "var(--d-danger)", bg: "var(--d-danger-soft)", label: "Rejected" },
-  none: { color: "var(--fg-3)", bg: "transparent", label: "" },
-}
-
-const ROADMAP_ITEMS = [
-  {
-    stage: "Now", title: "Companies + tracking",
-    desc: "Full company database, 13-status pipeline tracking, sidebar filters, quick filter presets.",
-    color: "var(--d-ok)",
-  },
-  {
-    stage: "Q3", title: "Openings + timelines",
-    desc: "Per-role timelines, recruiter contacts, compensation comparison.",
-    color: "var(--d-accent)",
-  },
-  {
-    stage: "Q4", title: "Smart queues",
-    desc: "Resurface stale applications, suggest follow-up windows, batch outreach.",
-    color: "var(--d-rust)",
-  },
-  {
-    stage: "2027", title: "Career intelligence",
-    desc: "Cohort comp data, hiring trends, automated discovery for your stack.",
-    color: "var(--d-warn)",
+    isHiring: true,
   },
 ]
 
@@ -103,13 +72,13 @@ const FILTER_FEATURES = [
   },
   {
     icon: <Target size={14} />,
-    title: "Quick filters",
-    desc: "One-tap presets for active pipeline, overdue follow-ups, and recently saved.",
+    title: "Queue-driven navigation",
+    desc: "Filter by status, hiring activity, and urgency. Each filtered view is a bookmarkable URL.",
   },
   {
-    icon: <Sparkles size={14} />,
+    icon: <Clock size={14} />,
     title: "Follow-up tracking",
-    desc: "Set follow-up dates when you apply. Surface everything overdue in one filter.",
+    desc: "Set a follow-up date when you apply. Surface everything overdue in a single filter.",
   },
 ]
 
@@ -338,8 +307,8 @@ export default async function HomePage() {
         >
           <SectionHeader
             kicker="Companies"
-            title="High-signal opportunities, curated like a tasting menu."
-            desc="Every company is hand-picked for engineering depth, remote culture, and compensation transparency. No agencies. No ghost listings."
+            title="Curated companies with real Rust signal."
+            desc="Every company is hand-picked for engineering depth and remote culture. Filtered by Rust usage, hiring status, and company type. No agencies, no ghost listings."
           />
 
           <div
@@ -405,10 +374,10 @@ export default async function HomePage() {
                   <>
                     Slice {companyCount} companies
                     <br />
-                    down to the 12 that matter.
+                    down to the ones that matter.
                   </>
                 }
-                desc="Stack filters by stage, compensation, remote region, hiring state and tracking status. Saved views remember your stack between sessions."
+                desc="Stack filters by tracking status, hiring activity, Rust depth, company type, and follow-up urgency. Every filtered view is a shareable URL."
                 inline
               />
               <ul
@@ -516,97 +485,6 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* ── Roadmap ───────────────────────────────────────────────────────── */}
-        <section
-          id="roadmap"
-          style={{
-            background: "var(--bg-1)",
-            borderTop: "1px solid var(--line-soft)",
-          }}
-        >
-          <div
-            className="landing-roadmap-inner"
-            style={{
-              maxWidth: 1240,
-              margin: "0 auto",
-              padding: "64px 32px",
-            }}
-          >
-            <SectionHeader
-              kicker="Roadmap"
-              title={<>From job board → career operating system.</>}
-              desc="We started by indexing Rust companies. We're building toward a system that knows your pipeline better than you do."
-            />
-
-            <div
-              className="landing-roadmap-grid"
-              style={{
-                marginTop: 32,
-                display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
-                gap: 14,
-              }}
-            >
-              {ROADMAP_ITEMS.map((item, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: 18,
-                    borderRadius: 10,
-                    background: "var(--bg-2)",
-                    border: "1px solid var(--line-soft)",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 8,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 6,
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 10.5,
-                      color: item.color,
-                      textTransform: "uppercase",
-                      letterSpacing: "0.06em",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: 999,
-                        background: item.color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    {item.stage}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 600,
-                      color: "var(--fg-0)",
-                    }}
-                  >
-                    {item.title}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12.5,
-                      color: "var(--fg-2)",
-                      lineHeight: 1.45,
-                    }}
-                  >
-                    {item.desc}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ── Footer ───────────────────────────────────────────────────────── */}
         <footer className="landing-footer" style={{ padding: "40px 32px 56px" }}>
           <div
@@ -622,8 +500,8 @@ export default async function HomePage() {
               fontFamily: "var(--font-mono)",
             }}
           >
-            <span>jobs.adarshrust · built by remote engineers, for remote engineers</span>
-            <span>v0.4.2 · 2026.05</span>
+            <span>jobs.adarshrust · career workflow for Rust engineers</span>
+            <span>private beta · 2026</span>
           </div>
         </footer>
       </div>
@@ -707,7 +585,7 @@ function PreviewCard({
 }) {
   const color = hashColor(company.name)
   const initials = getInitials(company.name)
-  const isHiring = company.hiring === "actively-hiring"
+  const isHiring = company.isHiring
 
   return (
     <Link
@@ -771,7 +649,7 @@ function PreviewCard({
           }}
         >
           <MiniPulse isHiring={isHiring} />
-          {company.openings}
+          {isHiring ? "Hiring" : "Passive"}
         </div>
       </div>
       <div
@@ -886,8 +764,8 @@ function HeroPreview({ companyCount }: { companyCount: number }) {
         >
           {[
             { l: "Companies", a: true, n: companyCount },
-            { l: "Tracking", n: 18 },
-            { l: "Saved", n: 7 },
+            { l: "Saved", n: null },
+            { l: "Dashboard", n: null },
           ].map((x, i) => (
             <div
               key={i}
@@ -900,9 +778,11 @@ function HeroPreview({ companyCount }: { companyCount: number }) {
               }}
             >
               <span style={{ flex: 1 }}>{x.l}</span>
-              <span style={{ fontFamily: "var(--font-mono)", color: "var(--fg-3)" }}>
-                {x.n}
-              </span>
+              {x.n != null && (
+                <span style={{ fontFamily: "var(--font-mono)", color: "var(--fg-3)" }}>
+                  {x.n}
+                </span>
+              )}
             </div>
           ))}
           <div
@@ -1131,9 +1011,7 @@ function HeroPreview({ companyCount }: { companyCount: number }) {
 // ── FiltersPreview ────────────────────────────────────────────────────────────
 
 function FiltersPreview() {
-  const filtered = DEMO_COMPANIES.filter(
-    (c: any) => c.hiring === "actively-hiring" && c.status !== "none"
-  ).slice(0, 3)
+  const filtered = DEMO_COMPANIES.filter((c: any) => c.isHiring).slice(0, 3)
 
   return (
     <div
@@ -1259,7 +1137,6 @@ function FiltersPreview() {
           {filtered.map((c: any) => {
             const color = hashColor(c.name)
             const initials = getInitials(c.name)
-            const st = STATUS_COLORS[c.status] ?? STATUS_COLORS.none
             return (
               <div
                 key={c.id}
@@ -1313,35 +1190,26 @@ function FiltersPreview() {
                     {c.desc}
                   </div>
                 </div>
-                {st.label && (
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "2px 7px",
+                    borderRadius: 10,
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 10,
+                    background: "color-mix(in oklch, var(--d-ok), transparent 85%)",
+                    color: "var(--d-ok)",
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
+                >
                   <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: 5,
-                      padding: "2px 7px",
-                      borderRadius: 10,
-                      fontFamily: "var(--font-mono)",
-                      fontSize: 10.5,
-                      background: st.bg,
-                      color: st.color,
-                      border: `1px solid color-mix(in oklch, ${st.color}, transparent 60%)`,
-                      whiteSpace: "nowrap",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 5,
-                        height: 5,
-                        borderRadius: 999,
-                        background: st.color,
-                        flexShrink: 0,
-                      }}
-                    />
-                    {st.label}
-                  </span>
-                )}
+                    style={{ width: 5, height: 5, borderRadius: 999, background: "var(--d-ok)" }}
+                  />
+                  Hiring
+                </span>
               </div>
             )
           })}
@@ -1560,10 +1428,10 @@ function DashboardPreview() {
               }}
             >
               {[
-                { l: "TRACKED", v: "18", s: "across pipeline", c: "var(--fg-0)" },
-                { l: "INTERVIEWING", v: "2", s: "active", c: "var(--d-rust)" },
-                { l: "FOLLOW-UP", v: "5", s: "overdue", c: "var(--d-warn)" },
-                { l: "APPLIED", v: "9", s: "awaiting reply", c: "var(--d-accent)" },
+                { l: "TRACKED", v: "—", s: "in pipeline", c: "var(--fg-0)" },
+                { l: "INTERVIEWING", v: "—", s: "active", c: "var(--d-rust)" },
+                { l: "FOLLOW-UP", v: "—", s: "overdue", c: "var(--d-warn)" },
+                { l: "NEW OPENINGS", v: "—", s: "verified 14d", c: "var(--d-ok)" },
               ].map((s, i) => (
                 <div
                   key={i}
@@ -1616,7 +1484,6 @@ function DashboardPreview() {
               {DEMO_COMPANIES.map((c: any) => {
                 const color = hashColor(c.name)
                 const initials = getInitials(c.name)
-                const st = STATUS_COLORS[c.status] ?? STATUS_COLORS.none
                 return (
                   <div
                     key={c.id}
@@ -1625,26 +1492,11 @@ function DashboardPreview() {
                       border: "1px solid var(--line-soft)",
                       borderRadius: 8,
                       padding: 10,
-                      position: "relative",
                       display: "flex",
                       flexDirection: "column",
                       gap: 8,
                     }}
                   >
-                    {c.status !== "none" && (
-                      <span
-                        style={{
-                          position: "absolute",
-                          left: 0,
-                          top: 8,
-                          bottom: 8,
-                          width: 2,
-                          background: st.color,
-                          opacity: 0.7,
-                          borderRadius: "0 2px 2px 0",
-                        }}
-                      />
-                    )}
                     <div
                       style={{
                         display: "flex",
@@ -1689,34 +1541,6 @@ function DashboardPreview() {
                           {c.domain}
                         </div>
                       </div>
-                      {st.label && (
-                        <span
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 4,
-                            padding: "1px 6px",
-                            borderRadius: 8,
-                            fontFamily: "var(--font-mono)",
-                            fontSize: 9.5,
-                            background: st.bg,
-                            color: st.color,
-                            border: `1px solid color-mix(in oklch, ${st.color}, transparent 65%)`,
-                            whiteSpace: "nowrap",
-                            flexShrink: 0,
-                          }}
-                        >
-                          <span
-                            style={{
-                              width: 4,
-                              height: 4,
-                              borderRadius: 999,
-                              background: st.color,
-                            }}
-                          />
-                          {st.label}
-                        </span>
-                      )}
                     </div>
                     <div
                       style={{
@@ -1750,8 +1574,8 @@ function DashboardPreview() {
                           gap: 4,
                         }}
                       >
-                        <MiniPulse isHiring={c.hiring === "actively-hiring"} />
-                        {c.openings} open
+                        <MiniPulse isHiring={c.isHiring} />
+                        {c.isHiring ? "Hiring" : "Passive"}
                       </span>
                     </div>
                   </div>

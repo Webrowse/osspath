@@ -11,7 +11,7 @@ const STEPS = [
     n: "01",
     label: "Discover",
     tagline: "Find companies worth your time",
-    body: "Browse 400+ remote-friendly companies ranked by Rust usage, team size, and open roles. Filter by language stack, company type, and hiring signal — not job boards full of noise.",
+    body: "Browse curated remote-friendly companies ranked by Rust usage and hiring signal. Filter by language stack, company type, and hiring activity — not job boards full of noise.",
     detail: "Companies are tagged HEAVY / SOME / NONE for Rust signal. Hiring status reflects the last known state — updated continuously.",
     preview: <DiscoverPreview />,
   },

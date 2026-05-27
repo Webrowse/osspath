@@ -4,7 +4,7 @@ import { memo } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2 } from "lucide-react"
+import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2, GitBranch, Bell } from "lucide-react"
 import { AdvancedFilters } from "@/components/advanced-filters"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import type { CompanyFilters } from "@/types"
@@ -31,6 +31,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/companies", label: "Companies", icon: <Building2 size={14} />, exact: false },
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={14} />, exact: false },
   { href: "/companies?status=SAVED", label: "Saved", icon: <Bookmark size={14} />, exact: false },
+  { href: "/companies?status=INTERVIEWING&status=FINAL_ROUND", label: "Interviewing", icon: <GitBranch size={14} />, exact: false },
+  { href: "/companies?time=follow_up_due", label: "Follow-up due", icon: <Bell size={14} />, exact: false },
 ]
 
 export const AppSidebar = memo(function AppSidebar({

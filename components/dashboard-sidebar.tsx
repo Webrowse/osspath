@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 const SIDEBAR_LINKS = [
-  { href: "/dashboard", label: "All" },
-  { href: "/dashboard/saved", label: "Saved" },
-  { href: "/dashboard/applied", label: "Applied" },
+  { href: "/dashboard", label: "Pipeline", exact: true },
+  { href: "/companies?status=SAVED", label: "Saved", exact: false },
+  { href: "/companies", label: "All companies", exact: false },
 ]
 
 export function DashboardSidebar() {
@@ -21,9 +21,7 @@ export function DashboardSidebar() {
         </p>
         <nav className="dash-sidebar-nav space-y-0.5">
           {SIDEBAR_LINKS.map((link) => {
-            const isActive = link.href === "/dashboard"
-              ? pathname === "/dashboard"
-              : pathname.startsWith(link.href)
+            const isActive = link.exact ? pathname === link.href : false
             return (
               <Link
                 key={link.href}
