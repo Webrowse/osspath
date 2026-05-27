@@ -132,7 +132,7 @@ export default async function CompanyPage({ params }: PageProps) {
           {!c.isHiring && (
             <Badge
               variant="outline"
-              className="text-xs text-muted-foreground border-border bg-white/3"
+              className="text-xs text-muted-foreground border-border bg-secondary/50"
             >
               Not actively hiring
             </Badge>
@@ -141,7 +141,7 @@ export default async function CompanyPage({ params }: PageProps) {
             <Badge
               key={tag}
               variant="secondary"
-              className="text-xs bg-white/5 text-muted-foreground border-transparent"
+              className="text-xs bg-secondary text-muted-foreground border-transparent"
             >
               {tag}
             </Badge>
@@ -162,7 +162,7 @@ export default async function CompanyPage({ params }: PageProps) {
                   rel="noopener noreferrer"
                   className={
                     buttonVariants({ size: "sm", variant: "secondary" }) +
-                    " h-8 bg-white/5 hover:bg-white/10"
+                    " h-8 bg-secondary hover:bg-muted"
                   }
                 >
                   <Globe className="mr-1.5 h-3.5 w-3.5" />
@@ -251,7 +251,7 @@ export default async function CompanyPage({ params }: PageProps) {
                         <Button
                           size="sm"
                           variant="secondary"
-                          className="h-7 text-xs w-full bg-white/5 hover:bg-white/10"
+                          className="h-7 text-xs w-full bg-secondary hover:bg-muted"
                         >
                           Edit status
                         </Button>

@@ -61,7 +61,7 @@ export function ApplicationRow({
 
   return (
     <div className="flex items-center gap-3 py-3 border-b border-border last:border-0">
-      <div className="flex-shrink-0 h-8 w-8 rounded bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+      <div className="flex-shrink-0 h-8 w-8 rounded bg-secondary border border-border flex items-center justify-center overflow-hidden">
         {companyLogoUrl ? (
           <Image
             src={companyLogoUrl}

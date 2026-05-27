@@ -385,19 +385,6 @@
   animation: d-slide-in-up 240ms cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-/* Dashboard sidebar — horizontal tab bar on mobile */
-@media (max-width: 767px) {
-  .dash-sidebar-nav {
-    display: flex !important;
-    flex-direction: row !important;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .dash-sidebar-label { display: none !important; }
-  .dash-sidebar-link  { white-space: nowrap !important; flex-shrink: 0 !important; }
-}
-
 /* ── Landing page — mobile responsive ───────────────────────────────────── */
 
 @media (max-width: 767px) {

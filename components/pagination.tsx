@@ -38,7 +38,7 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
         <button
           onClick={() => go(page - 1)}
           disabled={page <= 1}
-          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-secondary border border-border text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
           style={{ minWidth: 72 }}
         >
           <ChevronLeft className="h-3.5 w-3.5 mr-1" />
@@ -58,7 +58,7 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
               const v = parseInt(e.target.value, 10)
               if (!isNaN(v)) go(v)
             }}
-            className="w-12 h-7 text-center text-xs rounded-md bg-white/5 border border-white/10 text-foreground focus:outline-none focus:border-white/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="w-12 h-7 text-center text-xs rounded-md bg-secondary border border-border text-foreground focus:outline-none focus:border-ring/50 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
           <span className="text-xs text-muted-foreground">/ {totalPages}</span>
         </div>
@@ -78,7 +78,7 @@ export function Pagination({ page, totalPages, total, onPageChange, loading }: P
         <button
           onClick={() => go(page + 1)}
           disabled={page >= totalPages}
-          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-white/5 border border-white/10 text-foreground disabled:opacity-40 hover:bg-white/10 transition-colors"
+          className="inline-flex items-center h-9 px-3 text-sm rounded-lg bg-secondary border border-border text-foreground disabled:opacity-40 hover:bg-muted transition-colors"
           style={{ minWidth: 72 }}
         >
           Next

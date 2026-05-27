@@ -140,7 +140,7 @@ export function ApplicationDialog({
           <div className="space-y-1.5">
             <Label className="text-xs text-muted-foreground">Status</Label>
             <Select value={status} onValueChange={(v: string | null) => v && setStatus(v as UserCompanyStatus)}>
-              <SelectTrigger className="h-8 text-sm bg-white/5 border-white/10">
+              <SelectTrigger className="h-8 text-sm bg-secondary border-border">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -160,7 +160,7 @@ export function ApplicationDialog({
                 type="date"
                 value={appliedAt}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAppliedAt(e.target.value)}
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
             <div className="space-y-1.5">
@@ -169,7 +169,7 @@ export function ApplicationDialog({
                 type="date"
                 value={followUpAt}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFollowUpAt(e.target.value)}
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ export function ApplicationDialog({
                 type="date"
                 value={lastCheckedAt}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setLastCheckedAt(e.target.value)}
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
             <div className="space-y-1.5">
@@ -190,7 +190,7 @@ export function ApplicationDialog({
                 type="date"
                 value={rejectedAt}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRejectedAt(e.target.value)}
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
           </div>
@@ -202,7 +202,7 @@ export function ApplicationDialog({
                 value={recruiterName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRecruiterName(e.target.value)}
                 placeholder="Jane Smith"
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
             <div className="space-y-1.5">
@@ -211,7 +211,7 @@ export function ApplicationDialog({
                 value={salaryExpectation}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSalaryExpectation(e.target.value)}
                 placeholder="$180k + equity"
-                className="h-8 text-sm bg-white/5 border-white/10"
+                className="h-8 text-sm bg-secondary border-border"
               />
             </div>
           </div>
@@ -222,7 +222,7 @@ export function ApplicationDialog({
               value={notes}
               onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setNotes(e.target.value)}
               placeholder="Interview notes, recruiter feedback, follow-ups..."
-              className="text-sm bg-white/5 border-white/10 resize-none min-h-[80px]"
+              className="text-sm bg-secondary border-border resize-none min-h-[80px]"
             />
           </div>
         </div>
@@ -245,7 +245,7 @@ export function ApplicationDialog({
               size="sm"
               variant="secondary"
               onClick={() => setOpen(false)}
-              className="h-8 bg-white/5"
+              className="h-8 bg-secondary"
             >
               Cancel
             </Button>
