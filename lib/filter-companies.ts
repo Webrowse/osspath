@@ -10,12 +10,20 @@ export type FilteredResult = {
   totalPages: number
 }
 
+// RSC serialization turns Date objects into ISO strings on the client.
+// This normalizer handles both so date comparisons work on either side of the boundary.
+function asDate(d: Date | string | null | undefined): Date | null {
+  if (!d) return null
+  return d instanceof Date ? d : new Date(d as string)
+}
+
 // Dates are stored as UTC midnight ("YYYY-MM-DD" → new Date("YYYY-MM-DD")).
 // All calendar-day comparisons use UTC components so the offset is consistent
 // regardless of the server's local timezone.
-function calendarDaysAgo(now: Date, d: Date): number {
+function calendarDaysAgo(now: Date, d: Date | string): number {
+  const date = asDate(d)!
   const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
-  const dUTC = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())
+  const dUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   return Math.round((todayUTC - dUTC) / 86_400_000)
 }
 
@@ -109,7 +117,8 @@ export function filterCompanies(
           break
         }
         case "follow_up_due": {
-          if (!state.followUpAt || state.followUpAt > now) return false
+          const followUpAt = asDate(state.followUpAt)
+          if (!followUpAt || followUpAt > now) return false
           break
         }
       }

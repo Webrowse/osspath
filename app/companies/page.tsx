@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { getSession } from "@/lib/auth"
 import { getAllCompaniesForClient } from "@/lib/companies"
 import { CompaniesShell } from "@/components/companies-shell"
@@ -36,10 +37,12 @@ export default async function CompaniesPage({ searchParams }: PageProps) {
   const initialData = await getAllCompaniesForClient(userId)
 
   return (
-    <CompaniesShell
-      initialFilters={initialFilters}
-      initialData={initialData}
-      isAuthenticated={isAuthenticated}
-    />
+    <Suspense fallback={null}>
+      <CompaniesShell
+        initialFilters={initialFilters}
+        initialData={initialData}
+        isAuthenticated={isAuthenticated}
+      />
+    </Suspense>
   )
 }

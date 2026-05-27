@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useSearchParams } from "next/navigation"
 import { usePostHog } from "posthog-js/react"
 import { Building2, X } from "lucide-react"
 import { AppSidebar } from "@/components/app-sidebar"
@@ -229,6 +230,7 @@ export function CompaniesShell({
   initialData,
   isAuthenticated,
 }: CompaniesShellProps) {
+  const searchParams = useSearchParams()
   const [filters, setFilters] = useState<CompanyFilters>(initialFilters)
   const [view, setView] = useState<ViewMode>("list")
   const [searchValue, setSearchValue] = useState(initialFilters.q)
@@ -303,24 +305,23 @@ export function CompaniesShell({
     }, 400)
   }, [])
 
+  // Sync filter state when URL changes via Next.js navigation (Link, back/forward).
+  // useSearchParams updates on router navigations but NOT on replaceState calls,
+  // so user-driven filter changes (typing, chips) don't create a loop.
   useEffect(() => {
-    const onPop = () => {
-      const params: Record<string, string | string[]> = {}
-      new URLSearchParams(window.location.search).forEach((value, key) => {
-        const existing = params[key]
-        if (existing) {
-          params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
-        } else {
-          params[key] = value
-        }
-      })
-      const parsed = parseFilters(params)
-      setFilters(parsed)
-      setSearchValue(parsed.q)
-    }
-    window.addEventListener("popstate", onPop)
-    return () => window.removeEventListener("popstate", onPop)
-  }, [])
+    const params: Record<string, string | string[]> = {}
+    searchParams.forEach((value, key) => {
+      const existing = params[key]
+      if (existing) {
+        params[key] = Array.isArray(existing) ? [...existing, value] : [existing, value]
+      } else {
+        params[key] = value
+      }
+    })
+    const parsed = parseFilters(params)
+    setFilters(parsed)
+    setSearchValue(parsed.q)
+  }, [searchParams])
 
   const handleFiltersChange = useCallback(
     (next: CompanyFilters) => {
