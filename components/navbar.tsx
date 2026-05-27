@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { LogOut, LayoutDashboard, ArrowRight } from "lucide-react"
+import { PreferencesSwitcher } from "@/components/preferences-switcher"
 
 const NAV_LINKS = [
   {
@@ -191,9 +192,12 @@ export function Navbar() {
             flexShrink: 0,
           }}
         >
-          {/* ⌘K hint */}
-          <span
+          <PreferencesSwitcher />
+
+          {/* ⌘K — opens command palette */}
+          <button
             className="nav-cmd"
+            onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
             style={{
               display: "flex",
               alignItems: "center",
@@ -202,7 +206,12 @@ export function Navbar() {
               fontSize: 11,
               color: "var(--fg-3)",
               marginRight: 4,
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
             }}
+            title="Open command palette"
           >
             <kbd
               style={{
@@ -212,11 +221,12 @@ export function Navbar() {
                 background: "var(--bg-2)",
                 color: "var(--fg-2)",
                 fontSize: 10,
+                cursor: "pointer",
               }}
             >
               ⌘K
             </kbd>
-          </span>
+          </button>
 
           {status === "loading" ? (
             <div

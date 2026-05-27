@@ -497,3 +497,11 @@
   }
   .workflow-step-body { padding: 20px !important; }
 }
+
+/* Date inputs: tell the browser to render native controls in dark mode.
+   Without this the calendar picker icon is black and invisible on dark backgrounds. */
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="datetime-local"] {
+  color-scheme: dark;
+}

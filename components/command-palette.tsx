@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Grid3x3, LayoutDashboard, Bookmark, Search } from "lucide-react"
+import { Grid3x3, LayoutDashboard, Bookmark, Search, GitBranch, Bell } from "lucide-react"
+
+
 import type { CompanyListItem } from "@/lib/companies"
 
 function hashColor(name: string): string {
@@ -33,7 +35,6 @@ interface CmdItem {
   color?: string
   initials?: string
   icon?: React.ReactNode
-  shortcut?: string
   href?: string
 }
 
@@ -43,7 +44,6 @@ const ACTIONS: CmdItem[] = [
     kind: "action",
     label: "Go to Companies",
     icon: <Grid3x3 size={12} />,
-    shortcut: "G C",
     href: "/companies",
   },
   {
@@ -51,16 +51,28 @@ const ACTIONS: CmdItem[] = [
     kind: "action",
     label: "Go to Dashboard",
     icon: <LayoutDashboard size={12} />,
-    shortcut: "G D",
     href: "/dashboard",
   },
   {
     id: "nav-saved",
     kind: "action",
-    label: "View saved companies",
+    label: "Saved queue",
     icon: <Bookmark size={12} />,
-    shortcut: "G S",
     href: "/companies?status=SAVED",
+  },
+  {
+    id: "nav-interviewing",
+    kind: "action",
+    label: "Interviewing queue",
+    icon: <GitBranch size={12} />,
+    href: "/companies?status=INTERVIEWING&status=FINAL_ROUND",
+  },
+  {
+    id: "nav-followup",
+    kind: "action",
+    label: "Follow-up due",
+    icon: <Bell size={12} />,
+    href: "/companies?time=follow_up_due",
   },
 ]
 
@@ -366,18 +378,7 @@ function CmdRow({
         </span>
       )}
 
-      {item.shortcut && (
-        <span
-          style={{
-            ...kbdStyle,
-            marginLeft: "auto",
-          }}
-        >
-          {item.shortcut}
-        </span>
-      )}
-
-      {item.kind === "company" && !item.shortcut && (
+      {item.kind === "company" && (
         <span
           style={{
             fontFamily: "var(--font-mono)",
@@ -408,14 +409,20 @@ export function CommandPaletteMount() {
   const [open, setOpen] = useState(false)
 
   useEffect(() => {
+    const openPalette = () => setOpen(true)
+    window.addEventListener("open-command-palette", openPalette)
+
     const onKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
         setOpen(true)
       }
     }
     window.addEventListener("keydown", onKey)
-    return () => window.removeEventListener("keydown", onKey)
+    return () => {
+      window.removeEventListener("keydown", onKey)
+      window.removeEventListener("open-command-palette", openPalette)
+    }
   }, [])
 
   return <CommandPalette open={open} onClose={() => setOpen(false)} />
