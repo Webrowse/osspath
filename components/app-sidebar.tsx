@@ -2,11 +2,12 @@
 
 import { memo } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2, GitBranch, Bell } from "lucide-react"
+import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2, GitBranch, Bell, Briefcase, Globe } from "lucide-react"
 import { AdvancedFilters } from "@/components/advanced-filters"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { PreferencesSwitcher } from "@/components/preferences-switcher"
 import type { CompanyFilters } from "@/types"
 import type { StatusCounts } from "@/lib/companies"
 
@@ -22,13 +23,17 @@ interface AppSidebarProps {
 interface NavItem {
   href: string
   label: string
-  icon: React.ReactNode
+  icon: React.ReactNode | null
   exact?: boolean
   soon?: boolean
 }
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/companies", label: "Companies", icon: <Building2 size={14} />, exact: false },
+  { href: "/opportunities", label: "Opportunities", icon: <Briefcase size={14} />, exact: false },
+  { href: "/opportunities?remote=1&junior=1", label: "Beginner Remote", icon: null, exact: true },
+  { href: "/opportunities?rust=CORE&remote=1", label: "Core Rust", icon: null, exact: true },
+  { href: "/sources", label: "Sources", icon: <Globe size={14} />, exact: false },
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard size={14} />, exact: false },
   { href: "/companies?status=SAVED", label: "Saved", icon: <Bookmark size={14} />, exact: false },
   { href: "/companies?status=INTERVIEWING&status=FINAL_ROUND", label: "Interviewing", icon: <GitBranch size={14} />, exact: false },
@@ -44,6 +49,7 @@ export const AppSidebar = memo(function AppSidebar({
   statusCounts,
 }: AppSidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { data: session } = useSession()
 
   return (
@@ -122,7 +128,12 @@ export const AppSidebar = memo(function AppSidebar({
       {/* Nav */}
       <nav style={{ padding: "8px 8px 0", flexShrink: 0 }}>
         {NAV_ITEMS.map((item: any) => {
-          const active = pathname === item.href || (!item.exact && pathname.startsWith(item.href.split("?")[0]))
+          const [base, qs] = item.href.split("?")
+          const hasQs = !!qs
+          const isIndented = hasQs && item.exact
+          const active = isIndented
+            ? pathname === base && qs === searchParams.toString()
+            : pathname === base || (!item.exact && pathname.startsWith(base + "/"))
           return item.soon ? (
             <div
               key={item.href}
@@ -162,10 +173,10 @@ export const AppSidebar = memo(function AppSidebar({
                 display: "flex",
                 alignItems: "center",
                 gap: 8,
-                padding: "6px 8px",
+                padding: isIndented ? "4px 8px 4px 28px" : "6px 8px",
                 borderRadius: 6,
-                fontSize: 13,
-                color: active ? "var(--fg-0)" : "var(--fg-2)",
+                fontSize: isIndented ? 12 : 13,
+                color: active ? "var(--fg-0)" : isIndented ? "var(--fg-3)" : "var(--fg-2)",
                 background: active ? "var(--bg-2)" : "transparent",
                 textDecoration: "none",
                 transition: "background 100ms, color 100ms",
@@ -175,13 +186,13 @@ export const AppSidebar = memo(function AppSidebar({
               onMouseEnter={(e: any) => {
                 if (!active) {
                   e.currentTarget.style.background = "var(--bg-2)"
-                  e.currentTarget.style.color = "var(--fg-0)"
+                  e.currentTarget.style.color = isIndented ? "var(--fg-1)" : "var(--fg-0)"
                 }
               }}
               onMouseLeave={(e: any) => {
                 if (!active) {
                   e.currentTarget.style.background = "transparent"
-                  e.currentTarget.style.color = "var(--fg-2)"
+                  e.currentTarget.style.color = isIndented ? "var(--fg-3)" : "var(--fg-2)"
                 }
               }}
             >
@@ -204,6 +215,11 @@ export const AppSidebar = memo(function AppSidebar({
           loading={loading}
           statusCounts={statusCounts}
         />
+      </div>
+
+      {/* Preferences */}
+      <div style={{ padding: "4px 8px", display: "flex", justifyContent: "flex-end" }}>
+        <PreferencesSwitcher />
       </div>
 
       {/* User footer */}

@@ -16,20 +16,24 @@ import { PreferencesSwitcher } from "@/components/preferences-switcher"
 
 const NAV_LINKS = [
   {
+    href: "/opportunities",
+    label: "Opportunities",
+    match: (p: string) => p.startsWith("/opportunities"),
+  },
+  {
     href: "/companies",
     label: "Companies",
     match: (p: string) => p.startsWith("/companies"),
   },
   {
+    href: "/sources",
+    label: "Sources",
+    match: (p: string) => p.startsWith("/sources"),
+  },
+  {
     href: "/workflow",
     label: "Workflow",
     match: (p: string) => p === "/workflow",
-  },
-  {
-    href: "/demo",
-    label: "Demo",
-    match: (p: string) => false, // demo redirects; never shows as active
-    isDemo: true,
   },
 ]
 
@@ -163,18 +167,6 @@ export function Navbar() {
                 }}
               >
                 {link.label}
-                {link.isDemo && (
-                  <span
-                    style={{
-                      width: 5,
-                      height: 5,
-                      borderRadius: 999,
-                      background: "var(--d-ok)",
-                      flexShrink: 0,
-                      animation: "d-pulse 2.5s ease-out infinite",
-                    }}
-                  />
-                )}
               </Link>
             )
           })}
@@ -327,8 +319,8 @@ export function Navbar() {
             </DropdownMenu>
           ) : (
             <>
-              <button
-                onClick={() => signIn()}
+              <Link
+                href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
                 style={{
                   background: "none",
                   border: "none",
@@ -339,12 +331,13 @@ export function Navbar() {
                   borderRadius: 6,
                   transition: "color 100ms",
                   fontFamily: "var(--font-sans)",
+                  textDecoration: "none",
                 }}
                 onMouseEnter={(e: any) => (e.currentTarget.style.color = "var(--fg-0)")}
                 onMouseLeave={(e: any) => (e.currentTarget.style.color = "var(--fg-2)")}
               >
                 Sign in
-              </button>
+              </Link>
 
               <Link
                 href="/companies"
