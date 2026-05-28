@@ -299,15 +299,15 @@ export function Navbar() {
                   </p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild onSelect={() => {}}>
                   <Link href="/dashboard">
                     <LayoutDashboard size={13} style={{ marginRight: 8 }} />
                     Dashboard
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild onSelect={() => {}}>
                   <Link href="/companies">
-                    <span style={{ marginRight: 8, fontSize: 13 }}>⌘</span>
+                    <LayoutDashboard size={13} style={{ marginRight: 8 }} />
                     Open workspace
                   </Link>
                 </DropdownMenuItem>

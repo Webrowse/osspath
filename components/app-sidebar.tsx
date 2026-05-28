@@ -50,7 +50,7 @@ export const AppSidebar = memo(function AppSidebar({
 }: AppSidebarProps) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const { data: session } = useSession()
+  const { data: session, status: sessionStatus } = useSession()
 
   return (
     <aside
@@ -77,8 +77,8 @@ export const AppSidebar = memo(function AppSidebar({
           flexShrink: 0,
           textDecoration: "none",
         }}
-        onMouseEnter={(e: any) => (e.currentTarget.style.background = "var(--bg-2)")}
-        onMouseLeave={(e: any) => (e.currentTarget.style.background = "transparent")}
+        onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = "var(--bg-2)")}
+        onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.background = "transparent")}
       >
         {/* j. gradient logo */}
         <div
@@ -127,7 +127,7 @@ export const AppSidebar = memo(function AppSidebar({
 
       {/* Nav */}
       <nav style={{ padding: "8px 8px 0", flexShrink: 0 }}>
-        {NAV_ITEMS.map((item: any) => {
+        {NAV_ITEMS.map((item: NavItem) => {
           const [base, qs] = item.href.split("?")
           const hasQs = !!qs
           const isIndented = hasQs && item.exact
@@ -183,13 +183,13 @@ export const AppSidebar = memo(function AppSidebar({
                 marginBottom: 1,
                 fontWeight: active ? 500 : 400,
               }}
-              onMouseEnter={(e: any) => {
+              onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 if (!active) {
                   e.currentTarget.style.background = "var(--bg-2)"
                   e.currentTarget.style.color = isIndented ? "var(--fg-1)" : "var(--fg-0)"
                 }
               }}
-              onMouseLeave={(e: any) => {
+              onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => {
                 if (!active) {
                   e.currentTarget.style.background = "transparent"
                   e.currentTarget.style.color = isIndented ? "var(--fg-3)" : "var(--fg-2)"
@@ -230,7 +230,35 @@ export const AppSidebar = memo(function AppSidebar({
           flexShrink: 0,
         }}
       >
-        {session?.user ? (
+        {sessionStatus === "loading" ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "6px 8px",
+            }}
+          >
+            <div
+              style={{
+                width: 26,
+                height: 26,
+                borderRadius: 999,
+                background: "var(--bg-3)",
+                animation: "d-pulse 1.5s ease-in-out infinite",
+              }}
+            />
+            <div
+              style={{
+                flex: 1,
+                height: 12,
+                borderRadius: 4,
+                background: "var(--bg-3)",
+                animation: "d-pulse 1.5s ease-in-out infinite",
+              }}
+            />
+          </div>
+        ) : session?.user ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Avatar style={{ width: 26, height: 26, flexShrink: 0 }}>
               <AvatarImage src={session.user.image ?? undefined} />
@@ -273,8 +301,8 @@ export const AppSidebar = memo(function AppSidebar({
                 cursor: "pointer",
               }}
               title="Sign out"
-              onMouseEnter={(e: any) => (e.currentTarget.style.color = "var(--fg-1)")}
-              onMouseLeave={(e: any) => (e.currentTarget.style.color = "var(--fg-3)")}
+              onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.color = "var(--fg-1)")}
+              onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.color = "var(--fg-3)")}
             >
               <LogOut size={13} />
             </button>
@@ -296,11 +324,11 @@ export const AppSidebar = memo(function AppSidebar({
               cursor: "pointer",
               transition: "background 100ms, color 100ms",
             }}
-            onMouseEnter={(e: any) => {
+            onMouseEnter={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.currentTarget.style.background = "var(--bg-2)"
               e.currentTarget.style.color = "var(--fg-0)"
             }}
-            onMouseLeave={(e: any) => {
+            onMouseLeave={(e: React.MouseEvent<HTMLButtonElement>) => {
               e.currentTarget.style.background = "transparent"
               e.currentTarget.style.color = "var(--fg-2)"
             }}
