@@ -92,6 +92,8 @@
     "href": "https://news.ycombinator.com/item?id=47980297",
     "description": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
     "checkedAt": "2026-05-28",
-    "expiresAt": "2026-08-28"
+    "expiresAt": "2026-08-28",
+    "company": "yeet",
+    "role": "Rust developers / Backend Engineers"
   }
 ]
