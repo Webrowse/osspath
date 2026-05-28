@@ -299,13 +299,17 @@ export function Navbar() {
                   </p>
                 </div>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem render={<Link href="/dashboard" />}>
-                  <LayoutDashboard size={13} style={{ marginRight: 8 }} />
-                  Dashboard
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard">
+                    <LayoutDashboard size={13} style={{ marginRight: 8 }} />
+                    Dashboard
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem render={<Link href="/companies" />}>
-                  <span style={{ marginRight: 8, fontSize: 13 }}>⌘</span>
-                  Open workspace
+                <DropdownMenuItem asChild>
+                  <Link href="/companies">
+                    <span style={{ marginRight: 8, fontSize: 13 }}>⌘</span>
+                    Open workspace
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

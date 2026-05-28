@@ -30,8 +30,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   },
   events: {
     async signIn({ user, account, isNewUser }) {
-      if (!user.id) return
-      await captureServerEvent(user.id, {
+      const userId = (user as { id: string }).id
+      if (!userId) return
+      await captureServerEvent(userId, {
         event: "sign_in",
         props: {
           provider: account?.provider ?? "unknown",

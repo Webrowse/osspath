@@ -281,7 +281,7 @@ export const AppSidebar = memo(function AppSidebar({
           </div>
         ) : (
           <button
-            onClick={() => signIn()}
+            onClick={() => signIn(undefined, { callbackUrl: "/companies" })}
             style={{
               display: "flex",
               alignItems: "center",
