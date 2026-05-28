@@ -1,0 +1,44 @@
+[
+  {
+    "kind": "Newsletter",
+    "title": "This Week in Rust",
+    "description": "Community-edited weekly digest. Covers crates, blog posts, RFC updates, and job listings. Published every Tuesday without fail.",
+    "href": "https://this-week-in-rust.org",
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Forum",
+    "title": "users.rust-lang.org",
+    "description": "Long-running help forum. Thoughtful answers, minimal noise. Good place to ask design questions before opening a GitHub issue.",
+    "href": "https://users.rust-lang.org",
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Blog",
+    "title": "Inside Rust Blog",
+    "description": "Official team updates — working group notes, compiler progress, and governance changes. Low frequency, high signal.",
+    "href": "https://blog.rust-lang.org/inside-rust/",
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Forum",
+    "title": "internals.rust-lang.org",
+    "description": "Language design pre-RFCs and working group discussions. Useful for tracking where the language is heading.",
+    "href": "https://internals.rust-lang.org",
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Community",
+    "title": "r/rust",
+    "description": "High-volume community feed. Project announcements, learning resources, and release posts. Noisy but good for discovery.",
+    "href": "https://www.reddit.com/r/rust/",
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Podcast",
+    "title": "Rustacean Station",
+    "description": "Interviews with library authors, core team members, and ecosystem contributors. Useful for understanding the people behind the crates you use.",
+    "href": "https://rustacean-station.org",
+    "checkedAt": "2026-05-28"
+  }
+]

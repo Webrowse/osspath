@@ -29,6 +29,28 @@ export type AppEvent =
   | { event: "company_applied_quick"; props: { company_id: string; company_name: string } }
   | { event: "company_viewed"; props: { company_id: string; company_name: string; company_slug: string; is_authenticated: boolean } }
   | { event: "careers_page_clicked"; props: { company_id: string; company_name: string; source: "list_row" | "card" | "detail_page" } }
+  | {
+      event: "opportunity_clicked"
+      props: {
+        opportunity_id: string
+        company_name: string
+        rust_signal: string
+        source: string
+        position: number
+      }
+    }
+  | {
+      event: "opportunity_track_clicked"
+      props: { opportunity_id: string; company_name: string; company_slug: string }
+    }
+  | {
+      event: "opportunity_filter_changed"
+      props: { filter_key: string; filter_value: string; total_results: number }
+    }
+  | {
+      event: "source_clicked"
+      props: { source_id: string; source_name: string; category: string }
+    }
 
 // ─── Server-side capture ──────────────────────────────────────────────────────
 // Use in Server Actions and NextAuth callbacks.

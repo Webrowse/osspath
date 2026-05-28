@@ -12,7 +12,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "logos": "tsx scripts/fetch-logos.ts"
+    "logos": "tsx scripts/fetch-logos.ts",
+    "hn-opps": "tsx scripts/fetch-hn-opportunities.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

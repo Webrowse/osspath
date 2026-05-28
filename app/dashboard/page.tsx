@@ -23,9 +23,9 @@ export default async function DashboardPage() {
 
         <div className="w-full space-y-3 mb-8">
           {[
-            "Browse companies — find ones worth your attention",
-            "Click any card → \"Start tracking\" to add to your pipeline",
-            "Set status and follow-up date after applying",
+            "Browse opportunities — ranked by Rust signal and accessibility",
+            "Find a company worth applying to → click \"Track →\" to add it",
+            "Set your application status and a follow-up reminder date",
             "Return here to see the full picture across all applications",
           ].map((text, i) => (
             <div key={i} className="flex items-start gap-3">
@@ -50,10 +50,10 @@ export default async function DashboardPage() {
         </div>
 
         <Link
-          href="/companies"
+          href="/opportunities"
           className={buttonVariants({ size: "sm" }) + " gap-1.5"}
         >
-          Browse companies
+          Find opportunities
           <ArrowRight className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -147,9 +147,17 @@ export default async function DashboardPage() {
 
       {/* Application groups */}
       <div>
-        <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-          All Applications
-        </h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            All Applications
+          </h1>
+          <Link
+            href="/opportunities"
+            className="text-xs text-muted-foreground/60 hover:text-foreground transition-colors"
+          >
+            Find more →
+          </Link>
+        </div>
 
         <div className="space-y-6">
           {orderedKeys.map((status: any) => (
@@ -171,7 +179,6 @@ export default async function DashboardPage() {
                     companySlug={s.company.slug}
                     companyLogoUrl={s.company.logoUrl}
                     careersUrl={s.company.careersUrl}
-                    loginUrl={s.company.loginUrl}
                     userState={{
                       status: s.status as UserCompanyStatus,
                       appliedAt: s.appliedAt,

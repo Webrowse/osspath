@@ -1,0 +1,58 @@
+[
+  {
+    "name": "ratatui",
+    "eco": "UI · TUI",
+    "href": "https://github.com/ratatui/ratatui",
+    "note": "Active contributor community. Monthly contributor calls are recorded. Issues are tagged across docs, features, and bugs. A #contributing channel in Discord keeps context.",
+    "maintainerFriendliness": 0.92,
+    "issueQuality": 0.82,
+    "beginnerSuitability": 0.88,
+    "maintainerLabel": "PRs reviewed within 48h",
+    "issueLabel": "Multi-level labelling",
+    "beginnerLabel": "First-timers welcomed",
+    "topics": ["tui", "cli", "ui"],
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "name": "jiff",
+    "eco": "Time · Libraries",
+    "href": "https://github.com/BurntSushi/jiff",
+    "note": "Released 2024 — issue tracker is fresh, no accumulated backlog. Documentation and test coverage are reliable starting points.",
+    "maintainerFriendliness": 0.88,
+    "issueQuality": 0.85,
+    "beginnerSuitability": 0.72,
+    "maintainerLabel": "Responds within days",
+    "issueLabel": "Well-scoped, recent",
+    "beginnerLabel": "Docs & tests entry",
+    "topics": ["time", "datetime", "stdlib"],
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "name": "gitoxide",
+    "eco": "Git · Tooling",
+    "href": "https://github.com/GitoxideLabs/gitoxide",
+    "note": "Large, well-structured codebase. Pick a specific area of git functionality and read existing patterns before opening a PR. Mentored label for guided contributions.",
+    "maintainerFriendliness": 0.78,
+    "issueQuality": 0.80,
+    "beginnerSuitability": 0.52,
+    "maintainerLabel": "Acknowledges within a week",
+    "issueLabel": "Mentored label available",
+    "beginnerLabel": "Needs codebase familiarity",
+    "topics": ["git", "tooling", "cli"],
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "name": "winnow",
+    "eco": "Parsing · Libraries",
+    "href": "https://github.com/winnow-rs/winnow",
+    "note": "Parser combinator library. Read the nom-to-winnow migration guide before contributing. Typical entry issues are doc improvements and small test additions.",
+    "maintainerFriendliness": 0.82,
+    "issueQuality": 0.88,
+    "beginnerSuitability": 0.60,
+    "maintainerLabel": "Clear, instructive feedback",
+    "issueLabel": "Good first issues labelled",
+    "beginnerLabel": "Parsing knowledge required",
+    "topics": ["parser", "combinator", "libs"],
+    "checkedAt": "2026-05-28"
+  }
+]

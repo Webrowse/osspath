@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { format } from "date-fns"
 import { getSession } from "@/lib/auth"
-import { getCompanyBySlug, getRelatedCompanies } from "@/lib/companies"
+import { getCompanyBySlug, getRelatedCompanies, getUserCompanyState } from "@/lib/companies"
 import { captureServerEvent } from "@/lib/analytics"
 import { Navbar } from "@/components/navbar"
 import { StatusBadge } from "@/components/status-badge"
@@ -10,8 +10,8 @@ import { ApplicationDialog } from "@/components/application-dialog"
 import { CompanyAvatar } from "@/components/company-avatar"
 import { CareersLink } from "@/components/careers-link"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { ArrowLeft, Globe } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { ArrowLeft } from "lucide-react"
 import { RUST_LEVEL_LABELS } from "@/types"
 import type { Metadata } from "next"
 
@@ -56,12 +56,12 @@ export default async function CompanyPage({ params }: PageProps) {
 
   if (!company) notFound()
 
-  const [companyWithState, related] = await Promise.all([
-    session?.user?.id ? getCompanyBySlug(slug, session.user.id) : Promise.resolve(company),
+  const [userState, related] = await Promise.all([
+    session?.user?.id ? getUserCompanyState(company.id, session.user.id) : Promise.resolve(null),
     getRelatedCompanies(company.id, company.tags, 6),
   ])
 
-  const c = companyWithState ?? company
+  const c = { ...company, userState: userState ?? null }
 
   if (session?.user?.id) {
     captureServerEvent(session.user.id, {
@@ -155,20 +155,6 @@ export default async function CompanyPage({ params }: PageProps) {
             {/* Action links */}
             <div className="flex flex-wrap gap-2">
               <CareersLink href={c.careersUrl} companyId={c.id} companyName={c.name} />
-              {c.loginUrl && (
-                <a
-                  href={c.loginUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={
-                    buttonVariants({ size: "sm", variant: "secondary" }) +
-                    " h-8 bg-secondary hover:bg-muted"
-                  }
-                >
-                  <Globe className="mr-1.5 h-3.5 w-3.5" />
-                  Login portal
-                </a>
-              )}
             </div>
 
             {/* Metadata */}
@@ -274,7 +260,10 @@ export default async function CompanyPage({ params }: PageProps) {
             ) : (
               <div className="rounded-md border border-border bg-card/50 p-4 text-center">
                 <p className="text-sm text-muted-foreground">
-                  <Link href="/login" className="text-foreground hover:underline">
+                  <Link
+                    href={`/login?callbackUrl=/companies/${slug}`}
+                    className="text-foreground hover:underline"
+                  >
                     Sign in
                   </Link>{" "}
                   to track your application

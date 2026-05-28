@@ -15,6 +15,13 @@ export const metadata: Metadata = {
       "Browse curated remote engineering companies hiring Rust, backend, systems, and infra engineers.",
     url: "https://jobs.adarshrust.com/companies",
     type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Companies | jobs.adarshrust.com",
+    description: "Browse curated remote engineering companies hiring Rust, backend, systems, and infra engineers.",
+    images: ["/opengraph-image"],
   },
   alternates: {
     canonical: "https://jobs.adarshrust.com/companies",

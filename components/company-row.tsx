@@ -13,6 +13,7 @@ import { ApplicationDialog } from "@/components/application-dialog"
 import type { CompanyListItem, CompanyState } from "@/lib/companies"
 import { markCompanyStatus } from "@/actions/company"
 import { formatDistanceToNowStrict } from "date-fns"
+import { panelStore } from "@/lib/panel-store"
 
 const STRIPE_COLOR: Record<string, string> = {
   SAVED: "var(--fg-2)",
@@ -66,6 +67,11 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
 
   const handleRowClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest("button,a")) return
+    // Populate store before navigation so loading.tsx can render company
+    // name and logo immediately without waiting for the server response.
+    panelStore.name = company.name
+    panelStore.logoUrl = company.logoUrl ?? null
+    panelStore.status = localState?.status ?? null
     router.push(`/companies/${company.slug}`)
   }
 
@@ -120,7 +126,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
     <div
       className="row-outer"
       onClick={handleRowClick}
-      onMouseEnter={() => setHovered(true)}
+      onMouseEnter={() => { setHovered(true); router.prefetch(`/companies/${company.slug}`) }}
       onMouseLeave={() => setHovered(false)}
       style={{
         position: "relative",

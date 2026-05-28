@@ -79,31 +79,111 @@ enum CompanyType {
   AGENCY
 }
 
+enum CompanyCategory {
+  INFRASTRUCTURE
+  DATABASES
+  OBSERVABILITY
+  SECURITY
+  NETWORKING
+  DEV_TOOLS
+  SYSTEMS
+  COMPILERS
+  WEB3
+  AI_INFRA
+  CLOUD_PLATFORM
+  OTHER
+}
+
 model Company {
-  id          String       @id @default(cuid())
+  id          String           @id @default(cuid())
   name        String
-  slug        String       @unique
+  slug        String           @unique
   logoUrl     String?
   description String
   careersUrl  String
   loginUrl    String?
   tags        String[]
-  remote      Boolean      @default(true)
-  rustLevel   RustLevel    @default(NONE)
+  remote      Boolean          @default(true)
+  rustLevel   RustLevel        @default(NONE)
   atsProvider String?
   companyType CompanyType?
-  isHiring    Boolean      @default(true)
+  isHiring    Boolean          @default(true)
   lastHiringCheckAt DateTime?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @default(now()) @updatedAt
+  category         CompanyCategory?
+  juniorAccessible Boolean          @default(false)
+  openSourceRepo   String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
 
-  userStates UserCompanyState[]
+  userStates    UserCompanyState[]
+  opportunities Opportunity[]
 
   @@index([name])
   @@index([remote])
   @@index([rustLevel])
   @@index([isHiring])
   @@map("companies")
+}
+
+// ─── Opportunities ────────────────────────────────────────────────────────────
+
+enum OpportunitySource {
+  HN_HIRING
+  CURATED
+}
+
+enum ExperienceLevel {
+  INTERN
+  JUNIOR
+  MID
+  SENIOR
+  STAFF
+}
+
+enum RustSignal {
+  CORE
+  HIGH
+  MEDIUM
+  LOW
+}
+
+model Opportunity {
+  id               String            @id @default(cuid())
+  source           OpportunitySource
+  sourceId         String?
+  sourceUrl        String
+  title            String
+  companyName      String
+  companyId        String?
+  bodyText         String?           @db.Text
+  location         String?
+  salary           String?
+  isRemote         Boolean           @default(false)
+  tags             String[]
+  experienceLevel  ExperienceLevel?
+  rustSignal       RustSignal        @default(MEDIUM)
+  baseQualityScore Int?
+  isJuniorFriendly Boolean           @default(false)
+  hasOssPath       Boolean           @default(false)
+  postedAt         DateTime?
+  expiresAt        DateTime?
+  lastSeenAt       DateTime          @default(now())
+  isActive         Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  company Company? @relation(fields: [companyId], references: [id])
+
+  @@index([source, sourceId])
+  @@index([isActive, baseQualityScore])
+  @@index([isActive, postedAt])
+  @@index([isActive, experienceLevel])
+  @@index([isActive, rustSignal])
+  @@index([isActive, isRemote])
+  @@index([isActive, isJuniorFriendly])
+  @@index([isActive, source])
+  @@index([companyId])
+  @@map("opportunities")
 }
 
 // ─── User Company State ───────────────────────────────────────────────────────

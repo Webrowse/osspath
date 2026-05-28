@@ -1,0 +1,71 @@
+[
+  {
+    "id": "hn-47999884",
+    "type": "jobs",
+    "status": "pending",
+    "source": "hn-hiring",
+    "sourceUrl": "https://news.ycombinator.com/item?id=47999884",
+    "foundAt": "2026-05-03T18:28:34Z",
+    "confidence": 0.4,
+    "score": 4,
+    "whyMatched": "explicit Rust role · remote · onsite only · apply link present",
+    "rawText": "Kepler | Full Stack Engineer | New York, NY | ONSITE | $230K-$260K + equity\nWe're building the trust layer for AI in high-stakes industries. <a href=\"https://kepler.ai\" rel=\"nofollow\">https://kepler.ai</a>\nLLMs hallucinate, so they can't be the thing producing your numbers. In Kepler, the LLM orchestrates (decides what data to gather, what to compute, how to structure the output), but the model never touches the data itself. Every actual value flows through deterministic code pipelines with provenance metadata back to source. Verification loops cross-check outputs before users see them.\nWe started in finance because tolerance for wrong answers is zero. First product is a research platform for buy-side analysts: pull comparables, build models, research filings. Same architecture extends to chemicals, legal, healthcare. Models are commoditizing fast; the trust layer is what's missing.\nIf you want the deeper architecture writeup, Anthropic just published a case study on Kepler: <a href=\"https://claude.com/blog/how-kepler-built-verifiable-ai-for-financial-services-with-claude\" rel=\"nofollow\">https://claude.com/blog/how-kepler-built-verifiable-ai-for-f...</a>\nWhat you'd build:\n- Source-explorer UI that traces any value back to its exact origin in the original document\n- Extraction pipeline for a data source we don't yet handle, with provenance and verification from day one\n- Agent orchestrator that handles partial failures so a bad extraction from one source doesn't block parallel work\n- Verification rules that cross-check values across multiple sources and surface conflicts with provenance on both sides\nStack: Rust backend (orchestration, extraction, computation), TypeScript/React frontend, PostgreSQL, AWS. Model-agnostic, currently Claude + GPT. We don't require Rust experience; we hire on fundamentals.\nLooking for 5 years production experience, strong in TypeScript/React, comfortable in backend work. Bonus if you've built systems where correctness mattered (payments, ",
+    "extracted": {
+      "note": "Kepler | Full Stack Engineer | New York, NY | ONSITE | $230K-$260K + equity\nWe're building the trust layer for AI in high-stakes industries. <a href=\"https://kepler.ai\" rel=\"nofollow\">https://kepler.a",
+      "rustMentioned": true,
+      "remoteConfirmed": false,
+      "tags": [
+        "EU"
+      ],
+      "topics": [
+        "backend",
+        "infra"
+      ]
+    }
+  },
+  {
+    "id": "hn-47977183",
+    "type": "jobs",
+    "status": "pending",
+    "source": "hn-hiring",
+    "sourceUrl": "https://news.ycombinator.com/item?id=47977183",
+    "foundAt": "2026-05-01T17:03:54Z",
+    "confidence": 0.5,
+    "score": 7,
+    "whyMatched": "explicit Rust role · remote · apply link present",
+    "rawText": "Foxglove | Onsite (San Francisco) + Remote | Full Time | <a href=\"https://foxglove.dev/\" rel=\"nofollow\">https://foxglove.dev/</a>\nFoxglove is the leading data infrastructure & observability platform for robotics & physical AI.\nPrior experience in the autonomous vehicle or robotics industry is a bonus, but not required.\nMany open roles:\n- Senior Rust Engineer\n- Senior ML Engineer\n- Senior Frontend Engineer (Visualization, WebGL, WASM)\n- Solutions Engineer, Data Infrastructure\n- Product Manager, Data + ML\n- Head of Product Marketing\n- Account Executive\nEmail in profile.\n<a href=\"https://foxglove.dev/careers\" rel=\"nofollow\">https://foxglove.dev/careers</a>",
+    "extracted": {
+      "note": "Foxglove | Onsite (San Francisco) + Remote | Full Time | <a href=\"https://foxglove.dev/\" rel=\"nofollow\">https://foxglove.dev/</a>\nFoxglove is the leading data infrastructure & observability platform f",
+      "rustMentioned": true,
+      "remoteConfirmed": true,
+      "tags": [
+        "Remote"
+      ],
+      "topics": [
+        "wasm",
+        "infra"
+      ]
+    }
+  },
+  {
+    "id": "hn-47975951",
+    "type": "jobs",
+    "status": "pending",
+    "source": "hn-hiring",
+    "sourceUrl": "https://news.ycombinator.com/item?id=47975951",
+    "foundAt": "2026-05-01T15:30:43Z",
+    "confidence": 0.5,
+    "score": 5,
+    "whyMatched": "explicit Rust role · remote · architect role · clear hiring intent · apply link present",
+    "rawText": "FUTO | <a href=\"https://futo.tech\" rel=\"nofollow\">https://futo.tech</a> | Austin, TX | Remote or Onsite | Full Time\nFUTO is an organization dedicated to developing, both through in-house engineering and investment, technologies that frustrate centralization and industry consolidation. Our work consists of a combination of in-house engineering projects, targeted investments, generous grants, and multi-media public education efforts. We are hiring for a few of our software projects, and our stealth hardware project.\nWe are hiring for:\nMobile Developer - Immich : <a href=\"https://futo.tech/jobs/mobile-developer-immich\" rel=\"nofollow\">https://futo.tech/jobs/mobile-developer-immich</a>\nRust Developer - Polycentric: <a href=\"http://futo.tech/jobs/rust-developer-polycentric\" rel=\"nofollow\">http://futo.tech/jobs/rust-developer-polycentric</a>\nApp Developer - Polycentric: <a href=\"https://futo.tech/jobs/app-developer-polycentric\" rel=\"nofollow\">https://futo.tech/jobs/app-developer-polycentric</a>\nUI/UX Designer: <a href=\"https://futo.tech/jobs/ui-ux-designer-general\" rel=\"nofollow\">https://futo.tech/jobs/ui-ux-designer-general</a>\nRISC-V CPU Architect: <a href=\"https://jobs.gusto.com/postings/jdwk-inc-risc-v-cpu-architect-rtl-lead-c51a8a8d-9f9c-40e6-94e0-9e9f2e038255\" rel=\"nofollow\">https://jobs.gusto.com/postings/jdwk-inc-risc-v-cpu-architec...</a>\nDesign Verification Lead: <a href=\"https://jobs.gusto.com/postings/jdwk-inc-design-verification-lead-db955290-c9fa-4380-be93-b8b68db60c76\" rel=\"nofollow\">https://jobs.gusto.com/postings/jdwk-inc-design-verification...</a>\nMore details and job postings here: <a href=\"https://futo.tech/jobs\" rel=\"nofollow\">https://futo.tech/jobs</a>\nWe have hired five employees from these HN postings, so we highly encourage people to mention that you came from here in your email.\nTo apply, send your resume and cover letter to jobs at futo dot org.",
+    "extracted": {
+      "note": "FUTO | <a href=\"https://futo.tech\" rel=\"nofollow\">https://futo.tech</a> | Austin, TX | Remote or Onsite | Full Time\nFUTO is an organization dedicated to developing, both through in-house engineering a",
+      "rustMentioned": true,
+      "remoteConfirmed": true,
+      "tags": [
+        "Remote"
+      ],
+      "topics": []
+    }
+  }
+]

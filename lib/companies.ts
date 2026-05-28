@@ -40,6 +40,14 @@ export type CompanyListItem = {
 
 export type StatusCounts = Partial<Record<UserCompanyStatus, number>>
 
+
+// Full dataset for client-side filtering — loaded once on initial page render
+export type CompaniesClientData = {
+  allCompanies: CompanyListItem[]
+  statusCounts?: StatusCounts
+}
+
+// Augmented result returned by useCompanies — includes pre-computed stat-strip counts
 export type CompanyListResult = {
   companies: CompanyListItem[]
   total: number
@@ -47,12 +55,8 @@ export type CompanyListResult = {
   pageSize: number
   totalPages: number
   statusCounts?: StatusCounts
-}
-
-// Full dataset for client-side filtering — loaded once on initial page render
-export type CompaniesClientData = {
-  allCompanies: CompanyListItem[]
-  statusCounts?: StatusCounts
+  followUpDue: number
+  newOpenings: number
 }
 
 // ─── Cached base queries ──────────────────────────────────────────────────────
@@ -143,12 +147,10 @@ const fetchBaseCompany = unstable_cache(
 )
 
 export async function getCompanyBySlug(slug: string, userId?: string) {
-  const [company, state] = await Promise.all([
-    fetchBaseCompany(slug),
-    userId
-      ? prisma.userCompanyState.findFirst({ where: { userId, company: { slug } } })
-      : Promise.resolve(null),
-  ])
+  const company = await fetchBaseCompany(slug)
+  const state = userId && company
+    ? await prisma.userCompanyState.findFirst({ where: { userId, companyId: company.id } })
+    : null
 
   if (!company) return null
 
@@ -174,17 +176,24 @@ export async function getCompanyBySlug(slug: string, userId?: string) {
 
 // ─── Related companies ────────────────────────────────────────────────────────
 
+const fetchRelatedCompanies = unstable_cache(
+  async (companyId: string, tags: string[], limit: number) =>
+    prisma.company.findMany({
+      where: { id: { not: companyId }, tags: { hasSome: tags } },
+      orderBy: { name: "asc" },
+      take: limit,
+    }),
+  ["related-companies"],
+  { revalidate: 600, tags: ["companies"] },
+)
+
 export async function getRelatedCompanies(
   companyId: string,
   tags: string[],
   limit = 6,
 ): Promise<CompanyListItem[]> {
   if (tags.length === 0) return []
-  const rows = await prisma.company.findMany({
-    where: { id: { not: companyId }, tags: { hasSome: tags } },
-    orderBy: { name: "asc" },
-    take: limit,
-  })
+  const rows = await fetchRelatedCompanies(companyId, tags, limit)
   return rows.map((c) => ({
     id: c.id,
     name: c.name,
@@ -205,6 +214,12 @@ export async function getRelatedCompanies(
   }))
 }
 
+// ─── User company state (single lookup) ──────────────────────────────────────
+
+export async function getUserCompanyState(companyId: string, userId: string) {
+  return prisma.userCompanyState.findFirst({ where: { userId, companyId } })
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
 const ACTIVE_PIPELINE_STATUSES = [
@@ -222,18 +237,43 @@ export type DashboardMetrics = {
   followUpsDue: number
 }
 
+const fetchDashboardStates = unstable_cache(
+  async (userId: string) =>
+    prisma.userCompanyState.findMany({
+      where: { userId, status: { notIn: ["NOT_APPLIED", "NOT_INTERESTED"] } },
+      select: {
+        id: true,
+        status: true,
+        appliedAt: true,
+        rejectedAt: true,
+        offerReceivedAt: true,
+        followUpAt: true,
+        lastCheckedAt: true,
+        notes: true,
+        recruiterName: true,
+        salaryExpectation: true,
+        company: {
+          select: {
+            id: true,
+            name: true,
+            slug: true,
+            logoUrl: true,
+            careersUrl: true,
+            loginUrl: true,
+          },
+        },
+      },
+      orderBy: { updatedAt: "desc" },
+    }),
+  ["dashboard-states"],
+  { revalidate: 30, tags: ["user-states"] },
+)
+
 export async function getDashboardData() {
   const session = await getSession()
   if (!session?.user?.id) return null
 
-  const states = await prisma.userCompanyState.findMany({
-    where: {
-      userId: session.user.id,
-      status: { notIn: ["NOT_APPLIED", "NOT_INTERESTED"] },
-    },
-    include: { company: true },
-    orderBy: { updatedAt: "desc" },
-  })
+  const states = await fetchDashboardStates(session.user.id)
 
   // End of today in UTC — followUpAt dates on or before this are overdue
   const now = new Date()

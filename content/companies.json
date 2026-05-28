@@ -1,0 +1,22 @@
+[
+  { "name": "Cloudflare",           "sector": "Edge / Security",    "href": "https://cloudflare.com" },
+  { "name": "Mozilla",              "sector": "Browser / Open Web", "href": "https://mozilla.org" },
+  { "name": "AWS",                  "sector": "Cloud / Infra",      "href": "https://aws.amazon.com" },
+  { "name": "Microsoft",            "sector": "Cloud / Systems",    "href": "https://microsoft.com" },
+  { "name": "Google",               "sector": "Android / Fuchsia",  "href": "https://google.com" },
+  { "name": "Discord",              "sector": "Backend / Infra",    "href": "https://discord.com" },
+  { "name": "Dropbox",              "sector": "Storage",            "href": "https://dropbox.com" },
+  { "name": "1Password",            "sector": "Security",           "href": "https://1password.com" },
+  { "name": "Oxide Computer",       "sector": "Systems / Hardware", "href": "https://oxide.computer" },
+  { "name": "Parity Technologies",  "sector": "Blockchain / Infra", "href": "https://parity.io" },
+  { "name": "Deno",                 "sector": "Runtimes",           "href": "https://deno.com" },
+  { "name": "Zed Industries",       "sector": "Developer Tools",    "href": "https://zed.dev" },
+  { "name": "Fly.io",               "sector": "Cloud / PaaS",       "href": "https://fly.io" },
+  { "name": "Turso",                "sector": "Databases",          "href": "https://turso.tech" },
+  { "name": "PingCAP",              "sector": "Databases / TiKV",   "href": "https://pingcap.com" },
+  { "name": "SurrealDB",            "sector": "Databases",          "href": "https://surrealdb.com" },
+  { "name": "Embark Studios",       "sector": "Games / Graphics",   "href": "https://embark.dev" },
+  { "name": "Ferrous Systems",      "sector": "Safety / Toolchain", "href": "https://ferrous-systems.com" },
+  { "name": "Linkerd (Buoyant)",    "sector": "Service Mesh",       "href": "https://buoyant.io" },
+  { "name": "Vercel",               "sector": "Build / Tooling",    "href": "https://vercel.com" }
+]

@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import type { StatusCounts } from "@/lib/companies"
-import type { CompanyListItem } from "@/lib/companies"
 
 // All statuses that represent active user tracking (excludes NOT_APPLIED, NOT_INTERESTED)
 const TRACKED_QS =
@@ -12,7 +11,8 @@ const TRACKED_QS =
 
 interface StatStripProps {
   statusCounts?: StatusCounts
-  allCompanies?: CompanyListItem[]
+  followUpDue: number
+  newOpenings: number
   isAuthenticated: boolean
 }
 
@@ -76,10 +76,8 @@ function StatTile({
   )
 }
 
-export function StatStrip({ statusCounts, allCompanies, isAuthenticated }: StatStripProps) {
+export function StatStrip({ statusCounts, followUpDue, newOpenings, isAuthenticated }: StatStripProps) {
   if (!isAuthenticated || !statusCounts) return null
-
-  const now = new Date()
 
   // Tracked: all companies with any non-passive user status
   const tracked = Object.entries(statusCounts)
@@ -88,21 +86,6 @@ export function StatStrip({ statusCounts, allCompanies, isAuthenticated }: StatS
 
   // Interviewing: active conversation stages
   const interviewing = (statusCounts.INTERVIEWING ?? 0) + (statusCounts.FINAL_ROUND ?? 0)
-
-  // Follow-up due: actual overdue followUpAt dates from user states
-  const followUpDue = allCompanies
-    ? allCompanies.filter(
-        (c) => c.userState?.followUpAt && new Date(c.userState.followUpAt) <= now
-      ).length
-    : (statusCounts.RECRUITER_CALL ?? 0) + (statusCounts.OA ?? 0)
-
-  // New openings: companies verified as hiring within last 14 days
-  const fourteenDaysAgo = new Date(now.getTime() - 14 * 86_400_000)
-  const newOpenings = allCompanies
-    ? allCompanies.filter(
-        (c) => c.isHiring && c.lastHiringCheckAt && new Date(c.lastHiringCheckAt) >= fourteenDaysAgo
-      ).length
-    : 0
 
   return (
     <div

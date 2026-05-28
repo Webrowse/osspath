@@ -1,0 +1,51 @@
+[
+  {
+    "id": "hn-47986563",
+    "type": "jobs",
+    "status": "approved",
+    "source": "hn-hiring",
+    "sourceUrl": "https://news.ycombinator.com/item?id=47986563",
+    "foundAt": "2026-05-02T14:12:46Z",
+    "confidence": 0.5,
+    "score": 7,
+    "whyMatched": "explicit Rust role · remote · apply link present",
+    "rawText": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time | <a href=\"https://radar.com\" rel=\"nofollow\">https://radar.com</a>\n- Radar is the geo-location dev tool\n- Doing 1B+ API calls per day\n- Our main languages are Rust and TypeScript, we also use mobile and offline pipeline languages (Python, Scala, and Terraform).\n- We're based in NYC with our HQ in Union Square and remote friendly (US)\nInteresting things we're working on:\n- HorizonDB, our Geospatial database written in Rust\n- Precise indoor location more accurate than iOS and Android leveraging Ultra-Wideband, other mobile sensors and ML.\n- Anomaly detection to identify spoofed locations\n- Mobile infrastructure that automatically configures itself optimizing battery-life and location accuracy for different use-cases over time\n- Multi-Region AWS K8s deployment, 99.99%+ availability\n- Frontend tools to visualize and debug location data at scale\nCheck out our jobs page here: <a href=\"https://radar.com/jobs#jobs\" rel=\"nofollow\">https://radar.com/jobs#jobs</a> If you have any questions, feel free to reply here or you can e-mail me at tim@radar.com",
+    "extracted": {
+      "note": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time | <a href=\"https://radar.com\" rel=\"nofollow\">https://radar.com</a>\n- Radar is the geo-l",
+      "rustMentioned": true,
+      "remoteConfirmed": true,
+      "tags": [
+        "Remote",
+        "US"
+      ],
+      "topics": [
+        "backend",
+        "infra"
+      ]
+    }
+  },
+  {
+    "id": "hn-47980297",
+    "type": "jobs",
+    "status": "approved",
+    "source": "hn-hiring",
+    "sourceUrl": "https://news.ycombinator.com/item?id=47980297",
+    "foundAt": "2026-05-01T21:03:44Z",
+    "confidence": 0.5,
+    "score": 7,
+    "whyMatched": "explicit Rust role · remote · apply link present",
+    "rawText": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep interest in Linux internals, Distributed Systems, Dev Tools, Great Developer Experiences and Systems programming.\nExperience working with distributed systems AND / OR writing highly-concurrent, performant multi-threaded Rust is a must.\nFeel free to tell us all about your favorite GNU core utilities / Linux system calls / kernel sub-systems at: work [at] yeet.cx\nYou can visit us at <a href=\"https://yeet.cx/\" rel=\"nofollow\">https://yeet.cx/</a>\nOr try our interactive sandbox at <a href=\"https://yeet.cx/play\" rel=\"nofollow\">https://yeet.cx/play</a>\nFor more jobs check out <a href=\"https://yeet.cx/careers\" rel=\"nofollow\">https://yeet.cx/careers</a>",
+    "extracted": {
+      "note": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
+      "rustMentioned": true,
+      "remoteConfirmed": true,
+      "tags": [
+        "Remote",
+        "US"
+      ],
+      "topics": [
+        "backend"
+      ]
+    }
+  }
+]

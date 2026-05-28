@@ -1,0 +1,97 @@
+[
+  {
+    "company": "Parity Technologies",
+    "role": "Rust / Substrate Engineer",
+    "href": "https://www.parity.io/careers",
+    "note": "Core infra work on Polkadot and Substrate — a large, production Rust codebase with active releases. Fully distributed team.",
+    "tags": [
+      "Remote",
+      "Global"
+    ],
+    "topics": [
+      "blockchain",
+      "infra",
+      "systems"
+    ],
+    "source": "Direct",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-09-01"
+  },
+  {
+    "company": "Ferrocene (Ferrous Systems)",
+    "role": "Safety Engineer",
+    "href": "https://ferrocene.dev/careers",
+    "note": "Safety-critical Rust toolchain for automotive and industrial use. ISO 26262 / IEC 61508 qualification work. Small, focused team.",
+    "tags": [
+      "Remote",
+      "Europe-weighted"
+    ],
+    "topics": [
+      "embedded",
+      "safety",
+      "tooling"
+    ],
+    "source": "Direct",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-09-01"
+  },
+  {
+    "company": "Embark Studios",
+    "role": "Rust Game / Engine Engineer",
+    "href": "https://www.embark-studios.com/jobs",
+    "note": "Game studio with a public Rust commitment — engine, rendering, and tooling work. Unusual mix of game development and systems programming.",
+    "tags": [
+      "Remote",
+      "EU / Americas"
+    ],
+    "topics": [
+      "gamedev",
+      "graphics",
+      "systems"
+    ],
+    "source": "Direct",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-09-01"
+  },
+  {
+    "note": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time |",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "tags": [
+      "Remote",
+      "US"
+    ],
+    "topics": [
+      "backend",
+      "infra"
+    ],
+    "href": "https://news.ycombinator.com/item?id=47986563",
+    "description": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time | <a href=\"https://radar.com\" rel=\"nofollow\">https://radar.com</a>\n- Radar is the geo-l",
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-08-28",
+    "company": "Radar Labs ",
+    "role": "Software Engineers (SRE, data platform, backend, full-stack, mobile) "
+  },
+  {
+    "note": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "tags": [
+      "Remote",
+      "US"
+    ],
+    "topics": [
+      "backend"
+    ],
+    "href": "https://news.ycombinator.com/item?id=47980297",
+    "description": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-08-28"
+  }
+]

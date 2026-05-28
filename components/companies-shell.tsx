@@ -384,7 +384,8 @@ export function CompaniesShell({
       <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", overflow: "hidden" }}>
         <StatStrip
           statusCounts={data.statusCounts}
-          allCompanies={initialData.allCompanies}
+          followUpDue={data.followUpDue}
+          newOpenings={data.newOpenings}
           isAuthenticated={isAuthenticated}
         />
 

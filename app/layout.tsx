@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Newsreader, IBM_Plex_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 import { SessionProvider } from "@/components/session-provider"
@@ -17,29 +17,44 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  style: ["normal", "italic"],
+  display: "swap",
+})
+
+const ibmPlexMono = IBM_Plex_Mono({
+  variable: "--font-ibm-plex-mono",
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  display: "swap",
+})
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://jobs.adarshrust.com"),
   title: {
-    default: "jobs.adarshrust.com — Remote Engineering Job Tracker",
-    template: "%s | jobs.adarshrust.com",
+    default: "Rust Opportunities — Curated ecosystem paths",
+    template: "%s | Rust Opportunities",
   },
   description:
-    "Track all your remote job applications in one place. Rust, backend, systems, infra, distributed systems, and remote engineering companies.",
-  keywords: ["rust jobs", "remote engineering", "job tracker", "backend jobs", "systems programming"],
+    "Curated Rust ecosystem opportunities — remote jobs, OSS paths, grants, and ecosystem signals. Kept short and read by a human first.",
+  keywords: ["rust jobs", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering"],
   authors: [{ name: "Adarsh" }],
   openGraph: {
-    title: "jobs.adarshrust.com — Remote Engineering Job Tracker",
+    title: "Rust Opportunities — Curated ecosystem paths",
     description:
-      "Track all your remote job applications in one place. Rust, backend, systems, infra, distributed systems.",
+      "Remote jobs, OSS paths, grants, and quiet ecosystem signals — kept short and read by a human first.",
     url: "https://jobs.adarshrust.com",
-    siteName: "jobs.adarshrust.com",
+    siteName: "Rust Opportunities",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "jobs.adarshrust.com",
-    description: "Remote engineering job tracker for Rust and systems engineers.",
+    title: "Rust Opportunities",
+    description: "Curated Rust ecosystem paths — jobs, OSS, grants, and community signals.",
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
@@ -58,12 +73,18 @@ const preferencesScript = `
 })()
 `
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+  modal,
+}: {
+  children: React.ReactNode
+  modal: React.ReactNode
+}) {
   return (
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${ibmPlexMono.variable} h-full`}
     >
       <head>
         {/* eslint-disable-next-line react/no-danger */}
@@ -74,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <PostHogProvider>
             <UIPreferencesProvider>
               {children}
+              {modal}
               <CommandPaletteMount />
             </UIPreferencesProvider>
           </PostHogProvider>

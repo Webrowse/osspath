@@ -1,6 +1,7 @@
+import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
-import { Navbar } from "@/components/navbar"
+import { WorkspaceSidebar } from "@/components/workspace-sidebar"
 
 export default async function DashboardLayout({
   children,
@@ -11,11 +12,30 @@ export default async function DashboardLayout({
   if (!session) redirect("/login")
 
   return (
-    <>
-      <Navbar />
-      <div className="flex-1 mx-auto max-w-3xl w-full px-4 sm:px-6 lg:px-8 py-8">
-        {children}
+    <div
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "flex",
+        background: "var(--bg-0)",
+        overflow: "hidden",
+      }}
+    >
+      <div className="shell-sidebar" style={{ display: "flex" }}>
+        <Suspense>
+          <WorkspaceSidebar />
+        </Suspense>
       </div>
-    </>
+      <main
+        style={{
+          flex: 1,
+          minWidth: 0,
+          overflowY: "auto",
+          padding: "20px 24px 40px",
+        }}
+      >
+        {children}
+      </main>
+    </div>
   )
 }

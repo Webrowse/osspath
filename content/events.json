@@ -1,0 +1,49 @@
+[
+  {
+    "day": "Sep",
+    "month": "2026",
+    "title": "RustConf 2026",
+    "meta": "Annual · In-person + Remote",
+    "href": "https://rustconf.com",
+    "recurring": true,
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-10-31"
+  },
+  {
+    "day": "Oct",
+    "month": "2026",
+    "title": "EuroRust 2026",
+    "meta": "Annual · Europe",
+    "href": "https://eurorust.eu",
+    "recurring": true,
+    "checkedAt": "2026-05-28",
+    "expiresAt": "2026-11-30"
+  },
+  {
+    "day": "—",
+    "month": "Monthly",
+    "title": "Rust in Production — podcast",
+    "meta": "Recurring · Free · Audio",
+    "href": "https://corrode.dev/podcast/",
+    "recurring": true,
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "day": "—",
+    "month": "Ongoing",
+    "title": "Embedded Rust — Matrix community",
+    "meta": "Drop-in · Free",
+    "href": "https://matrix.to/#/#rust-embedded:matrix.org",
+    "recurring": true,
+    "checkedAt": "2026-05-28"
+  },
+  {
+    "day": "—",
+    "month": "Self-paced",
+    "title": "Rust Exercises",
+    "meta": "Interactive workshops · Free",
+    "href": "https://rust-exercises.com",
+    "recurring": false,
+    "checkedAt": "2026-05-28"
+  }
+]

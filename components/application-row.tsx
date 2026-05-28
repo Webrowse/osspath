@@ -24,7 +24,6 @@ interface ApplicationRowProps {
   companySlug: string
   companyLogoUrl: string | null
   careersUrl: string
-  loginUrl: string | null
   userState: {
     status: UserCompanyStatus
     appliedAt: Date | null
@@ -43,7 +42,6 @@ export function ApplicationRow({
   companySlug,
   companyLogoUrl,
   careersUrl,
-  loginUrl,
   userState,
 }: ApplicationRowProps) {
   const [isPending, startTransition] = useTransition()
@@ -139,11 +137,6 @@ export function ApplicationRow({
             <MoreHorizontal className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            {loginUrl && (
-              <DropdownMenuItem render={<a href={loginUrl} target="_blank" rel="noopener noreferrer" />}>
-                Open login portal
-              </DropdownMenuItem>
-            )}
             <DropdownMenuItem
               className="text-red-400"
               onClick={handleRemove}

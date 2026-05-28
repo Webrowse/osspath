@@ -3,7 +3,7 @@ dotenv.config({ path: ".env.local" })
 dotenv.config()
 import { PrismaClient } from "@prisma/client"
 import { PrismaPg } from "@prisma/adapter-pg"
-import type { RustLevel } from "@prisma/client"
+import type { RustLevel, CompanyCategory, OpportunitySource, ExperienceLevel, RustSignal } from "@prisma/client"
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
 const prisma = new PrismaClient({ adapter })
@@ -20,6 +20,8 @@ const companies = [
     remote: true,
     rustLevel: "HEAVY" as RustLevel,
     atsProvider: "Greenhouse",
+    category: "NETWORKING" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Fly.io",
@@ -32,6 +34,8 @@ const companies = [
     remote: true,
     rustLevel: "HEAVY" as RustLevel,
     atsProvider: null,
+    category: "CLOUD_PLATFORM" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Oxide Computer",
@@ -44,6 +48,8 @@ const companies = [
     remote: false,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "SYSTEMS" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Turso",
@@ -56,6 +62,9 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "DATABASES" as CompanyCategory,
+    juniorAccessible: true,
+    openSourceRepo: "https://github.com/tursodatabase/libsql",
   },
   {
     name: "Zed Industries",
@@ -68,6 +77,9 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "DEV_TOOLS" as CompanyCategory,
+    juniorAccessible: false,
+    openSourceRepo: "https://github.com/zed-industries/zed",
   },
   {
     name: "Canonical",
@@ -128,6 +140,8 @@ const companies = [
     remote: true,
     rustLevel: "HEAVY" as RustLevel,
     atsProvider: "Lever",
+    category: "NETWORKING" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "GitLab",
@@ -164,6 +178,9 @@ const companies = [
     remote: true,
     rustLevel: "PARTIAL" as RustLevel,
     atsProvider: "Lever",
+    category: "OBSERVABILITY" as CompanyCategory,
+    juniorAccessible: false,
+    openSourceRepo: "https://github.com/getsentry/relay",
   },
   {
     name: "Mozilla",
@@ -176,6 +193,9 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: "Greenhouse",
+    category: "SYSTEMS" as CompanyCategory,
+    juniorAccessible: false,
+    openSourceRepo: "https://github.com/mozilla/gecko-dev",
   },
   {
     name: "ClickHouse",
@@ -212,6 +232,8 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "DATABASES" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Deepgram",
@@ -248,6 +270,8 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "DEV_TOOLS" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Hetzner",
@@ -332,6 +356,8 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "COMPILERS" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Red Hat",
@@ -404,6 +430,8 @@ const companies = [
     remote: true,
     rustLevel: "HEAVY" as RustLevel,
     atsProvider: "Lever",
+    category: "SECURITY" as CompanyCategory,
+    juniorAccessible: false,
   },
   {
     name: "Parity Technologies",
@@ -416,6 +444,9 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "WEB3" as CompanyCategory,
+    juniorAccessible: false,
+    openSourceRepo: "https://github.com/paritytech/polkadot-sdk",
   },
   {
     name: "Palantir",
@@ -488,6 +519,9 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: "Lever",
+    category: "DATABASES" as CompanyCategory,
+    juniorAccessible: true,
+    openSourceRepo: "https://github.com/neondatabase/neon",
   },
   {
     name: "Tremor",
@@ -644,9 +678,12 @@ const companies = [
     remote: true,
     rustLevel: "CORE" as RustLevel,
     atsProvider: null,
+    category: "DEV_TOOLS" as CompanyCategory,
+    juniorAccessible: true,
+    openSourceRepo: "https://github.com/svix/svix-webhooks",
   },
   {
-    name: "EmbarkStudios",
+    name: "Embark Studios",
     slug: "embark-studios",
     logoUrl: null,
     description: "Stockholm-based game studio pushing Rust adoption in game development. Creators of rust-gpu and other open source tools.",
@@ -733,6 +770,237 @@ async function main() {
 
   const count = await prisma.company.count()
   console.log(`\nDone! ${count} companies in database.`)
+
+  // ─── Seed curated opportunities ─────────────────────────────────────────────
+  console.log("\nSeeding curated opportunities...")
+
+  type OpportunitySeed = {
+    companySlug: string
+    title: string
+    sourceUrl: string
+    tags: string[]
+    rustSignal: RustSignal
+    experienceLevel: ExperienceLevel
+    isRemote: boolean
+    isJuniorFriendly: boolean
+    hasOssPath: boolean
+    baseQualityScore: number
+    location?: string
+  }
+
+  const seedOpportunities: OpportunitySeed[] = [
+    {
+      companySlug: "svix",
+      title: "Software Engineer (Rust)",
+      sourceUrl: "https://www.svix.com/careers/",
+      tags: ["Rust", "Backend", "Open Source"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "JUNIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: true,
+      hasOssPath: true,
+      baseQualityScore: 100,
+    },
+    {
+      companySlug: "turso",
+      title: "Backend Engineer (Rust)",
+      sourceUrl: "https://turso.tech/careers",
+      tags: ["Rust", "Databases", "Open Source"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "JUNIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: true,
+      hasOssPath: true,
+      baseQualityScore: 100,
+    },
+    {
+      companySlug: "neon",
+      title: "Systems Engineer (Rust)",
+      sourceUrl: "https://neon.tech/careers",
+      tags: ["Rust", "Databases", "PostgreSQL"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: true,
+      hasOssPath: true,
+      baseQualityScore: 100,
+    },
+    {
+      companySlug: "zed-industries",
+      title: "Rust Engineer",
+      sourceUrl: "https://zed.dev/jobs",
+      tags: ["Rust", "DevTools", "Open Source"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: true,
+      baseQualityScore: 90,
+    },
+    {
+      companySlug: "mozilla",
+      title: "Rust Engineer, Firefox/Servo",
+      sourceUrl: "https://www.mozilla.org/en-US/careers/listings/",
+      tags: ["Rust", "Systems", "Open Source", "Compilers"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: true,
+      baseQualityScore: 90,
+    },
+    {
+      companySlug: "warp",
+      title: "Software Engineer, Rust Terminal",
+      sourceUrl: "https://www.warp.dev/careers",
+      tags: ["Rust", "DevTools", "Systems"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 86,
+    },
+    {
+      companySlug: "sentry",
+      title: "Software Engineer, Rust (Relay)",
+      sourceUrl: "https://sentry.io/careers/",
+      tags: ["Rust", "Observability", "Open Source"],
+      rustSignal: "HIGH" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: true,
+      baseQualityScore: 80,
+    },
+    {
+      companySlug: "parity-technologies",
+      title: "Rust Developer, Substrate/Polkadot",
+      sourceUrl: "https://www.parity.io/jobs",
+      tags: ["Rust", "Distributed Systems", "Open Source"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "SENIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: true,
+      baseQualityScore: 77,
+    },
+    {
+      companySlug: "fly-io",
+      title: "Infrastructure Engineer (Rust)",
+      sourceUrl: "https://fly.io/jobs/",
+      tags: ["Rust", "Infrastructure", "Cloud"],
+      rustSignal: "HIGH" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 76,
+    },
+    {
+      companySlug: "1password",
+      title: "Software Engineer, Rust",
+      sourceUrl: "https://1password.com/careers",
+      tags: ["Rust", "Security", "Backend"],
+      rustSignal: "HIGH" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 76,
+    },
+    {
+      companySlug: "fastly",
+      title: "Software Engineer, Compute@Edge",
+      sourceUrl: "https://www.fastly.com/about/careers/",
+      tags: ["Rust", "Networking", "Infrastructure"],
+      rustSignal: "HIGH" as RustSignal,
+      experienceLevel: "MID" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 76,
+    },
+    {
+      companySlug: "materialize",
+      title: "Database Engineer (Rust)",
+      sourceUrl: "https://materialize.com/careers/",
+      tags: ["Rust", "Databases", "Distributed Systems"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "SENIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 73,
+    },
+    {
+      companySlug: "ferrous-systems",
+      title: "Rust Consultant / Engineer",
+      sourceUrl: "https://ferrous-systems.com/",
+      tags: ["Rust", "Systems", "Compilers"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "SENIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 73,
+    },
+    {
+      companySlug: "oxide-computer",
+      title: "Systems Software Engineer",
+      sourceUrl: "https://oxide.computer/careers",
+      tags: ["Rust", "Systems", "Hardware"],
+      rustSignal: "CORE" as RustSignal,
+      experienceLevel: "SENIOR" as ExperienceLevel,
+      isRemote: false,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      location: "San Francisco, CA (on-site)",
+      baseQualityScore: 65,
+    },
+    {
+      companySlug: "cloudflare",
+      title: "Systems Engineer, Rust Networking",
+      sourceUrl: "https://www.cloudflare.com/careers/jobs/",
+      tags: ["Rust", "Networking", "Infrastructure"],
+      rustSignal: "HIGH" as RustSignal,
+      experienceLevel: "SENIOR" as ExperienceLevel,
+      isRemote: true,
+      isJuniorFriendly: false,
+      hasOssPath: false,
+      baseQualityScore: 63,
+    },
+  ]
+
+  for (const opp of seedOpportunities) {
+    const company = await prisma.company.findUnique({ where: { slug: opp.companySlug } })
+    if (!company) {
+      console.log(`  ⚠ Skip: unknown company slug "${opp.companySlug}"`)
+      continue
+    }
+
+    const existing = await prisma.opportunity.findFirst({
+      where: { source: "CURATED" as OpportunitySource, companyId: company.id },
+    })
+    if (existing) {
+      console.log(`  ↩ Skip (exists): ${opp.title} @ ${company.name}`)
+      continue
+    }
+
+    const { companySlug: _, ...data } = opp
+    await prisma.opportunity.create({
+      data: {
+        ...data,
+        source: "CURATED" as OpportunitySource,
+        companyId: company.id,
+        companyName: company.name,
+      },
+    })
+    console.log(`  ✓ ${opp.title} @ ${company.name}`)
+  }
+
+  const oppCount = await prisma.opportunity.count()
+  console.log(`\nDone! ${oppCount} opportunities in database.`)
 }
 
 main()

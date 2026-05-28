@@ -1,6 +1,6 @@
 import type { UserCompanyStatus } from "@/lib/company-status"
-import { RustLevel, CompanyType } from "@prisma/client"
-export type { UserCompanyStatus, RustLevel, CompanyType }
+import { RustLevel, CompanyType, ExperienceLevel, RustSignal, CompanyCategory } from "@prisma/client"
+export type { UserCompanyStatus, RustLevel, CompanyType, ExperienceLevel, RustSignal, CompanyCategory }
 
 // ─── Status metadata ──────────────────────────────────────────────────────────
 
@@ -148,6 +148,67 @@ export interface CompanyFilters {
   sort: SortOption
   page: number
 }
+
+export const EXPERIENCE_LEVEL_LABELS: Record<ExperienceLevel, string> = {
+  INTERN: "Intern",
+  JUNIOR: "Junior",
+  MID: "Mid-level",
+  SENIOR: "Senior",
+  STAFF: "Staff+",
+}
+
+export const RUST_SIGNAL_LABELS: Record<RustSignal, string> = {
+  CORE: "Rust Core",
+  HIGH: "Heavy Rust",
+  MEDIUM: "Some Rust",
+  LOW: "Minimal Rust",
+}
+
+export const COMPANY_CATEGORY_LABELS: Record<CompanyCategory, string> = {
+  INFRASTRUCTURE: "Infrastructure",
+  DATABASES: "Databases",
+  OBSERVABILITY: "Observability",
+  SECURITY: "Security",
+  NETWORKING: "Networking",
+  DEV_TOOLS: "Dev Tools",
+  SYSTEMS: "Systems",
+  COMPILERS: "Compilers",
+  WEB3: "Web3",
+  AI_INFRA: "AI Infra",
+  CLOUD_PLATFORM: "Cloud Platform",
+  OTHER: "Other",
+}
+
+// ─── User intent segmentation ────────────────────────────────────────────────
+// Not yet persisted or surfaced in UI. Defined here so analytics event
+// properties and future personalization logic use a consistent taxonomy.
+// Track via PostHog user properties when intent becomes known (e.g., from
+// filter patterns: heavy junior+OSS filter use → likely "beginner_oss").
+
+export type UserIntent =
+  | "beginner"      // learning Rust, wants accessible + junior-friendly roles
+  | "systems"       // backend / systems / distributed infrastructure
+  | "compiler_wasm" // compilers, WASM, language tooling
+  | "web3"          // blockchain, crypto, Polkadot/Solana ecosystem
+  | "oss"           // OSS-path roles, open source contribution track
+  | "remote_first"  // remote as non-negotiable constraint
+
+export const USER_INTENT_LABELS: Record<UserIntent, string> = {
+  beginner: "Learning Rust",
+  systems: "Systems / Backend",
+  compiler_wasm: "Compilers / WASM",
+  web3: "Web3 / Crypto",
+  oss: "OSS-focused",
+  remote_first: "Remote-first",
+}
+
+// Opportunity filter profiles that signal each intent:
+// beginner      → junior=1 OR rust=CORE filter used repeatedly
+// systems       → rust=CORE/HIGH, no level filter, tags: Distributed/Infra
+// compiler_wasm → tags: Compilers/WASM in viewed opportunities
+// web3          → category: WEB3 opportunities clicked
+// oss           → hasOssPath clicked, source: This Week in Rust, r/rust
+// remote_first  → remote=1 filter always on
 
 export const PAGE_SIZE = 24
 
