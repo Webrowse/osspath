@@ -27,12 +27,13 @@ export default async function QueuePage({ searchParams }: PageProps) {
           <Link
             key={t}
             href={`/admin/queue?type=${t}`}
-            className={`adm-tab${activeType === t ? " adm-tab--active" : ""}`}
+            className={`adm-tab${activeType === t ? " adm-tab--active" : ""}${tabCounts[t] === 0 ? " adm-tab--empty" : ""}`}
           >
             {CONTENT_TYPE_LABELS[t]}
-            {tabCounts[t] > 0 && (
-              <span className="adm-badge adm-badge--dim">{tabCounts[t]}</span>
-            )}
+            {tabCounts[t] > 0
+              ? <span className="adm-badge adm-badge--dim">{tabCounts[t]}</span>
+              : <span className="adm-badge" style={{ opacity: 0.35 }}>0</span>
+            }
           </Link>
         ))}
       </div>

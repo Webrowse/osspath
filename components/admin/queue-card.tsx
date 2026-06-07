@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { approveItem, rejectItem, updatePendingItem } from "@/lib/admin/actions"
+import { useRef, useState, useTransition } from "react"
+import { approveItem, rejectItem } from "@/lib/admin/actions"
 import type { PendingItem, ContentType } from "@/lib/admin/types"
 
 function formatAge(iso: string): string {
@@ -14,11 +14,20 @@ function formatAge(iso: string): string {
   return `${days}d ago`
 }
 
+function stripHtml(str: string): string {
+  return str.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'")
+}
+
 function ConfidenceBadge({ score }: { score?: number }) {
   if (score == null) return null
   const pct = Math.round(score * 100)
   const cls = score >= 0.7 ? "adm-card__confidence-hi" : score >= 0.4 ? "adm-card__confidence-med" : ""
-  return <span className={`adm-card__confidence ${cls}`}>{pct}% confidence</span>
+  const tip = score >= 0.7
+    ? `${pct}% — likely good match, review and approve`
+    : score >= 0.4
+    ? `${pct}% — borderline, read carefully before approving`
+    : `${pct}% — low confidence, likely reject unless you see clear Rust relevance`
+  return <span className={`adm-card__confidence ${cls}`} title={tip}>{pct}% confidence</span>
 }
 
 function getTitle(item: PendingItem): string {
@@ -27,6 +36,16 @@ function getTitle(item: PendingItem): string {
   if (e.role) return String(e.role)
   if (e.name) return String(e.name)
   if (e.title) return String(e.title)
+  // HN pipe format: "Company | Role | Location | ..."
+  if (item.rawText) {
+    const firstLine = stripHtml(item.rawText.split("\n")[0]).trim()
+    if (firstLine.includes(" | ")) {
+      const parts = firstLine.split(" | ").map((s) => s.trim()).filter(Boolean)
+      if (parts[0] && parts[1]) return `${parts[0]} — ${parts[1]}`
+      if (parts[0]) return parts[0]
+    }
+    if (firstLine.length > 0 && firstLine.length < 100) return firstLine
+  }
   return "Untitled"
 }
 
@@ -44,6 +63,21 @@ function getNote(item: PendingItem): string {
   return ""
 }
 
+function extractApplyUrl(item: PendingItem): string {
+  // Prefer extracted href if it's not the HN thread URL
+  const href = item.extracted.href ? String(item.extracted.href) : ""
+  if (href && !href.includes("news.ycombinator.com")) return href
+
+  // Try to find a non-HN URL in rawText
+  if (item.rawText) {
+    const cleaned = stripHtml(item.rawText)
+    const urlMatch = cleaned.match(/https?:\/\/(?!news\.ycombinator\.com)[^\s"'<>]+/i)
+    if (urlMatch) return urlMatch[0]
+  }
+
+  return item.sourceUrl
+}
+
 interface EditFormProps {
   item: PendingItem
   contentType: ContentType
@@ -53,17 +87,17 @@ interface EditFormProps {
 
 function EditForm({ item, contentType, onCancel, onApproved }: EditFormProps) {
   const [fields, setFields] = useState<Record<string, string>>({
-    company:          String(item.extracted.company ?? ""),
-    role:             String(item.extracted.role ?? ""),
-    name:             String(item.extracted.name ?? ""),
-    title:            String(item.extracted.title ?? ""),
-    href:             String(item.extracted.href ?? item.sourceUrl),
-    note:             String(item.extracted.note ?? item.extracted.description ?? ""),
-    description:      String(item.extracted.description ?? item.extracted.note ?? ""),
-    tags:             (item.extracted.tags as string[] | undefined ?? []).join(", "),
-    topics:           (item.extracted.topics as string[] | undefined ?? []).join(", "),
-    checkedAt:        new Date().toISOString().split("T")[0],
-    expiresAt:        (() => {
+    company:     String(item.extracted.company ?? ""),
+    role:        String(item.extracted.role ?? ""),
+    name:        String(item.extracted.name ?? ""),
+    title:       String(item.extracted.title ?? ""),
+    href:        contentType === "jobs" ? extractApplyUrl(item) : String(item.extracted.href ?? item.sourceUrl),
+    note:        stripHtml(String(item.extracted.note ?? item.extracted.description ?? "")),
+    description: stripHtml(String(item.extracted.description ?? item.extracted.note ?? "")),
+    tags:        (item.extracted.tags as string[] | undefined ?? []).join(", "),
+    topics:      (item.extracted.topics as string[] | undefined ?? []).join(", "),
+    checkedAt:   new Date().toISOString().split("T")[0],
+    expiresAt:   (() => {
       const d = new Date(); d.setMonth(d.getMonth() + 3); return d.toISOString().split("T")[0]
     })(),
   })
@@ -80,8 +114,6 @@ function EditForm({ item, contentType, onCancel, onApproved }: EditFormProps) {
         if (!v.trim()) continue
         if (k === "tags" || k === "topics") {
           overrides[k] = v.split(",").map((s) => s.trim()).filter(Boolean)
-        } else if (k === "checkedAt" || k === "expiresAt") {
-          overrides[k] = v
         } else {
           overrides[k] = v
         }
@@ -95,8 +127,8 @@ function EditForm({ item, contentType, onCancel, onApproved }: EditFormProps) {
 
   return (
     <div className="adm-form">
-      <div style={{ fontSize: 11.5, color: "var(--fg-2)", marginBottom: 4, fontFamily: "var(--font-geist-mono)" }}>
-        Edit before publishing — all fields are optional overrides
+      <div style={{ fontSize: 11.5, color: "var(--fg-3)", marginBottom: 4, fontFamily: "var(--font-geist-mono)" }}>
+        Review before publishing — Company and Role are required for a well-formed listing
       </div>
       <div className="adm-form-row">
         {relevantFields.map(({ key, label, multiline }) => (
@@ -144,11 +176,11 @@ function getFieldsForType(type: ContentType): { key: string; label: string; mult
       { key: "note",      label: "Note", multiline: true },
     ]
     case "oss": return [
-      { key: "name",  label: "Repo Name" },
-      { key: "eco",   label: "Eco (e.g. CLI · Tooling)" },
-      { key: "href",  label: "GitHub URL" },
+      { key: "name",   label: "Repo Name" },
+      { key: "eco",    label: "Eco (e.g. CLI · Tooling)" },
+      { key: "href",   label: "GitHub URL" },
       { key: "topics", label: "Topics (comma-sep)" },
-      { key: "note",  label: "Contributor note", multiline: true },
+      { key: "note",   label: "Contributor note", multiline: true },
     ]
     case "grants": return [
       { key: "kind",        label: "Kind (Grant/Bounty/…)" },
@@ -187,15 +219,25 @@ interface QueueCardProps {
 export function QueueCard({ item, contentType }: QueueCardProps) {
   const [editing, setEditing] = useState(false)
   const [done, setDone] = useState(false)
+  const [confirmReject, setConfirmReject] = useState(false)
   const [rejecting, startRejectTransition] = useTransition()
+  const formRef = useRef<HTMLDivElement>(null)
 
   if (done) return null
 
-  function handleReject() {
+  function handleRejectClick() {
+    if (!confirmReject) { setConfirmReject(true); return }
     startRejectTransition(async () => {
       await rejectItem(contentType, item.id)
       setDone(true)
     })
+  }
+
+  function handleEditClick() {
+    setEditing(true)
+    setConfirmReject(false)
+    // Scroll to form after state update renders it
+    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50)
   }
 
   const title = getTitle(item)
@@ -227,10 +269,7 @@ export function QueueCard({ item, contentType }: QueueCardProps) {
             )}
           </div>
         )}
-        {note && <div className="adm-card__note">{note}</div>}
-        {item.rawText && (
-          <div className="adm-card__raw">{item.rawText.slice(0, 220)}</div>
-        )}
+        {note && <div className="adm-card__note">{stripHtml(note)}</div>}
         {tags.length > 0 && (
           <div className="adm-card__tags">
             {tags.map((t) => <span key={t} className="adm-chip">{t}</span>)}
@@ -239,12 +278,14 @@ export function QueueCard({ item, contentType }: QueueCardProps) {
       </div>
 
       {editing ? (
-        <EditForm
-          item={item}
-          contentType={contentType}
-          onCancel={() => setEditing(false)}
-          onApproved={() => setDone(true)}
-        />
+        <div ref={formRef}>
+          <EditForm
+            item={item}
+            contentType={contentType}
+            onCancel={() => setEditing(false)}
+            onApproved={() => setDone(true)}
+          />
+        </div>
       ) : (
         <div className="adm-card__actions">
           <a
@@ -252,20 +293,43 @@ export function QueueCard({ item, contentType }: QueueCardProps) {
             target="_blank"
             rel="noopener noreferrer"
             className="adm-btn adm-btn--ghost"
+            title="Open source in new tab"
           >
             Source ↗
           </a>
           <div className="adm-card__actions-spacer" />
-          <button
-            className="adm-btn adm-btn--reject"
-            onClick={handleReject}
-            disabled={rejecting}
-          >
-            {rejecting ? "…" : "Reject"}
-          </button>
+          {confirmReject ? (
+            <>
+              <span style={{ fontSize: 11.5, color: "var(--fg-3)", fontFamily: "var(--font-geist-mono)" }}>
+                Reject permanently?
+              </span>
+              <button
+                className="adm-btn adm-btn--reject"
+                onClick={handleRejectClick}
+                disabled={rejecting}
+              >
+                {rejecting ? "…" : "Yes, reject"}
+              </button>
+              <button
+                className="adm-btn adm-btn--ghost"
+                onClick={() => setConfirmReject(false)}
+                disabled={rejecting}
+              >
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              className="adm-btn adm-btn--reject"
+              onClick={handleRejectClick}
+              disabled={rejecting}
+            >
+              Reject
+            </button>
+          )}
           <button
             className="adm-btn adm-btn--approve"
-            onClick={() => setEditing(true)}
+            onClick={handleEditClick}
           >
             Edit & Approve →
           </button>

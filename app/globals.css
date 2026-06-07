@@ -603,6 +603,7 @@
   white-space: nowrap;
 }
 .e-nav__link:hover { color: var(--e-accent); }
+.e-nav__link--active { color: var(--e-fg); font-weight: 500; }
 .e-nav__spacer { flex: 1; }
 .e-nav__workspace {
   font-family: var(--e-mono);

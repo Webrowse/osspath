@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, LayoutDashboard, ArrowRight } from "lucide-react"
+import { LogOut, LayoutDashboard, ArrowRight, Settings2 } from "lucide-react"
 import { PreferencesSwitcher } from "@/components/preferences-switcher"
 
 const NAV_LINKS = [
@@ -307,6 +307,12 @@ export function Navbar() {
                   <LayoutDashboard size={13} style={{ marginRight: 8 }} />
                   Open workspace
                 </DropdownMenuItem>
+                {session.user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                  <DropdownMenuItem render={<Link href="/admin" />}>
+                    <Settings2 size={13} style={{ marginRight: 8 }} />
+                    Admin
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => signOut({ callbackUrl: "/" })}

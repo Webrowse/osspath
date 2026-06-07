@@ -7,6 +7,24 @@ import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 
 const TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
 
+const RAW_TEXT_LABELS: Record<ContentType, string> = {
+  jobs:      "Job listing text",
+  oss:       "GitHub README or repo description",
+  grants:    "Grant / bounty description",
+  pulse:     "Newsletter or forum post",
+  events:    "Event description",
+  companies: "Company description",
+}
+
+const RAW_TEXT_PLACEHOLDERS: Record<ContentType, string> = {
+  jobs:      "Paste the full job listing or HN hiring comment…",
+  oss:       "Paste the GitHub README, repo description, or good-first-issue text…",
+  grants:    "Paste the grant announcement or bounty description…",
+  pulse:     "Paste the newsletter excerpt or forum post…",
+  events:    "Paste the event announcement or CFP description…",
+  companies: "Paste the company description or About page text…",
+}
+
 export function ManualAddForm() {
   const [type, setType]   = useState<ContentType>("jobs")
   const [url, setUrl]     = useState("")
@@ -66,10 +84,10 @@ export function ManualAddForm() {
           </select>
         </div>
         <div className="adm-field">
-          <label>Source URL</label>
+          <label title="Becomes the 'Source ↗' link on the queue card">Source URL</label>
           <input
             className="adm-input"
-            placeholder="https://…"
+            placeholder="https://… (HN thread, GitHub repo, or job listing URL)"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
           />
@@ -77,10 +95,10 @@ export function ManualAddForm() {
       </div>
 
       <div className="adm-field">
-        <label>Raw text / paste job description</label>
+        <label>{RAW_TEXT_LABELS[type] ?? "Raw text"}</label>
         <textarea
           className="adm-input adm-textarea"
-          placeholder="Paste the job listing, OSS readme excerpt, or description…"
+          placeholder={RAW_TEXT_PLACEHOLDERS[type] ?? "Paste content here…"}
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={4}

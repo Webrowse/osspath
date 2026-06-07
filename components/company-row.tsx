@@ -120,7 +120,12 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
   }
 
   const visibleTagsDesktop = company.tags.slice(0, 2)
+  const extraTagsDesktop = company.tags.length - 2
   const visibleTagsMobile = company.tags.slice(0, 3)
+
+  const timeAgoLabel = localState?.updatedAt
+    ? `Tracking updated ${timeAgo} ago`
+    : `Added ${timeAgo} ago`
 
   return (
     <div
@@ -239,6 +244,23 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
               {tag.toLowerCase()}
             </span>
           ))}
+          {extraTagsDesktop > 0 && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                padding: "1px 5px",
+                borderRadius: 4,
+                fontFamily: "var(--font-mono)",
+                fontSize: 10.5,
+                color: "var(--fg-3)",
+                border: "1px solid var(--line-soft)",
+                whiteSpace: "nowrap",
+              }}
+            >
+              +{extraTagsDesktop}
+            </span>
+          )}
         </div>
 
         <div
@@ -275,7 +297,7 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
               onClick={(e) => { e.stopPropagation(); handleMarkApplied() }}
               style={{
                 ...actionBtnStyle,
-                opacity: hovered || isApplied ? 1 : 0,
+                opacity: hovered || isApplied ? 1 : 0.35,
                 transition: "opacity 100ms",
                 border: `1px solid ${isApplied ? "var(--d-accent-line)" : "var(--line-soft)"}`,
                 background: isApplied ? "var(--d-accent-soft)" : "transparent",
@@ -308,12 +330,14 @@ export function CompanyRow({ company, isAuthenticated }: CompanyRowProps) {
             <ExternalLink size={12} />
           </a>
           <span
+            title={timeAgoLabel}
             style={{
               fontFamily: "var(--font-mono)",
               fontSize: 10.5,
               color: "var(--fg-3)",
               minWidth: 28,
               textAlign: "right",
+              cursor: "default",
             }}
           >
             {timeAgo}

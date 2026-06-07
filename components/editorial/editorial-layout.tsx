@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
+import { EditorialNav } from "@/components/editorial/editorial-nav"
 import { SITE_NAV } from "@/lib/nav-config"
 import { SITE_CONFIG } from "@/lib/site-config"
 
@@ -17,23 +18,17 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
             <span>rust opportunities</span>
           </Link>
 
-          {/* Desktop nav links go to archive pages on archive routes */}
-          <nav className="e-nav__links" aria-label="Primary">
-            {SITE_NAV.map((l) => (
-              <Link key={l.archive} className="e-nav__link" href={l.archive}>
-                {l.label}
-              </Link>
-            ))}
-          </nav>
+          {/* Desktop nav links — client component for active-state highlighting */}
+          <EditorialNav />
 
           <div className="e-nav__spacer" />
 
           <Link
             className="e-nav__workspace"
             href="/companies"
-            title="Research workspace — saved jobs, notes, deep research"
+            title="Job tracker — save companies, track applications, take notes"
           >
-            <span>Research Workspace</span>
+            <span>Job Tracker</span>
             <span aria-hidden="true">→</span>
           </Link>
 
@@ -57,7 +52,7 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
             </div>
             <div>
               <Link className="e-footer__workspace" href="/companies">
-                Research Workspace →
+                Job Tracker →
               </Link>
               <div className="e-footer__tagline" style={{ marginTop: 6 }}>
                 saved jobs · notes · tracking · deep research

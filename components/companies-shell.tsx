@@ -238,6 +238,7 @@ export function CompaniesShell({
 
   const { data, loading } = useCompanies(filters, initialData)
   const searchRef = useRef<HTMLInputElement>(null)
+  const mainRef = useRef<HTMLDivElement>(null)
   const urlSyncTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const filterTrackTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const isFirstMount = useRef(true)
@@ -356,6 +357,11 @@ export function CompaniesShell({
     setSearchValue("")
   }, [handleFiltersChange])
 
+  const handleViewChange = useCallback((next: ViewMode) => {
+    setView(next)
+    mainRef.current?.scrollTo({ top: 0 })
+  }, [])
+
   const { companies, total, page, totalPages } = data
 
   return (
@@ -394,7 +400,7 @@ export function CompaniesShell({
           onSearchChange={handleSearchChange}
           searchRef={searchRef}
           view={view}
-          onViewChange={setView}
+          onViewChange={handleViewChange}
           total={total}
           loading={loading}
           activeFilterCount={activeFilterCount}
@@ -437,7 +443,7 @@ export function CompaniesShell({
           </div>
         )}
 
-        <main style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
+        <main ref={mainRef} style={{ flex: 1, overflowY: "auto", padding: "12px 16px 24px" }}>
           {/* Page header */}
           <div
             style={{

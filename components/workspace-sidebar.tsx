@@ -164,6 +164,24 @@ export function WorkspaceSidebar() {
         <PreferencesSwitcher />
       </div>
 
+      {/* Public site link */}
+      <div style={{ padding: "0 12px 6px" }}>
+        <Link
+          href="/"
+          style={{
+            fontSize: 11.5,
+            color: "var(--fg-3)",
+            textDecoration: "none",
+            fontFamily: "var(--font-mono)",
+            transition: "color 100ms",
+          }}
+          onMouseEnter={(e: any) => (e.currentTarget.style.color = "var(--fg-1)")}
+          onMouseLeave={(e: any) => (e.currentTarget.style.color = "var(--fg-3)")}
+        >
+          ← Public site
+        </Link>
+      </div>
+
       {/* User footer */}
       <div
         style={{

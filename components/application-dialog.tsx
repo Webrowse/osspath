@@ -72,6 +72,7 @@ export function ApplicationDialog({
 }: ApplicationDialogProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const ph = usePostHog()
 
   const [status, setStatus] = useState<UserCompanyStatus>(
@@ -115,12 +116,14 @@ export function ApplicationDialog({
   }
 
   const handleRemove = () => {
+    if (!confirmRemove) { setConfirmRemove(true); return }
     startTransition(async () => {
       try {
         await removeCompanyState(companyId)
         ph?.capture("company_untracked", { company_id: companyId, company_name: companyName })
         toast.success("Removed")
         setOpen(false)
+        setConfirmRemove(false)
         onSuccess?.()
       } catch {
         toast.error("Failed to remove")
@@ -153,26 +156,28 @@ export function ApplicationDialog({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Applied date</Label>
-              <Input
-                type="date"
-                value={appliedAt}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAppliedAt(e.target.value)}
-                className="h-8 text-sm bg-secondary border-border"
-              />
+          {status !== "SAVED" && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Applied date</Label>
+                <Input
+                  type="date"
+                  value={appliedAt}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setAppliedAt(e.target.value)}
+                  className="h-8 text-sm bg-secondary border-border"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs text-muted-foreground">Follow-up date</Label>
+                <Input
+                  type="date"
+                  value={followUpAt}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFollowUpAt(e.target.value)}
+                  className="h-8 text-sm bg-secondary border-border"
+                />
+              </div>
             </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs text-muted-foreground">Follow-up date</Label>
-              <Input
-                type="date"
-                value={followUpAt}
-                onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFollowUpAt(e.target.value)}
-                className="h-8 text-sm bg-secondary border-border"
-              />
-            </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
@@ -201,7 +206,7 @@ export function ApplicationDialog({
               <Input
                 value={recruiterName}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setRecruiterName(e.target.value)}
-                placeholder="Jane Smith"
+                placeholder="e.g. Jane Smith"
                 className="h-8 text-sm bg-secondary border-border"
               />
             </div>
@@ -210,7 +215,7 @@ export function ApplicationDialog({
               <Input
                 value={salaryExpectation}
                 onChange={(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setSalaryExpectation(e.target.value)}
-                placeholder="$180k + equity"
+                placeholder="e.g. $180k + equity"
                 className="h-8 text-sm bg-secondary border-border"
               />
             </div>
@@ -229,16 +234,40 @@ export function ApplicationDialog({
 
         <div className="flex items-center justify-between gap-2 pt-2">
           {userState && (
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleRemove}
-              disabled={isPending}
-              className="text-red-400 hover:text-red-300 hover:bg-red-950/30 h-8"
-            >
-              <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-              Remove
-            </Button>
+            confirmRemove ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Remove all tracking?</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleRemove}
+                  disabled={isPending}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-950/30 h-7 px-2"
+                >
+                  {isPending ? "Removing…" : "Yes, remove"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setConfirmRemove(false)}
+                  disabled={isPending}
+                  className="h-7 px-2"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleRemove}
+                disabled={isPending}
+                className="text-red-400 hover:text-red-300 hover:bg-red-950/30 h-8"
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                Remove
+              </Button>
+            )
           )}
           <div className="flex gap-2 ml-auto">
             <Button

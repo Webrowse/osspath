@@ -92,11 +92,11 @@ export default async function CompanyPage({ params }: PageProps) {
       />
       <main className="flex-1 mx-auto max-w-5xl w-full px-4 sm:px-6 lg:px-8 py-6">
         <Link
-          href="/companies"
+          href="/ecosystem"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-5"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          All companies
+          Ecosystem
         </Link>
 
         {/* Company header */}

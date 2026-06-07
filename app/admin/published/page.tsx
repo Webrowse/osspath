@@ -71,6 +71,8 @@ export default async function PublishedPage({ searchParams }: PageProps) {
                   rel="noopener noreferrer"
                   className="adm-btn adm-btn--ghost"
                   style={{ padding: "2px 7px", fontSize: 11 }}
+                  title="Open source URL in new tab"
+                  aria-label="Open source URL"
                 >
                   ↗
                 </a>

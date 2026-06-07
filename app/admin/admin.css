@@ -224,6 +224,9 @@
   color: var(--fg-0, #e5e5e5);
   border-bottom-color: oklch(0.62 0.14 42);
 }
+.adm-tab--empty {
+  opacity: 0.45;
+}
 
 /* ── Pending item card ───────────────────────────────────── */
 

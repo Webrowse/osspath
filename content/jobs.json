@@ -95,5 +95,23 @@
     "expiresAt": "2026-08-28",
     "company": "yeet",
     "role": "Rust developers / Backend Engineers"
+  },
+  {
+    "note": "Foxglove | Onsite (San Francisco) + Remote | Full Time |\nFoxglove is the leading data infrastructure & observability platform f",
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "tags": [
+      "Remote"
+    ],
+    "topics": [
+      "wasm",
+      "infra"
+    ],
+    "company": "Foxglove",
+    "role": "Remote | Full Time",
+    "href": "https://news.ycombinator.com/item?id=47977183",
+    "description": "Foxglove | Onsite (San Francisco) + Remote | Full Time | <a href=\"https://foxglove.dev/\" rel=\"nofollow\">https://foxglove.dev/</a>\nFoxglove is the leading data infrastructure & observability platform f",
+    "checkedAt": "2026-06-06",
+    "expiresAt": "2026-09-06"
   }
 ]

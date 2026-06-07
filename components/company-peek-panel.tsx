@@ -319,21 +319,26 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
               {company.remote && <Pill>Remote</Pill>}
               {company.isHiring ? <Pill ok>Hiring</Pill> : <Pill muted>Not hiring</Pill>}
             </div>
+            {company.lastHiringCheckAt && (
+              <p style={{ fontSize: 10.5, color: "var(--fg-4)", margin: "4px 0 0", fontFamily: "var(--font-mono)" }}>
+                ✓ Verified {fmtDate(company.lastHiringCheckAt, true)}
+              </p>
+            )}
           </div>
 
           {/* ── Open roles ─────────────────────────────────────────────────── */}
-          {openRoles.length > 0 && (
-            <div style={{ borderBottom: "1px solid var(--line-soft)" }}>
-              <div style={{
-                padding: "7px 14px 5px",
-                display: "flex", alignItems: "center", gap: 6,
+          <div style={{ borderBottom: "1px solid var(--line-soft)" }}>
+            <div style={{
+              padding: "7px 14px 5px",
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <span style={{
+                fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 600,
+                color: "var(--fg-4)", letterSpacing: "0.07em", textTransform: "uppercase",
               }}>
-                <span style={{
-                  fontFamily: "var(--font-mono)", fontSize: 9.5, fontWeight: 600,
-                  color: "var(--fg-4)", letterSpacing: "0.07em", textTransform: "uppercase",
-                }}>
-                  Open Roles
-                </span>
+                Open Roles
+              </span>
+              {openRoles.length > 0 ? (
                 <span style={{
                   fontFamily: "var(--font-mono)", fontSize: 9.5,
                   color: "var(--d-ok)",
@@ -343,8 +348,31 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                 }}>
                   {openRoles.length} active
                 </span>
-              </div>
+              ) : (
+                <span style={{
+                  fontFamily: "var(--font-mono)", fontSize: 9.5,
+                  color: "var(--fg-4)",
+                  background: "var(--bg-3)",
+                  border: "1px solid var(--line-soft)",
+                  padding: "0 5px", borderRadius: 3,
+                }}>
+                  none tracked
+                </span>
+              )}
+            </div>
 
+            {openRoles.length === 0 ? (
+              <div style={{ padding: "4px 14px 8px" }}>
+                <p style={{ fontSize: 11.5, color: "var(--fg-4)", margin: 0, fontStyle: "italic" }}>
+                  No roles in our index yet —{" "}
+                  <a href={company.careersUrl} target="_blank" rel="noopener noreferrer"
+                    style={{ color: "var(--fg-3)", textDecoration: "underline" }}>
+                    check their careers page
+                  </a>.
+                </p>
+              </div>
+            ) : (
+              <>
               {openRoles.map((role, i) => (
                 <div
                   key={role.id}
@@ -425,8 +453,9 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                   All opportunities for {company.name} →
                 </Link>
               </div>
-            </div>
-          )}
+              </>
+            )}
+          </div>
 
           {/* ── Application state ──────────────────────────────────────────── */}
           {isTracked ? (
@@ -566,7 +595,7 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                 </p>
               ) : (
                 <p style={{ fontSize: 11.5, color: "var(--fg-4)", margin: "3px 0 0", fontStyle: "italic" }}>
-                  No notes — add them via Edit tracking.
+                  No notes — add them via Update status.
                 </p>
               )}
             </div>
@@ -622,7 +651,7 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                 </>
               ) : (
                 <>
-                  <Link
+                  <a
                     href="/login"
                     style={{
                       ...btn, display: "inline-flex", textDecoration: "none",
@@ -631,7 +660,7 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                     }}
                   >
                     Sign in to track
-                  </Link>
+                  </a>
                   <div style={{ flex: 1 }} />
                   <a
                     href={company.careersUrl}

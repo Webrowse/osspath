@@ -4,7 +4,7 @@ import { memo } from "react"
 import Link from "next/link"
 import { usePathname, useSearchParams } from "next/navigation"
 import { signIn, signOut, useSession } from "next-auth/react"
-import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2, GitBranch, Bell, Briefcase, Globe } from "lucide-react"
+import { LayoutDashboard, Bookmark, LogOut, LogIn, Building2, GitBranch, Bell, Briefcase, Globe, Settings2 } from "lucide-react"
 import { AdvancedFilters } from "@/components/advanced-filters"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { PreferencesSwitcher } from "@/components/preferences-switcher"
@@ -222,6 +222,24 @@ export const AppSidebar = memo(function AppSidebar({
         <PreferencesSwitcher />
       </div>
 
+      {/* Public site link */}
+      <div style={{ padding: "0 12px 6px" }}>
+        <Link
+          href="/"
+          style={{
+            fontSize: 11.5,
+            color: "var(--fg-3)",
+            textDecoration: "none",
+            fontFamily: "var(--font-mono)",
+            transition: "color 100ms",
+          }}
+          onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "var(--fg-1)")}
+          onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "var(--fg-3)")}
+        >
+          ← Public site
+        </Link>
+      </div>
+
       {/* User footer */}
       <div
         style={{
@@ -288,6 +306,24 @@ export const AppSidebar = memo(function AppSidebar({
                 {session.user.name}
               </p>
             </div>
+            {session.user.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+              <Link
+                href="/admin"
+                title="Admin panel"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  padding: 4,
+                  borderRadius: 4,
+                  color: "var(--fg-3)",
+                  textDecoration: "none",
+                }}
+                onMouseEnter={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "var(--fg-1)")}
+                onMouseLeave={(e: React.MouseEvent<HTMLAnchorElement>) => (e.currentTarget.style.color = "var(--fg-3)")}
+              >
+                <Settings2 size={13} />
+              </Link>
+            )}
             <button
               onClick={() => signOut({ callbackUrl: "/" })}
               style={{

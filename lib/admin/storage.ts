@@ -77,11 +77,18 @@ export function removeContent(type: ContentType, index: number) {
   writeContent(type, existing.filter((_, i) => i !== index))
 }
 
-// ── Pending counts (for sidebar badges) ──────────────────────────────────────
+// ── Counts (for sidebar badges) ──────────────────────────────────────────────
+
+const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
 
 export function getPendingCounts(): Record<ContentType, number> {
-  const types: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
   return Object.fromEntries(
-    types.map((t) => [t, readPending(t).length])
+    ALL_TYPES.map((t) => [t, readPending(t).length])
+  ) as Record<ContentType, number>
+}
+
+export function getPublishedCounts(): Record<ContentType, number> {
+  return Object.fromEntries(
+    ALL_TYPES.map((t) => [t, readContent(t).length])
   ) as Record<ContentType, number>
 }

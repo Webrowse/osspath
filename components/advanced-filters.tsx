@@ -68,13 +68,17 @@ const EMPTY_FILTERS: CompanyFilters = {
 }
 
 // Quick-access presets replace all active filters with a single click
-const PRESETS: Array<{ label: string; filters: Partial<CompanyFilters> }> = [
+const PRESETS: Array<{ label: string; tooltip?: string; filters: Partial<CompanyFilters> }> = [
   {
     label: "Active pipeline",
     filters: { statuses: ["APPLIED", "OA", "RECRUITER_CALL", "INTERVIEWING", "FINAL_ROUND"] },
   },
   { label: "Follow-up due", filters: { timeFilter: "follow_up_due" } },
-  { label: "Not reviewed 7d", filters: { timeFilter: "not_checked_7d" } },
+  {
+    label: "Not reviewed 7d",
+    tooltip: "Companies where you haven't opened the panel or updated status in 7+ days",
+    filters: { timeFilter: "not_checked_7d" },
+  },
   { label: "Saved", filters: { statuses: ["SAVED"] } },
 ]
 
@@ -223,6 +227,7 @@ export function AdvancedFilters({
               <PresetBtn
                 key={preset.label}
                 label={preset.label}
+                tooltip={preset.tooltip}
                 onClick={() => {
                   ph?.capture("preset_applied", { preset_name: preset.label })
                   onChange({ ...EMPTY_FILTERS, ...preset.filters })
@@ -373,11 +378,12 @@ export function AdvancedFilters({
   )
 }
 
-function PresetBtn({ label, onClick }: { label: string; onClick: () => void }) {
+function PresetBtn({ label, tooltip, onClick }: { label: string; tooltip?: string; onClick: () => void }) {
   const [hovered, setHovered] = useState(false)
   return (
     <button
       onClick={onClick}
+      title={tooltip}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
