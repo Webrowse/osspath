@@ -91,9 +91,15 @@ function EditForm({ item, contentType, onCancel, onApproved }: EditFormProps) {
     role:        String(item.extracted.role ?? ""),
     name:        String(item.extracted.name ?? ""),
     title:       String(item.extracted.title ?? ""),
+    eco:         String(item.extracted.eco ?? ""),
+    kind:        String(item.extracted.kind ?? ""),
+    status:      String(item.extracted.status ?? ""),
+    day:         String(item.extracted.day ?? ""),
+    month:       String(item.extracted.month ?? ""),
+    meta:        String(item.extracted.meta ?? ""),
     href:        contentType === "jobs" ? extractApplyUrl(item) : String(item.extracted.href ?? item.sourceUrl),
-    note:        stripHtml(String(item.extracted.note ?? item.extracted.description ?? "")),
-    description: stripHtml(String(item.extracted.description ?? item.extracted.note ?? "")),
+    note:        stripHtml(String(item.extracted.note ?? item.extracted.description ?? item.rawText ?? "")),
+    description: stripHtml(String(item.extracted.description ?? item.extracted.note ?? item.rawText ?? "")),
     tags:        (item.extracted.tags as string[] | undefined ?? []).join(", "),
     topics:      (item.extracted.topics as string[] | undefined ?? []).join(", "),
     checkedAt:   new Date().toISOString().split("T")[0],
@@ -177,7 +183,7 @@ function getFieldsForType(type: ContentType): { key: string; label: string; mult
     ]
     case "oss": return [
       { key: "name",   label: "Repo Name" },
-      { key: "eco",    label: "Eco (e.g. CLI · Tooling)" },
+      { key: "eco",    label: "Ecosystem" },
       { key: "href",   label: "GitHub URL" },
       { key: "topics", label: "Topics (comma-sep)" },
       { key: "note",   label: "Contributor note", multiline: true },
@@ -202,6 +208,13 @@ function getFieldsForType(type: ContentType): { key: string; label: string; mult
       { key: "href",     label: "URL" },
       { key: "meta",     label: "Meta (format, cost)" },
       { key: "expiresAt", label: "Expires At" },
+    ]
+    case "portals": return [
+      { key: "name",        label: "Portal Name" },
+      { key: "kind",        label: "Kind (Job Board / Aggregator / …)" },
+      { key: "href",        label: "URL" },
+      { key: "description", label: "Description", multiline: true },
+      { key: "tags",        label: "Tags (comma-sep)" },
     ]
     default: return [
       { key: "name",   label: "Name" },

@@ -1,1 +1,34 @@
-[]
+[
+  {
+    "id": "gh-org-272961631",
+    "type": "companies",
+    "status": "pending",
+    "source": "github-orgs",
+    "sourceUrl": "https://github.com/ultraworkers",
+    "foundAt": "2026-06-08T17:45:44.706Z",
+    "confidence": 0.65,
+    "whyMatched": "1 Rust repos · 193485 total stars",
+    "rawText": "Org: Ultraworkers - ULW\nAbout: The boulder never stops.\nWebsite: https://discord.gg/6ztZB9jvWq\nGitHub: https://github.com/ultraworkers\n1 Rust repos · 193485 total stars",
+    "extracted": {
+      "name": "Ultraworkers",
+      "sector": "Gaming",
+      "href": "https://discord.gg/6ztZB9jvWq"
+    }
+  },
+  {
+    "id": "gh-org-49654870",
+    "type": "companies",
+    "status": "pending",
+    "source": "github-orgs",
+    "sourceUrl": "https://github.com/starship",
+    "foundAt": "2026-06-08T17:45:45.842Z",
+    "confidence": 0.65,
+    "whyMatched": "1 Rust repos · 58155 total stars",
+    "rawText": "Org: Starship Command\nAbout:     ✨🚀✨           ✨     ☄️   ✨      ✨🌌\nWebsite: https://starship.rs\nGitHub: https://github.com/starship\n1 Rust repos · 58155 total stars",
+    "extracted": {
+      "name": "Starship",
+      "sector": "CLI Tools",
+      "href": "https://starship.rs"
+    }
+  }
+]

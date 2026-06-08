@@ -13,6 +13,7 @@ export type OSSPath = {
   beginnerLabel: string
   topics: string[]
   checkedAt: string
+  stars?: number
 }
 
 export const OSS_PATHS = rawOSS as OSSPath[]

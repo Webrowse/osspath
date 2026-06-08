@@ -40,5 +40,89 @@
     "description": "Interviews with library authors, core team members, and ecosystem contributors. Useful for understanding the people behind the crates you use.",
     "href": "https://rustacean-station.org",
     "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Community",
+    "title": "awesome-rust-mentors",
+    "description": "A curated list of Rust mentors tagged by topics of interest to help learners find guidance.",
+    "href": "https://rustbeginners.github.io/awesome-rust-mentors/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Blog",
+    "title": "rustycrate.ru",
+    "description": "Русскоязычный сайт о языке программирования Rust.",
+    "href": "http://rustycrate.ru/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "eu-uso-rust",
+    "description": "Repositório de empresas e projetos 'made in Brazil' usando Rust.",
+    "href": "https://github.com/rust-br/eu-uso-rust",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "RustIndia",
+    "description": "The official Rust India community repository on GitHub for collaboration and resources.",
+    "href": "https://github.com/MozillaIndia/RustIndia",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "Rust Brasil General",
+    "description": "Repositório com informações gerais sobre grupos de Rust no Brasil.",
+    "href": "https://github.com/rust-br/general",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Blog",
+    "title": "RustFest Speakers Guide",
+    "description": "A comprehensive guide for speakers at Rust conferences, covering talk preparation, submission, and delivery.",
+    "href": "https://rustfesteu.github.io/speakers-guide/index.html",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "awesome-rust-mentors",
+    "description": "A list of Rust language mentors tagged by topics of interest.",
+    "href": "https://rustbeginners.github.io/awesome-rust-mentors/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Blog",
+    "title": "rustycrate.ru",
+    "description": "Русскоязычный сайт о языке программирования Rust.",
+    "href": "http://rustycrate.ru/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "eu-uso-rust",
+    "description": "Repositório de empresas e projetos brasileiros que usam Rust.",
+    "href": "https://github.com/rust-br/eu-uso-rust",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "RustIndia",
+    "description": "The official Rust India community repository on GitHub for collaboration and resources.",
+    "href": "https://github.com/MozillaIndia/RustIndia",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Community",
+    "title": "Rust Brasil General",
+    "description": "Repositório com informações gerais sobre grupos de Rust no Brasil.",
+    "href": "https://github.com/rust-br/general",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "kind": "Blog",
+    "title": "RustFest Speakers Guide",
+    "description": "A comprehensive guide for speakers at Rust conferences, covering talk preparation, submission, and delivery.",
+    "href": "https://rustfesteu.github.io/speakers-guide/index.html",
+    "checkedAt": "2026-06-08"
   }
 ]

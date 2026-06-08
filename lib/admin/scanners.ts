@@ -1,7 +1,8 @@
 "use server"
 
-import { addPendingItems } from "./storage"
-import { extractWithDeepSeek } from "./deepseek"
+import { addPendingItems, readPending, readContent, readRejected } from "./storage"
+import { extractWithDeepSeek, classifyReposWithDeepSeek } from "./deepseek"
+import type { RepoInput } from "./deepseek"
 import {
   classifyRustSignal,
   scoreJobText,
@@ -9,6 +10,15 @@ import {
   QUEUE_THRESHOLD,
 } from "./prefilter"
 import type { PendingItem, ScanLog } from "./types"
+import { auth } from "@/lib/auth"
+
+async function requireAdmin() {
+  const session = await auth()
+  const adminEmail = process.env.ADMIN_EMAIL
+  if (!adminEmail || session?.user?.email !== adminEmail) {
+    throw new Error("Unauthorized")
+  }
+}
 
 // ── HN Who Is Hiring ──────────────────────────────────────────────────────────
 
@@ -22,7 +32,7 @@ async function findLatestHNHiringPost(): Promise<number | null> {
   try {
     const res = await fetch(
       "https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&query=hiring&hitsPerPage=1",
-      { next: { revalidate: 0 } }
+      { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
     )
     const data = await res.json()
     const hit = data?.hits?.[0]
@@ -33,6 +43,9 @@ async function findLatestHNHiringPost(): Promise<number | null> {
 }
 
 export async function scanHNHiring(useAI = false): Promise<ScanLog> {
+  await requireAdmin()
+  // Always use AI when key is present — checkbox is a manual override only
+  const shouldUseAI = useAI || !!process.env.DEEPSEEK_API_KEY
   const log: ScanLog = {
     source: "hn-hiring",
     startedAt: new Date().toISOString(),
@@ -55,15 +68,32 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
   try {
     const res = await fetch(
       `https://hn.algolia.com/api/v1/search?tags=comment,story_${storyId}&query=rust&hitsPerPage=100&attributesToRetrieve=objectID,comment_text,created_at`,
-      { next: { revalidate: 0 } }
+      { signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } }
     )
     const data = await res.json()
     const hits: HNSearchHit[] = data?.hits ?? []
     log.found = hits.length
     log.stages!.fetched = hits.length
 
+    // Build dedup set: pending IDs + already processed (approved or rejected) IDs
+    const processedIds = new Set<string>()
+    try {
+      for (const item of readPending("jobs")) processedIds.add(item.id)
+      for (const item of readRejected("jobs")) processedIds.add(item.id)
+    } catch { /* non-fatal */ }
+
+    // Also dedup by href against published content
+    const publishedHrefs = new Set<string>()
+    try {
+      for (const item of readContent("jobs")) {
+        const href = String(item.href ?? "")
+        if (href) publishedHrefs.add(href)
+      }
+    } catch { /* non-fatal */ }
+
     let rustFiltered = 0
     let scoreFiltered = 0
+    let dupFiltered = 0
     const pendingItems: PendingItem[] = []
 
     for (const hit of hits) {
@@ -84,20 +114,30 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
       }
 
       const id = `hn-${hit.objectID}`
+      if (processedIds.has(id)) { dupFiltered++; continue }
+
       const sourceUrl = `https://news.ycombinator.com/item?id=${hit.objectID}`
 
       let extracted: Record<string, unknown>
-      if (useAI && process.env.DEEPSEEK_API_KEY) {
+      if (shouldUseAI) {
         const result = await extractWithDeepSeek("jobs", text)
-        if (result.ok && result.data) {
-          extracted = result.data
-        } else {
+        if (!result.ok || !result.data) {
           log.notes!.push(`AI extract failed for ${id}: ${result.error?.slice(0, 80)}`)
           extracted = extractMinimalJob(text)
+        } else if ((result.data as any).skip === true) {
+          // DeepSeek determined this is not a Rust-primary role
+          dupFiltered++
+          continue
+        } else {
+          extracted = result.data
         }
       } else {
         extracted = extractMinimalJob(text)
       }
+
+      // Dedup by href against already-published jobs
+      const extractedHref = String(extracted.href ?? "")
+      if (extractedHref && publishedHrefs.has(extractedHref)) { dupFiltered++; continue }
 
       pendingItems.push({
         id,
@@ -116,6 +156,7 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
 
     log.stages!.rustFiltered  = rustFiltered
     log.stages!.scoreFiltered = scoreFiltered
+    log.stages!.dupFiltered   = dupFiltered
     log.stages!.queued        = pendingItems.length
     log.added   = addPendingItems("jobs", pendingItems)
     log.skipped = log.found - pendingItems.length
@@ -136,6 +177,8 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
 // ── TWIR Scanner ──────────────────────────────────────────────────────────────
 
 export async function scanTWIR(useAI = false): Promise<ScanLog> {
+  await requireAdmin()
+  const shouldUseAI = useAI || !!process.env.DEEPSEEK_API_KEY
   const log: ScanLog = {
     source: "twir",
     startedAt: new Date().toISOString(),
@@ -149,6 +192,7 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
 
   try {
     const rssRes = await fetch("https://this-week-in-rust.org/rss.xml", {
+      signal: AbortSignal.timeout(15_000),
       next: { revalidate: 0 },
     })
     const rssText = await rssRes.text()
@@ -163,7 +207,7 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
 
     const issueUrl = linkMatch[1]
     log.notes!.push(`Latest issue: ${issueUrl}`)
-    const htmlRes = await fetch(issueUrl, { next: { revalidate: 0 } })
+    const htmlRes = await fetch(issueUrl, { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } })
     const html = await htmlRes.text()
 
     // Extract the Jobs section by its h2 id="jobs" anchor
@@ -228,7 +272,7 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
       }
 
       let extracted: Record<string, unknown>
-      if (useAI && process.env.DEEPSEEK_API_KEY) {
+      if (shouldUseAI) {
         const result = await extractWithDeepSeek("jobs", text)
         if (result.ok && result.data) extracted = result.data
         else extracted = extractMinimalJob(text)
@@ -267,6 +311,7 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
 // ── GitHub OSS Scanner ────────────────────────────────────────────────────────
 
 export async function scanGitHubOSS(): Promise<ScanLog> {
+  await requireAdmin()
   const log: ScanLog = {
     source: "github-oss",
     startedAt: new Date().toISOString(),
@@ -278,111 +323,140 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
     notes: [],
   }
 
-  // Time window: repos pushed in the last 90 days
   const since = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0]
 
-  // Use the `good-first-issues:>5` qualifier (NOT `label:`, which doesn't work
-  // for repository search). This is GitHub's standardised metric for repos that
-  // actively curate beginner issues.
-  const queries = [
+  // Dedup against already-known items
+  const existingIds = new Set<string>()
+  try {
+    for (const item of readPending("oss")) existingIds.add(item.id)
+    for (const item of readContent("oss")) {
+      const href = String(item.href ?? "")
+      if (href) existingIds.add(`gh-${href}`)
+    }
+  } catch { /* non-fatal */ }
+
+  const rawRepos: RepoInput[] = []
+  const seenIds = new Set<number>()
+
+  // ── 1. Search queries: good-first-issues, help-wanted, star ranges ────────
+  const searchQueries = [
     `language:Rust+good-first-issues:>5+pushed:>${since}`,
-    // Fallback: any actively pushed Rust repo with help-wanted-issues
     `language:Rust+help-wanted-issues:>3+pushed:>${since}`,
+    `language:Rust+stars:20..500+pushed:>${since}`,
+    `language:Rust+stars:501..2000+pushed:>${since}`,
   ]
 
-  try {
-    const seen = new Set<number>()
-    const pendingItems: PendingItem[] = []
-    let totalFetched = 0
-    let lowQualityFiltered = 0
+  for (const q of searchQueries) {
+    try {
+      const data = await ghFetch(
+        `https://api.github.com/search/repositories?q=${q}&sort=updated&per_page=50`
+      ) as { items?: RepoInput[] }
+      const items = data?.items ?? []
+      log.stages![`search_${q.slice(0, 30)}`] = items.length
+      for (const r of items) {
+        if (seenIds.has(r.id)) continue
+        if ((r as any).archived || (r as any).disabled) continue
+        if (r.stargazers_count < 10) continue
+        seenIds.add(r.id)
+        rawRepos.push(r)
+      }
+    } catch (e) {
+      log.errors.push(`Search failed (${q.slice(0, 40)}): ${String(e)}`)
+    }
+  }
 
-    for (let qi = 0; qi < queries.length && pendingItems.length < 15; qi++) {
-      const q = queries[qi]
-      log.notes!.push(`Query ${qi + 1}: ${decodeURIComponent(q)}`)
+  // ── 2. Org scans (parallel) ───────────────────────────────────────────────
+  const cutoff = new Date(Date.now() - 90 * 86400000)
+  const orgResults = await Promise.allSettled(
+    RUST_ORGS.map((org) =>
+      ghFetch(`https://api.github.com/orgs/${org}/repos?type=public&sort=pushed&per_page=50`)
+        .then((data) => ({ org, repos: data as RepoInput[] }))
+    )
+  )
+  for (const result of orgResults) {
+    if (result.status === "rejected") {
+      log.errors.push(`Org scan failed: ${String(result.reason)}`)
+      continue
+    }
+    const { org, repos } = result.value
+    let orgAdded = 0
+    for (const r of repos) {
+      if (seenIds.has(r.id)) continue
+      if ((r as any).language && (r as any).language !== "Rust") continue
+      if (r.stargazers_count < 10) continue
+      if (new Date(r.pushed_at) < cutoff) continue
+      if ((r as any).archived || (r as any).disabled) continue
+      seenIds.add(r.id)
+      rawRepos.push(r)
+      orgAdded++
+    }
+    log.stages![`org_${org}`] = orgAdded
+  }
 
-      const res = await fetch(
-        `https://api.github.com/search/repositories?q=${q}&sort=updated&per_page=25`,
-        {
-          headers: { Accept: "application/vnd.github.v3+json" },
-          next: { revalidate: 0 },
-        }
-      )
+  // Cap before DeepSeek: top 60 by stars
+  rawRepos.sort((a, b) => b.stargazers_count - a.stargazers_count)
+  const toClassify = rawRepos.slice(0, 60)
 
-      if (!res.ok) {
-        const body = await res.text().catch(() => "")
-        if (res.status === 403) {
-          log.errors.push(
-            `GitHub rate-limited (403). Set GITHUB_TOKEN in .env.local for higher limits.`
-          )
-        } else {
-          log.errors.push(`GitHub API ${res.status}: ${body.slice(0, 200)}`)
-        }
+  log.found = rawRepos.length
+  log.notes!.push(`${rawRepos.length} unique repos collected, classifying top ${toClassify.length} with DeepSeek`)
+
+  if (toClassify.length === 0) {
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+
+  // ── 3. DeepSeek batch classification ─────────────────────────────────────
+  const BATCH = 15
+  const pendingItems: PendingItem[] = []
+  let dsSkipped = 0
+  let dsErrors = 0
+
+  for (let i = 0; i < toClassify.length; i += BATCH) {
+    const batch = toClassify.slice(i, i + BATCH)
+    const { results, error } = await classifyReposWithDeepSeek(batch)
+    if (error) {
+      log.errors.push(`DeepSeek batch ${i / BATCH + 1}: ${error}`)
+      dsErrors += batch.length
+    }
+
+    for (let j = 0; j < batch.length; j++) {
+      const repo = batch[j]
+      const cls = results[j]
+      const id = `gh-${repo.id}`
+
+      if (existingIds.has(id)) { dsSkipped++; continue }
+      if (!cls.queue) {
+        dsSkipped++
+        log.notes!.push(`Skipped ${repo.full_name}: ${cls.skipReason}`)
         continue
       }
 
-      const data = await res.json()
-      const repos = data?.items ?? []
-      totalFetched += repos.length
-      log.stages![`query${qi + 1}Returned`] = repos.length
+      const whyParts: string[] = []
+      if (cls.ecosystem.length > 0) whyParts.push(cls.ecosystem.join(" · "))
+      whyParts.push(cls.activityTier)
+      if (cls.beginnerFriendly) whyParts.push("beginner-friendly")
+      whyParts.push(`${repo.stargazers_count} stars`)
 
-      for (const repo of repos) {
-        if (seen.has(repo.id)) continue
-        seen.add(repo.id)
-
-        // Quality filter: skip repos that look low-quality or stale
-        if (repo.archived || repo.disabled) { lowQualityFiltered++; continue }
-        if (!repo.has_issues) { lowQualityFiltered++; continue }
-        if (repo.stargazers_count < 50) { lowQualityFiltered++; continue }
-        if (repo.open_issues_count > 2000) { lowQualityFiltered++; continue } // overwhelming backlog
-
-        const goodFirst = repo.good_first_issues_count ?? 0
-        const helpWanted = repo.help_wanted_issues_count ?? 0
-
-        const why: string[] = []
-        if (goodFirst > 0) why.push(`${goodFirst} good-first-issues`)
-        if (helpWanted > 0) why.push(`${helpWanted} help-wanted issues`)
-        why.push(`${repo.stargazers_count} stars`)
-        if (repo.has_wiki) why.push("docs/wiki")
-
-        pendingItems.push({
-          id: `gh-${repo.id}`,
-          type: "oss",
-          status: "pending",
-          source: "github-oss",
-          sourceUrl: repo.html_url,
-          foundAt: new Date().toISOString(),
-          confidence: 0.6,
-          whyMatched: why.join(" · "),
-          rawText: `${repo.full_name}: ${repo.description ?? ""}`,
-          extracted: {
-            name: repo.name,
-            eco: inferEco(repo.topics ?? [], repo.description ?? ""),
-            href: repo.html_url,
-            note: (repo.description ?? "").slice(0, 180),
-            topics: (repo.topics ?? []).slice(0, 4),
-            maintainerFriendliness: Math.min(0.5 + helpWanted / 100, 0.95),
-            issueQuality: Math.min(0.5 + goodFirst / 50, 0.95),
-            beginnerSuitability: Math.min(0.4 + goodFirst / 30, 0.95),
-            maintainerLabel: helpWanted > 0 ? `${helpWanted} help-wanted` : "Active maintainer",
-            issueLabel: goodFirst > 0 ? `${goodFirst} good-first-issues` : "Issues labelled",
-            beginnerLabel: goodFirst >= 10 ? "Many beginner issues" : "Some beginner issues",
-          },
-        })
-      }
+      pendingItems.push({
+        id,
+        type: "oss",
+        status: "pending",
+        source: "github-oss",
+        sourceUrl: repo.html_url,
+        foundAt: new Date().toISOString(),
+        confidence: cls.beginnerSuitability,
+        whyMatched: whyParts.join(" · "),
+        rawText: `${repo.full_name}: ${repo.description ?? ""}`,
+        extracted: cls as unknown as Record<string, unknown>,
+      })
     }
-
-    log.found = totalFetched
-    log.stages!.lowQualityFiltered = lowQualityFiltered
-    log.stages!.queued = pendingItems.length
-    log.added = addPendingItems("oss", pendingItems)
-    log.skipped = totalFetched - pendingItems.length
-
-    if (pendingItems.length === 0 && totalFetched === 0 && log.errors.length === 0) {
-      log.notes!.push("No repos returned by either query. Try widening the time window.")
-    }
-  } catch (e) {
-    log.errors.push(`GitHub scan failed: ${String(e)}`)
   }
+
+  log.stages!.deepseekSkipped = dsSkipped
+  log.stages!.deepseekErrors  = dsErrors
+  log.stages!.queued          = pendingItems.length
+  log.added   = addPendingItems("oss", pendingItems)
+  log.skipped = toClassify.length - pendingItems.length
 
   log.finishedAt = new Date().toISOString()
   return log
@@ -447,15 +521,526 @@ function estimateConfidence(extracted: Record<string, unknown>): number {
   return Math.min(score, 1)
 }
 
-function inferEco(topics: string[], description: string): string {
-  const lc = (topics.join(" ") + " " + description).toLowerCase()
-  if (lc.includes("tui") || lc.includes("terminal")) return "UI · TUI"
-  if (lc.includes("cli") || lc.includes("command")) return "CLI · Tooling"
-  if (lc.includes("embedded") || lc.includes("no_std")) return "Embedded · no_std"
-  if (lc.includes("parser") || lc.includes("parsing")) return "Parsing · Libraries"
-  if (lc.includes("async") || lc.includes("tokio")) return "Async · Runtime"
-  if (lc.includes("wasm") || lc.includes("webassembly")) return "WASM · Runtime"
-  if (lc.includes("crypto") || lc.includes("security")) return "Security · Crypto"
-  if (lc.includes("game") || lc.includes("bevy")) return "Game · Engine"
-  return "Libraries · General"
+// ── Shared HN story helper ────────────────────────────────────────────────────
+
+type HNStoryHit = {
+  objectID: string
+  title?: string
+  url?: string
+  created_at?: string
 }
+
+async function hnSearch(query: string, hitsPerPage = 10): Promise<HNStoryHit[]> {
+  try {
+    const res = await fetch(
+      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=${hitsPerPage}`,
+      { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
+    )
+    const data = await res.json()
+    return data?.hits ?? []
+  } catch {
+    return []
+  }
+}
+
+// ── Grants Scanner ────────────────────────────────────────────────────────────
+
+// Rejects placeholder/hallucinated URLs DeepSeek sometimes invents
+function isRealGrantUrl(href: unknown, fallback: string): boolean {
+  if (!href || typeof href !== "string") return false
+  if (!href.startsWith("http")) return false
+  if (href.includes("example.com")) return false
+  if (href.includes("ycombinator.com")) return false
+  if (href === fallback) return false
+  return true
+}
+
+// Known Rust grant programs — seeded directly, no scraping needed
+const KNOWN_GRANTS = [
+  {
+    id: "grant-rustfound-community",
+    name: "Rust Foundation Community Grants",
+    kind: "Grant",
+    description: "Funded work on Rust libraries, tools, and education. Open to individuals and teams worldwide.",
+    status: "Open",
+    href: "https://foundation.rust-lang.org/grants/",
+  },
+  {
+    id: "grant-rustfound-fellowships",
+    name: "Rust Foundation Fellowships",
+    kind: "Grant",
+    description: "Paid fellowships for contributors who want to work full-time on the Rust compiler, toolchain, or ecosystem.",
+    status: "Open",
+    href: "https://foundation.rust-lang.org/grants/fellowships/",
+  },
+]
+
+export async function scanGrants(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "grants", startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  const existingIds = new Set(readPending("grants").map(i => i.id))
+  const existingHrefs = new Set(readContent("grants").map(i => String(i.href ?? "")))
+  const pendingItems: PendingItem[] = []
+
+  // ── 1. Seeded known programs ──────────────────────────────────────────────
+  for (const grant of KNOWN_GRANTS) {
+    if (existingIds.has(grant.id) || existingHrefs.has(grant.href)) { log.skipped++; continue }
+    pendingItems.push({
+      id: grant.id, type: "grants", status: "pending",
+      source: "grant-seed", sourceUrl: grant.href,
+      foundAt: new Date().toISOString(),
+      confidence: 0.9, whyMatched: "Known Rust Foundation grant program",
+      rawText: `${grant.name}: ${grant.description}`,
+      extracted: grant,
+    })
+  }
+  log.stages!.seeded = pendingItems.length
+
+  // ── 2. Scrape foundation.rust-lang.org for grant/bounty/fellowship articles ─
+  const articleLinks: { title: string; href: string }[] = []
+  for (const pageUrl of ["https://foundation.rust-lang.org/grants/", "https://foundation.rust-lang.org/news/"]) {
+    try {
+      const res = await fetch(pageUrl, {
+        signal: AbortSignal.timeout(15_000),
+        headers: { "User-Agent": "jobs.adarshrust.com/scanner" },
+        next: { revalidate: 0 },
+      })
+      const html = await res.text()
+      const linkRe = /<a\s[^>]*href="([^"]+)"[^>]*>([^<]{10,120})<\/a>/gi
+      let m: RegExpExecArray | null
+      while ((m = linkRe.exec(html)) !== null) {
+        const [, href, rawTitle] = m
+        const title = rawTitle.trim().replace(/\s+/g, " ")
+        const lower = (href + title).toLowerCase()
+        if (!lower.includes("grant") && !lower.includes("bounty") && !lower.includes("fellow")) continue
+        const full = href.startsWith("http") ? href : `https://foundation.rust-lang.org${href}`
+        if (!articleLinks.find(l => l.href === full)) articleLinks.push({ title, href: full })
+      }
+    } catch (e) {
+      log.errors.push(`Scrape ${pageUrl}: ${String(e)}`)
+    }
+  }
+
+  log.found = KNOWN_GRANTS.length + articleLinks.length
+  log.stages!.articlesFound = articleLinks.length
+  log.notes!.push(`${articleLinks.length} grant-related articles found on foundation.rust-lang.org`)
+
+  // ── 3. DeepSeek-extract each article (with skip guard) ───────────────────
+  for (const article of articleLinks.slice(0, 10)) {
+    const id = `foundation-${Buffer.from(article.href).toString("base64").slice(0, 16)}`
+    if (existingIds.has(id) || existingHrefs.has(article.href)) { log.skipped++; continue }
+
+    const text = `${article.title}\nURL: ${article.href}`
+    const result = await extractWithDeepSeek("grants", text)
+
+    // DeepSeek returns {skip:true} when content isn't actually a grant
+    if (!result.ok || !result.data || (result.data as any).skip === true) { log.skipped++; continue }
+
+    const rawHref = String(result.data.href ?? "")
+    const resolvedHref = isRealGrantUrl(rawHref, article.href) ? rawHref : article.href
+
+    pendingItems.push({
+      id, type: "grants", status: "pending",
+      source: "foundation-news", sourceUrl: article.href,
+      foundAt: new Date().toISOString(),
+      confidence: 0.75, whyMatched: article.title,
+      rawText: text,
+      extracted: { ...result.data, href: resolvedHref },
+    })
+  }
+
+  log.stages!.queued = pendingItems.length
+  log.added = addPendingItems("grants", pendingItems)
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Pulse Scanner ─────────────────────────────────────────────────────────────
+
+export async function scanPulse(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "pulse", startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  // Community resource repos (newsletter, forum, podcast, blog) — NOT filtered by language
+  // because pulse resources often live in non-Rust codebases
+  const ghQueries = [
+    "topic:rust-newsletter",
+    "topic:rust-community",
+    "rust+newsletter+in:name",
+    "rust+podcast+in:name",
+    "rust+blog+resources+in:name,description",
+  ]
+
+  const repos: (RepoInput & { homepage?: string })[] = []
+  const seenIds = new Set<number>()
+
+  for (const q of ghQueries) {
+    try {
+      const data = await ghFetch(
+        `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&per_page=10`
+      ) as { items?: (RepoInput & { homepage?: string })[] }
+      const items = data?.items ?? []
+      log.stages![`gh_${q.slice(0, 20)}`] = items.length
+      for (const r of items) {
+        if (!seenIds.has(r.id) && r.stargazers_count >= 20) {
+          seenIds.add(r.id); repos.push(r)
+        }
+      }
+    } catch (e) {
+      log.errors.push(`GitHub "${q.slice(0, 30)}": ${String(e)}`)
+    }
+  }
+
+  log.found = repos.length
+  const existingIds = new Set(readPending("pulse").map(i => i.id))
+  const pendingItems: PendingItem[] = []
+
+  for (const repo of repos) {
+    const id = `gh-pulse-${repo.id}`
+    if (existingIds.has(id)) { log.skipped++; continue }
+
+    const href = repo.homepage || repo.html_url
+    const text = [
+      `${repo.name}: ${repo.description ?? ""}`,
+      `URL: ${href}`,
+      `GitHub: ${repo.html_url}`,
+    ].join("\n")
+
+    const result = await extractWithDeepSeek("pulse", text)
+    if (!result.ok || !result.data) { log.skipped++; continue }
+
+    pendingItems.push({
+      id, type: "pulse", status: "pending",
+      source: "github-pulse", sourceUrl: repo.html_url,
+      foundAt: new Date().toISOString(),
+      confidence: 0.6, whyMatched: `${repo.stargazers_count}★ · community resource`,
+      rawText: text,
+      extracted: { ...result.data, href: result.data.href || href },
+    })
+  }
+
+  log.stages!.queued = pendingItems.length
+  log.added = addPendingItems("pulse", pendingItems)
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Events Scanner ────────────────────────────────────────────────────────────
+
+export async function scanEvents(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "events", startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  const queries = [
+    "RustConf 2025",
+    "EuroRust 2025",
+    "Oxidize conference Rust",
+    "Rust Nation conference",
+    "Rust workshop conference 2025",
+  ]
+
+  const stories: HNStoryHit[] = []
+  const seenIds = new Set<string>()
+
+  for (const q of queries) {
+    const hits = await hnSearch(q, 5)
+    log.stages![`hn_${q.slice(0, 15)}`] = hits.length
+    for (const h of hits) {
+      if (!seenIds.has(h.objectID)) { seenIds.add(h.objectID); stories.push(h) }
+    }
+  }
+
+  log.found = stories.length
+  const existingIds = new Set(readPending("events").map(i => i.id))
+  const pendingItems: PendingItem[] = []
+
+  for (const story of stories) {
+    const id = `hn-event-${story.objectID}`
+    if (existingIds.has(id)) { log.skipped++; continue }
+
+    const sourceUrl = `https://news.ycombinator.com/item?id=${story.objectID}`
+    const text = [story.title, story.url ? `URL: ${story.url}` : ""].filter(Boolean).join("\n")
+
+    const result = await extractWithDeepSeek("events", text)
+    if (!result.ok || !result.data) { log.skipped++; continue }
+
+    pendingItems.push({
+      id, type: "events", status: "pending",
+      source: "hn-events", sourceUrl,
+      foundAt: story.created_at ?? new Date().toISOString(),
+      confidence: 0.65, whyMatched: story.title ?? "",
+      rawText: text,
+      extracted: { ...result.data, href: result.data.href || story.url || sourceUrl },
+    })
+  }
+
+  log.stages!.queued = pendingItems.length
+  log.added = addPendingItems("events", pendingItems)
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Portals Scanner ───────────────────────────────────────────────────────────
+
+// Direct Rust pages on major job boards. These are the canonical filtered URLs —
+// not the homepage, specifically the Rust search/filter landing page.
+const PORTAL_SEEDS = [
+  {
+    name: "LinkedIn — Rust Developer Jobs",
+    kind: "General",
+    href: "https://www.linkedin.com/jobs/rust-developer-jobs/",
+    description: "LinkedIn filtered for Rust developer roles. Largest professional network, high volume of direct employer postings.",
+    tags: ["general", "high-volume"],
+  },
+  {
+    name: "Indeed — Rust Developer Jobs",
+    kind: "General",
+    href: "https://www.indeed.com/q-rust-developer-jobs.html",
+    description: "Indeed filtered for Rust developer roles. Broad reach across startups and enterprise.",
+    tags: ["general", "high-volume"],
+  },
+  {
+    name: "Glassdoor — Rust Developer Jobs",
+    kind: "General",
+    href: "https://www.glassdoor.com/Job/rust-developer-jobs-SRCH_KO0,19.htm",
+    description: "Glassdoor Rust jobs with salary transparency and company culture data.",
+    tags: ["general", "salary-data"],
+  },
+  {
+    name: "We Work Remotely — Rust",
+    kind: "Remote-only",
+    href: "https://weworkremotely.com/remote-rust-jobs",
+    description: "Dedicated Rust section on one of the largest remote job boards.",
+    tags: ["remote-only"],
+  },
+  {
+    name: "Arc.dev — Remote Rust Jobs",
+    kind: "Remote-only",
+    href: "https://arc.dev/remote-jobs/rust",
+    description: "Vetted remote Rust developer roles. Screened candidates and employers.",
+    tags: ["remote-only", "vetted"],
+  },
+  {
+    name: "Hired — Rust Engineering",
+    kind: "Aggregator",
+    href: "https://hired.com/jobs/rust",
+    description: "Hired's Rust engineering listings. Tech-focused with salary transparency and company bids.",
+    tags: ["aggregator", "salary-data"],
+  },
+]
+
+export async function scanPortals(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "portals", startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  const existingIds = new Set(readPending("portals").map(i => i.id))
+  const existingHrefs = new Set(readContent("portals").map(i => String(i.href ?? "")))
+  const pendingItems: PendingItem[] = []
+
+  // Add seeded portals that aren't already published or pending
+  for (const portal of PORTAL_SEEDS) {
+    const id = `portal-seed-${portal.name.replace(/\W+/g, "-").toLowerCase()}`
+    if (existingIds.has(id) || existingHrefs.has(portal.href)) { log.skipped++; continue }
+
+    pendingItems.push({
+      id, type: "portals", status: "pending",
+      source: "portal-seed", sourceUrl: portal.href,
+      foundAt: new Date().toISOString(),
+      confidence: 0.9, whyMatched: `Known Rust job portal — ${portal.kind}`,
+      rawText: `${portal.name}: ${portal.description}`,
+      extracted: portal,
+    })
+  }
+
+  log.stages!.seeded = pendingItems.length
+  log.notes!.push(`${pendingItems.length} known portals queued`)
+
+  // Search HN for any additional portals people discuss
+  const hnHits = await hnSearch("rust jobs where apply remote", 10)
+  const hnCandidates = hnHits.filter(h => h.url && !h.url.includes("ycombinator"))
+  log.stages!.hnCandidates = hnCandidates.length
+
+  for (const story of hnCandidates.slice(0, 5)) {
+    const id = `hn-portal-${story.objectID}`
+    if (existingIds.has(id)) { log.skipped++; continue }
+
+    const text = [story.title, `URL: ${story.url}`].join("\n")
+    const result = await extractWithDeepSeek("portals", text)
+    if (!result.ok || !result.data) continue
+
+    pendingItems.push({
+      id, type: "portals", status: "pending",
+      source: "hn-portals",
+      sourceUrl: `https://news.ycombinator.com/item?id=${story.objectID}`,
+      foundAt: story.created_at ?? new Date().toISOString(),
+      confidence: 0.5, whyMatched: story.title ?? "",
+      rawText: text,
+      extracted: { ...result.data, href: result.data.href || story.url },
+    })
+  }
+
+  log.found = PORTAL_SEEDS.length + hnCandidates.length
+  log.stages!.queued = pendingItems.length
+  log.added = addPendingItems("portals", pendingItems)
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Companies Scanner ─────────────────────────────────────────────────────────
+
+type GHOrgDetail = {
+  id: number
+  login: string
+  name?: string
+  html_url: string
+  blog?: string
+  description?: string
+  public_repos?: number
+}
+
+export async function scanCompanies(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "companies", startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  // Find high-star Rust repos, group by owning org to discover companies
+  const since = new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]
+  const rawRepos: RepoInput[] = []
+  const seenRepoIds = new Set<number>()
+
+  try {
+    for (const q of [
+      `language:Rust+stars:>500+pushed:>${since}+fork:false`,
+      `language:Rust+stars:>100+pushed:>${since}+fork:false`,
+    ]) {
+      const data = await ghFetch(
+        `https://api.github.com/search/repositories?q=${q}&sort=stars&per_page=50`
+      ) as { items?: RepoInput[] }
+      for (const r of data.items ?? []) {
+        if (!seenRepoIds.has(r.id)) { seenRepoIds.add(r.id); rawRepos.push(r) }
+      }
+    }
+  } catch (e) {
+    log.errors.push(`GitHub search: ${String(e)}`)
+  }
+
+  log.found = rawRepos.length
+  log.stages!.reposFound = rawRepos.length
+
+  // Group by org, only Organization owners (not personal repos)
+  const orgToRepos = new Map<string, { repos: RepoInput[]; stars: number }>()
+  for (const repo of rawRepos) {
+    const owner = (repo as any).owner
+    if (!owner || owner.type !== "Organization") continue
+    const login = owner.login as string
+    const entry = orgToRepos.get(login) ?? { repos: [], stars: 0 }
+    entry.repos.push(repo)
+    entry.stars += repo.stargazers_count
+    orgToRepos.set(login, entry)
+  }
+
+  log.stages!.orgsFound = orgToRepos.size
+
+  // Top 15 orgs by total Rust stars
+  const topOrgs = Array.from(orgToRepos.entries())
+    .sort((a, b) => b[1].stars - a[1].stars)
+    .slice(0, 15)
+    .map(([login, { repos, stars }]) => ({ login, repoCount: repos.length, stars }))
+
+  log.notes!.push(`Top ${topOrgs.length} orgs selected out of ${orgToRepos.size}`)
+
+  // Fetch org details in parallel
+  const orgDetailResults = await Promise.allSettled(
+    topOrgs.map(({ login }) =>
+      ghFetch(`https://api.github.com/orgs/${login}`).then(d => d as GHOrgDetail)
+    )
+  )
+
+  const existingIds = new Set(readPending("companies").map(i => i.id))
+  const existingNames = new Set(readContent("companies").map(i => String(i.name ?? "").toLowerCase()))
+  const pendingItems: PendingItem[] = []
+
+  for (let i = 0; i < topOrgs.length; i++) {
+    const { login, repoCount, stars } = topOrgs[i]
+    const result = orgDetailResults[i]
+
+    if (result.status === "rejected") {
+      log.errors.push(`Org ${login}: ${String(result.reason)}`)
+      continue
+    }
+
+    const org = result.value
+    const id = `gh-org-${org.id}`
+    const displayName = org.name ?? org.login
+
+    if (existingIds.has(id) || existingNames.has(displayName.toLowerCase())) {
+      log.skipped++; continue
+    }
+
+    const href = org.blog?.startsWith("http") ? org.blog : org.html_url
+    const text = [
+      `Org: ${displayName}`,
+      org.description ? `About: ${org.description}` : "",
+      org.blog ? `Website: ${org.blog}` : "",
+      `GitHub: ${org.html_url}`,
+      `${repoCount} Rust repos · ${stars} total stars`,
+    ].filter(Boolean).join("\n")
+
+    const aiResult = await extractWithDeepSeek("companies", text)
+    const extracted = aiResult.ok && aiResult.data
+      ? { ...aiResult.data, href: (aiResult.data.href as string)?.startsWith("http") ? aiResult.data.href : href }
+      : { name: displayName, sector: "Open Source", href }
+
+    pendingItems.push({
+      id, type: "companies", status: "pending",
+      source: "github-orgs", sourceUrl: org.html_url,
+      foundAt: new Date().toISOString(),
+      confidence: 0.65,
+      whyMatched: `${repoCount} Rust repos · ${stars} total stars`,
+      rawText: text,
+      extracted,
+    })
+  }
+
+  log.stages!.queued = pendingItems.length
+  log.added = addPendingItems("companies", pendingItems)
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── GitHub shared helpers ─────────────────────────────────────────────────────
+
+const RUST_ORGS = [
+  "tokio-rs", "hyperium", "embassy-rs", "rustwasm", "bytecodealliance",
+  "tauri-apps", "bevyengine", "linebender", "rust-lang", "rust-cli",
+  "diesel-rs", "smol-rs",
+]
+
+const GH_HEADERS = {
+  Accept: "application/vnd.github.v3+json",
+  "User-Agent": "jobs.adarshrust.com/scanner",
+  ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
+}
+
+async function ghFetch(url: string): Promise<unknown> {
+  const res = await fetch(url, { headers: GH_HEADERS, signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } })
+  if (res.status === 403) throw new Error("GitHub rate-limited (403). Set GITHUB_TOKEN in .env.local.")
+  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`)
+  return res.json()
+}
+

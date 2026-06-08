@@ -1,1 +1,146 @@
-[]
+[
+  {
+    "id": "hn-grant-30889273",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=30889273",
+    "foundAt": "2022-04-02T16:11:45Z",
+    "confidence": 0.55,
+    "whyMatched": "Rust Foundation Launches Rust Community Grants Program",
+    "rawText": "Rust Foundation Launches Rust Community Grants Program\nURL: https://www.zdnet.com/article/rust-foundation-opens-up-rust-community-grants-program/",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Rust Community Grants Program",
+      "description": "The Rust Foundation launches a grants program to support the Rust community.",
+      "status": "Open",
+      "href": "https://www.zdnet.com/article/rust-foundation-opens-up-rust-community-grants-program/"
+    }
+  },
+  {
+    "id": "hn-grant-30873096",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=30873096",
+    "foundAt": "2022-03-31T22:47:42Z",
+    "confidence": 0.55,
+    "whyMatched": "Rust Foundation Launches Rust Community Grants Program",
+    "rawText": "Rust Foundation Launches Rust Community Grants Program\nURL: https://www.zdnet.com/article/rust-foundation-opens-up-rust-community-grants-program/",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Rust Community Grants Program",
+      "description": "The Rust Foundation launches a grants program to support the Rust community.",
+      "status": "Open",
+      "href": "https://www.zdnet.com/article/rust-foundation-opens-up-rust-community-grants-program/"
+    }
+  },
+  {
+    "id": "hn-grant-34265133",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=34265133",
+    "foundAt": "2023-01-05T19:26:11Z",
+    "confidence": 0.55,
+    "whyMatched": "Rust Foundation – Introducing Our Newest Project Grantees",
+    "rawText": "Rust Foundation – Introducing Our Newest Project Grantees\nURL: https://foundation.rust-lang.org/news/community-grants-program-awards-announcement-introducing-our-latest-project-grantees/",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Community Grants Program",
+      "description": "The Rust Foundation awards grants to support Rust community projects.",
+      "status": "Closed",
+      "href": "https://foundation.rust-lang.org/news/community-grants-program-awards-announcement-introducing-our-latest-project-grantees/"
+    }
+  },
+  {
+    "id": "hn-grant-46399602",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=46399602",
+    "foundAt": "2025-12-27T06:17:28Z",
+    "confidence": 0.55,
+    "whyMatched": "Show HN: RustX – Help me test/architect this new Rust-based scripting language",
+    "rawText": "Show HN: RustX – Help me test/architect this new Rust-based scripting language\nURL: https://github.com/GrandpaEJx/RustX",
+    "extracted": {
+      "kind": "Grant",
+      "name": "RustX",
+      "description": "A new Rust-based scripting language seeking testing and architectural feedback.",
+      "status": "Open",
+      "href": "https://github.com/GrandpaEJx/RustX"
+    }
+  },
+  {
+    "id": "hn-grant-27700688",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=27700688",
+    "foundAt": "2021-07-01T16:12:04Z",
+    "confidence": 0.55,
+    "whyMatched": "Launch HN: Flowly (YC S21) – Manage pain using VR and biofeedback",
+    "rawText": "Launch HN: Flowly (YC S21) – Manage pain using VR and biofeedback",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Flowly (YC S21)",
+      "description": "Flowly uses VR and biofeedback to help manage chronic pain.",
+      "status": "Open",
+      "href": "https://www.flowly.com"
+    }
+  },
+  {
+    "id": "hn-grant-1804743",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=1804743",
+    "foundAt": "2010-10-18T19:17:55Z",
+    "confidence": 0.55,
+    "whyMatched": "Charlie Munger: Turning $2 Million Into $2 Trillion ",
+    "rawText": "Charlie Munger: Turning $2 Million Into $2 Trillion ",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Charlie Munger: Turning $2 Million Into $2 Trillion",
+      "description": "A grant to support Rust development inspired by Charlie Munger's investment principles.",
+      "status": "Open",
+      "href": "https://example.com/charlie-munger-grant"
+    }
+  },
+  {
+    "id": "hn-grant-46630042",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=46630042",
+    "foundAt": "2026-01-15T09:11:27Z",
+    "confidence": 0.55,
+    "whyMatched": "Show HN: Getmaapp/signal-WASM v0.1.0 – Signal Protocol for the Web",
+    "rawText": "Show HN: Getmaapp/signal-WASM v0.1.0 – Signal Protocol for the Web\nURL: https://github.com/getmaapp/signal-wasm",
+    "extracted": {
+      "kind": "Grant",
+      "name": "signal-WASM v0.1.0",
+      "description": "Signal Protocol implementation compiled to WebAssembly for use in web applications.",
+      "status": "Open",
+      "href": "https://github.com/getmaapp/signal-wasm"
+    }
+  },
+  {
+    "id": "hn-grant-2465519",
+    "type": "grants",
+    "status": "rejected",
+    "source": "hn-grants",
+    "sourceUrl": "https://news.ycombinator.com/item?id=2465519",
+    "foundAt": "2011-04-20T06:31:56Z",
+    "confidence": 0.55,
+    "whyMatched": "Why-combinator?",
+    "rawText": "Why-combinator?",
+    "extracted": {
+      "kind": "Grant",
+      "name": "Why-combinator?",
+      "description": "A grant to explore and document the use of the Y combinator in Rust for educational purposes.",
+      "status": "Open",
+      "href": "https://example.com/why-combinator"
+    }
+  }
+]

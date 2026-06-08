@@ -33,21 +33,39 @@ function Meter({
   )
 }
 
+function formatStars(n: number): string {
+  if (n >= 1000) return `${(n / 1000).toFixed(n >= 10000 ? 0 : 1)}k`
+  return String(n)
+}
+
 export function OSSCard({ repo }: { repo: OSSPath }) {
+  const displayTopics = (repo.topics ?? []).filter(t => t !== "rust").slice(0, 4)
+
   return (
     <article className="e-oss">
       <div className="e-oss__head">
         <span className="e-oss__name">{repo.name}</span>
         <span className="e-oss__eco">{repo.eco}</span>
+        {repo.stars != null && (
+          <span className="e-oss__stars">★ {formatStars(repo.stars)}</span>
+        )}
       </div>
       <p className="e-oss__note">{repo.note}</p>
-      <div className="e-meter-row">
-        <Meter label="Maintainers" value={repo.maintainerFriendliness} valueLabel={repo.maintainerLabel} />
-        <Meter label="Issues"      value={repo.issueQuality}           valueLabel={repo.issueLabel} />
-        <Meter label="Beginners"   value={repo.beginnerSuitability}    valueLabel={repo.beginnerLabel} accent />
-      </div>
+      {!(repo.maintainerFriendliness === 0.5 && repo.issueQuality === 0.5 && repo.beginnerSuitability === 0.5) && (
+        <div className="e-meter-row">
+          <Meter label="Maintainers" value={repo.maintainerFriendliness} valueLabel={repo.maintainerLabel} />
+          <Meter label="Issues"      value={repo.issueQuality}           valueLabel={repo.issueLabel} />
+          <Meter label="Beginners"   value={repo.beginnerSuitability}    valueLabel={repo.beginnerLabel} accent />
+        </div>
+      )}
       <div className="e-oss__foot">
-        <span className="e-tag e-tag--soft">contribute</span>
+        {displayTopics.length > 0 && (
+          <div className="e-oss__topics">
+            {displayTopics.map(t => (
+              <span key={t} className="e-tag e-tag--soft">{t}</span>
+            ))}
+          </div>
+        )}
         <a
           className="e-ext-link"
           href={repo.href}

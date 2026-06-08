@@ -1,4 +1,4 @@
-export type ContentType = "jobs" | "oss" | "grants" | "pulse" | "events" | "companies"
+export type ContentType = "jobs" | "oss" | "grants" | "pulse" | "events" | "companies" | "portals"
 
 export type PendingStatus = "pending" | "approved" | "rejected"
 
@@ -43,6 +43,7 @@ export const CONTENT_FILES: Record<ContentType, string> = {
   pulse:     "pulse",
   events:    "events",
   companies: "companies",
+  portals:   "portals",
 }
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
@@ -52,4 +53,5 @@ export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   pulse:     "Pulse",
   events:    "Events",
   companies: "Companies",
+  portals:   "Job Portals",
 }

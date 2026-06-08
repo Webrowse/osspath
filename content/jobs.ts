@@ -14,4 +14,4 @@ export type EditorialJob = {
   expiresAt: string
 }
 
-export const JOBS = rawJobs as EditorialJob[]
+export const JOBS = rawJobs as unknown as EditorialJob[]

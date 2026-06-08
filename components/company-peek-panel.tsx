@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { X, Bookmark, BookmarkCheck } from "lucide-react"
 import { toast } from "sonner"
-import { usePostHog } from "posthog-js/react"
 import { CompanyAvatar } from "@/components/company-avatar"
 import { ApplicationDialog } from "@/components/application-dialog"
 import { markCompanyStatus } from "@/actions/company"
@@ -152,7 +151,6 @@ function getNextAction(status: string | null, appliedAt: Date | null, followUpAt
 
 export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: CompanyPeekPanelProps) {
   const router = useRouter()
-  const ph = usePostHog()
   const [localState, setLocalState] = useState(company.userState)
 
   const close = useCallback(() => router.back(), [router])
@@ -192,11 +190,9 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
     try {
       if (isSaved) {
         await markCompanyStatus(company.id, "NOT_APPLIED")
-        ph?.capture("company_unsaved", { company_id: company.id, source: "peek_panel" })
         toast.success("Removed from saved")
       } else {
         await markCompanyStatus(company.id, "SAVED")
-        ph?.capture("company_saved", { company_id: company.id, source: "peek_panel" })
         toast.success("Saved")
       }
     } catch {
@@ -427,7 +423,6 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                     href={role.sourceUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => ph?.capture("opportunity_apply_clicked", { opportunity_id: role.id, source: "peek_panel" })}
                     style={{
                       height: 24, padding: "0 8px",
                       borderRadius: 4, border: "1px solid var(--line-soft)",
@@ -643,7 +638,6 @@ export function CompanyPeekPanel({ company, openRoles, isAuthenticated }: Compan
                     href={company.careersUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={() => ph?.capture("careers_link_clicked", { company_id: company.id, source: "peek_panel" })}
                     style={{ ...btn, display: "inline-flex", textDecoration: "none", color: "var(--fg-3)" }}
                   >
                     Careers ↗

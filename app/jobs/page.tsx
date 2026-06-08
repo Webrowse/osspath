@@ -26,7 +26,7 @@ export default async function JobsArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Archive</div>
+              <div className="e-section__num">Open positions</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Remote Rust Jobs</h1>
               <p className="e-archive-meta">
                 Rust-explicit roles only. Each entry links directly to the company careers page and is manually verified before listing.

@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "id": "grant-rustfound-fellowships",
+    "type": "grants",
+    "status": "pending",
+    "source": "grant-seed",
+    "sourceUrl": "https://foundation.rust-lang.org/grants/fellowships/",
+    "foundAt": "2026-06-08T17:46:26.774Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust Foundation grant program",
+    "rawText": "Rust Foundation Fellowships: Paid fellowships for contributors who want to work full-time on the Rust compiler, toolchain, or ecosystem.",
+    "extracted": {
+      "id": "grant-rustfound-fellowships",
+      "name": "Rust Foundation Fellowships",
+      "kind": "Grant",
+      "description": "Paid fellowships for contributors who want to work full-time on the Rust compiler, toolchain, or ecosystem.",
+      "status": "Open",
+      "href": "https://foundation.rust-lang.org/grants/fellowships/"
+    }
+  }
+]

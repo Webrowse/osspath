@@ -1,0 +1,127 @@
+[
+  {
+    "id": "portal-seed-linkedin-rust-developer-jobs",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://www.linkedin.com/jobs/rust-developer-jobs/",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — General",
+    "rawText": "LinkedIn — Rust Developer Jobs: LinkedIn filtered for Rust developer roles. Largest professional network, high volume of direct employer postings.",
+    "extracted": {
+      "name": "LinkedIn — Rust Developer Jobs",
+      "kind": "General",
+      "href": "https://www.linkedin.com/jobs/rust-developer-jobs/",
+      "description": "LinkedIn filtered for Rust developer roles. Largest professional network, high volume of direct employer postings.",
+      "tags": [
+        "general",
+        "high-volume"
+      ]
+    }
+  },
+  {
+    "id": "portal-seed-indeed-rust-developer-jobs",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://www.indeed.com/q-rust-developer-jobs.html",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — General",
+    "rawText": "Indeed — Rust Developer Jobs: Indeed filtered for Rust developer roles. Broad reach across startups and enterprise.",
+    "extracted": {
+      "name": "Indeed — Rust Developer Jobs",
+      "kind": "General",
+      "href": "https://www.indeed.com/q-rust-developer-jobs.html",
+      "description": "Indeed filtered for Rust developer roles. Broad reach across startups and enterprise.",
+      "tags": [
+        "general",
+        "high-volume"
+      ]
+    }
+  },
+  {
+    "id": "portal-seed-glassdoor-rust-developer-jobs",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://www.glassdoor.com/Job/rust-developer-jobs-SRCH_KO0,19.htm",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — General",
+    "rawText": "Glassdoor — Rust Developer Jobs: Glassdoor Rust jobs with salary transparency and company culture data.",
+    "extracted": {
+      "name": "Glassdoor — Rust Developer Jobs",
+      "kind": "General",
+      "href": "https://www.glassdoor.com/Job/rust-developer-jobs-SRCH_KO0,19.htm",
+      "description": "Glassdoor Rust jobs with salary transparency and company culture data.",
+      "tags": [
+        "general",
+        "salary-data"
+      ]
+    }
+  },
+  {
+    "id": "portal-seed-we-work-remotely-rust",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://weworkremotely.com/remote-rust-jobs",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — Remote-only",
+    "rawText": "We Work Remotely — Rust: Dedicated Rust section on one of the largest remote job boards.",
+    "extracted": {
+      "name": "We Work Remotely — Rust",
+      "kind": "Remote-only",
+      "href": "https://weworkremotely.com/remote-rust-jobs",
+      "description": "Dedicated Rust section on one of the largest remote job boards.",
+      "tags": [
+        "remote-only"
+      ]
+    }
+  },
+  {
+    "id": "portal-seed-arc-dev-remote-rust-jobs",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://arc.dev/remote-jobs/rust",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — Remote-only",
+    "rawText": "Arc.dev — Remote Rust Jobs: Vetted remote Rust developer roles. Screened candidates and employers.",
+    "extracted": {
+      "name": "Arc.dev — Remote Rust Jobs",
+      "kind": "Remote-only",
+      "href": "https://arc.dev/remote-jobs/rust",
+      "description": "Vetted remote Rust developer roles. Screened candidates and employers.",
+      "tags": [
+        "remote-only",
+        "vetted"
+      ]
+    }
+  },
+  {
+    "id": "portal-seed-hired-rust-engineering",
+    "type": "portals",
+    "status": "approved",
+    "source": "portal-seed",
+    "sourceUrl": "https://hired.com/jobs/rust",
+    "foundAt": "2026-06-07T21:58:41.524Z",
+    "confidence": 0.9,
+    "whyMatched": "Known Rust job portal — Aggregator",
+    "rawText": "Hired — Rust Engineering: Hired's Rust engineering listings. Tech-focused with salary transparency and company bids.",
+    "extracted": {
+      "name": "Hired — Rust Engineering",
+      "kind": "Aggregator",
+      "href": "https://hired.com/jobs/rust",
+      "description": "Hired's Rust engineering listings. Tech-focused with salary transparency and company bids.",
+      "tags": [
+        "aggregator",
+        "salary-data"
+      ]
+    }
+  }
+]

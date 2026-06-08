@@ -2,26 +2,37 @@ import Link from "next/link"
 import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
 import { SectionHeader } from "@/components/editorial/section-header"
 import { JobCard } from "@/components/editorial/job-card"
-import { OSSCard } from "@/components/editorial/oss-card"
+import { OSSHomeSection } from "@/components/editorial/oss-home-section"
 import { GrantCard } from "@/components/editorial/grant-card"
 import { PulseRow } from "@/components/editorial/pulse-item"
 import { EventCard } from "@/components/editorial/event-card"
 import { CompanyGrid } from "@/components/editorial/company-grid"
+import { PortalRow } from "@/components/editorial/portal-row"
 import { JOBS } from "@/content/jobs"
 import { OSS_PATHS } from "@/content/oss-paths"
 import { GRANTS } from "@/content/grants"
 import { PULSE } from "@/content/pulse"
 import { EVENTS } from "@/content/events"
 import { COMPANIES } from "@/content/companies"
+import { PORTALS } from "@/content/portals"
 import { filterActive } from "@/lib/content-utils"
 import { SITE_CONFIG } from "@/lib/site-config"
 import { SITE_NAV } from "@/lib/nav-config"
+
+// Max items shown per section on the homepage — View All appears when total exceeds this
+const LIMITS = { jobs: 4, grants: 4, pulse: 4, events: 3, companies: 8 }
 
 export default function HomePage() {
   // Auto-hide expired content at build time
   const activeJobs   = filterActive(JOBS)
   const activeGrants = filterActive(GRANTS)
   const activeEvents = filterActive(EVENTS)
+
+  const featuredJobs      = activeJobs.slice(0, LIMITS.jobs)
+  const featuredGrants    = activeGrants.slice(0, LIMITS.grants)
+  const featuredPulse     = PULSE.slice(0, LIMITS.pulse)
+  const featuredEvents    = activeEvents.slice(0, LIMITS.events)
+  const featuredCompanies = COMPANIES.slice(0, LIMITS.companies)
 
   return (
     <div className="editorial-root">
@@ -34,10 +45,9 @@ export default function HomePage() {
             <span>rust opportunities</span>
           </Link>
 
-          {/* Homepage nav uses anchor links (same-page scrolling) */}
           <nav className="e-nav__links" aria-label="Primary">
             {SITE_NAV.map((l) => (
-              <a key={l.anchor} className="e-nav__link" href={l.anchor}>{l.label}</a>
+              <a key={l.anchor} className="e-nav__link" href={l.archive}>{l.label}</a>
             ))}
           </nav>
 
@@ -46,14 +56,14 @@ export default function HomePage() {
           <Link
             className="e-nav__workspace"
             href="/companies"
-            title="Research workspace — saved jobs, notes, deep research"
+            title="Job tracker — save companies, track applications, take notes"
           >
-            <span>Research Workspace</span>
+            <span>Job Tracker</span>
             <span aria-hidden="true">→</span>
           </Link>
 
           <EditorialMobileMenu links={
-            SITE_NAV.map((l) => ({ label: l.label, href: l.anchor }))
+            SITE_NAV.map((l) => ({ label: l.label, href: l.archive }))
           } />
         </div>
       </header>
@@ -86,10 +96,11 @@ export default function HomePage() {
               title="Remote Rust Jobs"
               meta={activeJobs.length > 0 ? `${activeJobs.length} open · verified this week` : "checking for openings"}
               note="Rust-explicit roles only. Each entry links directly to the company careers page."
-              archiveHref="/jobs"
+              archiveHref={activeJobs.length > LIMITS.jobs ? "/jobs" : undefined}
+              archiveLabel={`View all ${activeJobs.length}`}
             />
             <div className="e-jobs">
-              {activeJobs.map((job) => (
+              {featuredJobs.map((job) => (
                 <JobCard key={`${job.company}-${job.role}`} job={job} />
               ))}
             </div>
@@ -102,15 +113,12 @@ export default function HomePage() {
             <SectionHeader
               num="02"
               title="OSS Paths"
-              meta="approachable repositories"
+              meta={`${OSS_PATHS.length} repositories · 4 featured`}
               note="Realistic places to make a first or fifth contribution. Maintainer responsiveness, issue quality, and a short human note on each."
               archiveHref="/oss"
+              archiveLabel={`View all ${OSS_PATHS.length}`}
             />
-            <div className="e-oss-grid">
-              {OSS_PATHS.map((repo) => (
-                <OSSCard key={repo.name} repo={repo} />
-              ))}
-            </div>
+            <OSSHomeSection repos={OSS_PATHS} />
           </div>
         </section>
 
@@ -122,10 +130,11 @@ export default function HomePage() {
               title="Grants & Bounties"
               meta={`${activeGrants.length} listed`}
               note="Grants, sponsorships, and funded opportunities in the Rust ecosystem. Click out for current terms."
-              archiveHref="/grants"
+              archiveHref={activeGrants.length > LIMITS.grants ? "/grants" : undefined}
+              archiveLabel={`View all ${activeGrants.length}`}
             />
             <div className="e-grants">
-              {activeGrants.map((grant) => (
+              {featuredGrants.map((grant) => (
                 <GrantCard key={grant.name} grant={grant} />
               ))}
             </div>
@@ -140,10 +149,11 @@ export default function HomePage() {
               title="Ecosystem Pulse"
               meta="important internet places"
               note="Forums, newsletters, working-group notes, and community spaces worth following."
-              archiveHref="/pulse"
+              archiveHref={PULSE.length > LIMITS.pulse ? "/pulse" : undefined}
+              archiveLabel={`View all ${PULSE.length}`}
             />
             <div className="e-pulse">
-              {PULSE.map((item) => (
+              {featuredPulse.map((item) => (
                 <PulseRow key={item.title} item={item} />
               ))}
             </div>
@@ -158,10 +168,11 @@ export default function HomePage() {
               title="Events & Learning"
               meta="time-bound · free"
               note="Conferences, workshops, and recurring community calls. Temporary opportunities worth knowing about."
-              archiveHref="/events"
+              archiveHref={activeEvents.length > LIMITS.events ? "/events" : undefined}
+              archiveLabel={`View all ${activeEvents.length}`}
             />
             <div className="e-events">
-              {activeEvents.map((event) => (
+              {featuredEvents.map((event) => (
                 <EventCard key={event.title} event={event} />
               ))}
             </div>
@@ -176,9 +187,27 @@ export default function HomePage() {
               title="Companies Using Rust"
               meta="exploratory"
               note="Not all companies listed here are hiring. Useful for orientation — who builds what in the Rust ecosystem."
-              archiveHref="/ecosystem"
+              archiveHref={COMPANIES.length > LIMITS.companies ? "/ecosystem" : undefined}
+              archiveLabel={`View all ${COMPANIES.length}`}
             />
-            <CompanyGrid companies={COMPANIES} />
+            <CompanyGrid companies={featuredCompanies} />
+          </div>
+        </section>
+
+        {/* ── 07 Job Portals ───────────────────────────────────────────────── */}
+        <section id="portals" className="e-section">
+          <div className="e-col">
+            <SectionHeader
+              num="07"
+              title="Job Portals"
+              meta="where else to look"
+              note="Rust-relevant job boards and aggregators. Complementary sources — not curated by this site."
+            />
+            <div className="e-pulse">
+              {PORTALS.map((portal) => (
+                <PortalRow key={portal.name} portal={portal} />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -194,7 +223,7 @@ export default function HomePage() {
             </div>
             <div>
               <Link className="e-footer__workspace" href="/companies">
-                Research Workspace →
+                Job Tracker →
               </Link>
               <div className="e-footer__tagline" style={{ marginTop: 6 }}>
                 saved jobs · notes · tracking · deep research
@@ -204,7 +233,7 @@ export default function HomePage() {
           <div className="e-footer__links">
             <a href={SITE_CONFIG.submitUrl} rel="noopener noreferrer">Submit a link</a>
             <Link href="/privacy">Privacy</Link>
-            <Link href="/login">Sign in</Link>
+            <Link href="/login?callbackUrl=%2Fdashboard">Sign in</Link>
           </div>
         </div>
       </footer>

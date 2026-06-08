@@ -266,6 +266,17 @@
   50% { opacity: 0.1; transform: scale(1.9); }
 }
 
+@keyframes e-shimmer {
+  0%, 100% { opacity: 0.8; }
+  50%       { opacity: 0.35; }
+}
+
+@keyframes e-progress {
+  0%   { transform: translateX(-100%); }
+  60%  { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+
 @keyframes d-fade-in {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -603,7 +614,14 @@
   white-space: nowrap;
 }
 .e-nav__link:hover { color: var(--e-accent); }
-.e-nav__link--active { color: var(--e-fg); font-weight: 500; }
+.editorial-root .e-nav__link--active {
+  color: var(--e-accent);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklab, var(--e-accent) 40%, transparent);
+  text-underline-offset: 3px;
+}
+.editorial-root .e-nav__link--active:hover { color: var(--e-accent); }
 .e-nav__spacer { flex: 1; }
 .e-nav__workspace {
   font-family: var(--e-mono);
@@ -707,7 +725,7 @@
 
 .e-hero {
   padding-top: clamp(56px, 9vw, 96px);
-  padding-bottom: clamp(36px, 6vw, 56px);
+  padding-bottom: clamp(16px, 3vw, 28px);
 }
 .e-hero__eyebrow {
   font-family: var(--e-mono);
@@ -1244,7 +1262,7 @@
   font-family: var(--e-mono);
   font-size: 13.5px;
   padding-bottom: 2px;
-  border-bottom: 1px dashed var(--e-line-2);
+  border-bottom: 1px solid var(--e-line-2);
   transition: color 120ms ease, border-color 120ms ease;
 }
 .e-footer__workspace:hover { color: var(--e-accent); border-color: var(--e-accent); }
@@ -1340,6 +1358,195 @@
 }
 .e-archive-search__input::placeholder { color: var(--e-fg-dim); }
 .e-archive-search__input::-webkit-search-cancel-button { display: none; }
+
+/* ── OSS stars + topics on card ───────────────────────────── */
+.e-oss__stars {
+  font-size: 11px;
+  color: var(--e-fg-dim);
+  font-family: var(--e-mono);
+  margin-left: auto;
+  white-space: nowrap;
+}
+.e-oss__topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+}
+
+/* ── OSS browser (archive page) ────────────────────────────── */
+.oss-topbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.oss-topbar-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.oss-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 14px;
+  border: 1px solid var(--e-line);
+  border-radius: 8px;
+  background: var(--e-bg-2);
+  font-family: var(--e-ui);
+  font-size: 14px;
+  color: var(--e-fg);
+  outline: none;
+  transition: border-color 120ms;
+}
+.oss-search:focus { border-color: var(--e-accent); }
+.oss-search::placeholder { color: var(--e-fg-dim); }
+
+.oss-filter-toggle-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--e-line);
+  border-radius: 6px;
+  background: var(--e-bg-2);
+  font-family: var(--e-ui);
+  font-size: 12.5px;
+  color: var(--e-fg-mute);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 120ms;
+}
+.oss-filter-toggle-btn:hover { border-color: var(--e-line-2); color: var(--e-fg); }
+.oss-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--e-accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+/* Desktop layout: sidebar + grid side-by-side */
+.oss-browser {
+  display: grid;
+  grid-template-columns: 195px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+.oss-sidebar {
+  /* shown by default on desktop */
+}
+.oss-filters {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--e-line) transparent;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding-right: 4px;
+}
+.oss-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 14px 0 10px;
+  border-top: 1px solid var(--e-line-soft);
+}
+.oss-filter-group:first-child { border-top: none; padding-top: 0; }
+.oss-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--e-fg-dim);
+  margin-bottom: 3px;
+}
+.oss-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12.5px;
+  color: var(--e-fg-mute);
+  cursor: pointer;
+  line-height: 1.35;
+  user-select: none;
+}
+.oss-filter-row:hover { color: var(--e-fg); }
+.oss-filter-eco { font-size: 11.5px; }
+.oss-filter-radio { accent-color: var(--e-accent); cursor: pointer; flex-shrink: 0; }
+.oss-filter-select {
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--e-line-soft);
+  border-radius: 5px;
+  background: var(--e-bg-2);
+  font-family: var(--e-ui);
+  font-size: 12.5px;
+  color: var(--e-fg);
+  cursor: pointer;
+  outline: none;
+}
+.oss-filter-select:focus { border-color: var(--e-accent); }
+.oss-filter-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid var(--e-line-soft);
+  border-radius: 5px;
+  background: var(--e-bg-2);
+  font-family: var(--e-ui);
+  font-size: 12px;
+  color: var(--e-fg);
+  outline: none;
+  margin-bottom: 2px;
+}
+.oss-filter-input:focus { border-color: var(--e-accent); }
+.oss-filter-input::placeholder { color: var(--e-fg-faint); }
+.oss-topic-list { display: flex; flex-direction: column; gap: 4px; }
+.oss-filter-count {
+  font-size: 10px;
+  color: var(--e-fg-faint);
+  font-family: var(--e-mono);
+  margin-left: auto;
+}
+.oss-filter-clear {
+  font-size: 11.5px;
+  color: var(--e-fg-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0 0;
+  text-align: left;
+  font-family: var(--e-ui);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.oss-filter-clear:hover { color: var(--e-fg); }
+
+/* Mobile: sidebar hidden until toggle */
+@media (max-width: 740px) {
+  .oss-browser { grid-template-columns: 1fr; gap: 0; }
+  .oss-sidebar { display: none; margin-bottom: 20px; }
+  .oss-browser--open .oss-sidebar {
+    display: block;
+    border: 1px solid var(--e-line-soft);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background: var(--e-bg-2);
+  }
+  .oss-browser--open .oss-filters { position: static; max-height: none; overflow: visible; }
+  .oss-filter-toggle-btn { display: flex; }
+}
 
 /* ── Mobile improvements ───────────────────────────────────── */
 

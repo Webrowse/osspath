@@ -3,6 +3,15 @@
 import { revalidatePath } from "next/cache"
 import { readPending, writePending, archiveItem, appendContent, readContent, writeContent } from "./storage"
 import type { ContentType, PendingItem } from "./types"
+import { auth } from "@/lib/auth"
+
+async function requireAdmin() {
+  const session = await auth()
+  const adminEmail = process.env.ADMIN_EMAIL
+  if (!adminEmail || session?.user?.email !== adminEmail) {
+    throw new Error("Unauthorized")
+  }
+}
 
 // ── Approve ───────────────────────────────────────────────────────────────────
 
@@ -11,6 +20,7 @@ export async function approveItem(
   id: string,
   overrides?: Record<string, unknown>
 ) {
+  await requireAdmin()
   const pending = readPending(type)
   const item = pending.find((p) => p.id === id)
   if (!item) throw new Error(`Pending item not found: ${id}`)
@@ -41,12 +51,56 @@ export async function approveItem(
 // ── Reject ────────────────────────────────────────────────────────────────────
 
 export async function rejectItem(type: ContentType, id: string) {
+  await requireAdmin()
   const pending = readPending(type)
   const item = pending.find((p) => p.id === id)
   if (!item) throw new Error(`Pending item not found: ${id}`)
 
   writePending(type, pending.filter((p) => p.id !== id))
   archiveItem(type, { ...item, status: "rejected" })
+
+  revalidatePath("/admin/queue")
+}
+
+// ── Bulk approve / reject ─────────────────────────────────────────────────────
+
+export async function approveAll(type: ContentType) {
+  await requireAdmin()
+  const pending = readPending(type)
+  if (pending.length === 0) return
+
+  const today = new Date().toISOString().split("T")[0]
+  const expiry = new Date()
+  expiry.setMonth(expiry.getMonth() + 3)
+  const expiresAt = expiry.toISOString().split("T")[0]
+
+  for (const item of pending) {
+    const published: Record<string, unknown> = {
+      ...item.extracted,
+      checkedAt: today,
+    }
+    if (type === "jobs" && !published.expiresAt) {
+      published.expiresAt = expiresAt
+    }
+    appendContent(type, published)
+    archiveItem(type, { ...item, status: "approved" })
+  }
+  writePending(type, [])
+
+  revalidatePath("/admin/queue")
+  revalidatePath("/admin/published")
+  revalidatePath("/")
+}
+
+export async function rejectAll(type: ContentType) {
+  await requireAdmin()
+  const pending = readPending(type)
+  if (pending.length === 0) return
+
+  for (const item of pending) {
+    archiveItem(type, { ...item, status: "rejected" })
+  }
+  writePending(type, [])
 
   revalidatePath("/admin/queue")
 }
@@ -58,6 +112,7 @@ export async function addManualPending(
   sourceUrl: string,
   extracted: Record<string, unknown>
 ) {
+  await requireAdmin()
   const { addPendingItems } = await import("./storage")
   const item: PendingItem = {
     id: `manual-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -77,8 +132,16 @@ export async function addManualPending(
 // ── Delete published ──────────────────────────────────────────────────────────
 
 export async function deletePublished(type: ContentType, index: number) {
+  await requireAdmin()
   const { removeContent } = await import("./storage")
   removeContent(type, index)
+  revalidatePath("/admin/published")
+  revalidatePath("/")
+}
+
+export async function deleteAllPublished(type: ContentType) {
+  await requireAdmin()
+  writeContent(type, [])
   revalidatePath("/admin/published")
   revalidatePath("/")
 }
@@ -89,6 +152,7 @@ export async function extractWithAI(
   type: ContentType,
   text: string
 ) {
+  await requireAdmin()
   const { extractWithDeepSeek } = await import("./deepseek")
   return extractWithDeepSeek(type, text)
 }
@@ -96,6 +160,7 @@ export async function extractWithAI(
 // ── DeepSeek diagnostic (isolated API test) ───────────────────────────────────
 
 export async function runDeepSeekDiagnostic(): Promise<string> {
+  await requireAdmin()
   const apiKey = process.env.DEEPSEEK_API_KEY
   const lines: string[] = []
 
@@ -179,6 +244,7 @@ export async function updatePublished(
   index: number,
   patch: Record<string, unknown>
 ) {
+  await requireAdmin()
   const { readContent, writeContent } = await import("./storage")
   const items = readContent(type)
   if (index < 0 || index >= items.length) throw new Error("Index out of range")
@@ -197,6 +263,7 @@ export async function updatePendingItem(
   id: string,
   patch: Record<string, unknown>
 ) {
+  await requireAdmin()
   const pending = readPending(type)
   const updated = pending.map((p) =>
     p.id === id ? { ...p, extracted: { ...p.extracted, ...patch } } : p

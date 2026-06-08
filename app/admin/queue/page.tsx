@@ -3,8 +3,9 @@ import { readPending } from "@/lib/admin/storage"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import type { ContentType } from "@/lib/admin/types"
 import { QueueCard } from "@/components/admin/queue-card"
+import { BulkActions } from "@/components/admin/bulk-actions"
 
-const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
+const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
 interface PageProps {
   searchParams: Promise<{ type?: string }>
@@ -46,6 +47,7 @@ export default async function QueuePage({ searchParams }: PageProps) {
         <span className="adm-page-meta">
           {items.length} item{items.length !== 1 ? "s" : ""}
         </span>
+        <BulkActions contentType={activeType} count={items.length} />
       </div>
 
       {/* Queue */}

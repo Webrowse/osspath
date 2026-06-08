@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg"],
   turbopack: {
     root: path.resolve(__dirname),
   },

@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { redirect } from "next/navigation"
 import { getSession } from "@/lib/auth"
 import { WorkspaceSidebar } from "@/components/workspace-sidebar"
+import { WorkspaceProviders } from "@/components/workspace-providers"
 
 export default async function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default async function DashboardLayout({
   if (!session) redirect("/login")
 
   return (
+    <WorkspaceProviders>
     <div
       style={{
         position: "fixed",
@@ -37,5 +39,6 @@ export default async function DashboardLayout({
         {children}
       </main>
     </div>
+    </WorkspaceProviders>
   )
 }

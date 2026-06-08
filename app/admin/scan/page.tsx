@@ -14,20 +14,44 @@ export default function ScanPage() {
           <ScannerPanel
             id="hn"
             title="HN Who Is Hiring"
-            description="Searches the latest Ask HN: Who is hiring? thread for Rust-related comments via Algolia HN API (no key needed)."
+            description="Searches the latest Ask HN: Who is hiring? thread for Rust-related comments via Algolia HN API. DeepSeek fills all job fields."
             source="hn-hiring"
           />
           <ScannerPanel
-            id="twir"
-            title="This Week in Rust — Jobs"
-            description="Fetches the latest TWIR issue and extracts the Jobs section."
-            source="twir"
+            id="github"
+            title="GitHub OSS"
+            description="Good-first-issues, help-wanted, star-range queries, and 12 org scans (tokio-rs, embassy-rs, bevyengine, etc.). All repos classified by DeepSeek."
+            source="github-oss"
           />
           <ScannerPanel
-            id="github"
-            title="GitHub OSS — good-first-issue"
-            description="Recently updated Rust repos with good-first-issue labels. GitHub public API, rate limited without token."
-            source="github-oss"
+            id="grants"
+            title="Grants & Bounties"
+            description="Searches HN for Rust Foundation grants, open source bounties, and ecosystem funding announcements. DeepSeek extracts kind, name, status, and URL."
+            source="hn-grants"
+          />
+          <ScannerPanel
+            id="pulse"
+            title="Ecosystem Pulse"
+            description="Searches GitHub for Rust community resources — newsletters, podcasts, blogs — via topic tags. DeepSeek classifies each as Newsletter, Forum, Podcast, etc."
+            source="github-pulse"
+          />
+          <ScannerPanel
+            id="events"
+            title="Events & Conferences"
+            description="Searches HN for Rust conference and workshop announcements (RustConf, EuroRust, Oxidize, etc.). DeepSeek extracts date, format, and registration URL."
+            source="hn-events"
+          />
+          <ScannerPanel
+            id="portals"
+            title="Job Portals"
+            description="Seeds direct Rust-filtered pages for major job boards (LinkedIn, Indeed, Glassdoor, We Work Remotely, Arc.dev, Hired) plus HN discussion mining. One-time seeding — re-running skips already-queued or published portals."
+            source="portal-seed"
+          />
+          <ScannerPanel
+            id="companies"
+            title="Companies Using Rust"
+            description="Finds GitHub organizations with multiple high-star Rust repos. Groups repos by owning org, fetches org details, and uses DeepSeek to classify sector and extract company website."
+            source="github-orgs"
           />
         </div>
 

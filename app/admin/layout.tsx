@@ -9,28 +9,22 @@ import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 
-const SCAN_LINKS = [
-  { label: "HN Hiring",  href: "/admin/scan#hn" },
-  { label: "TWIR",       href: "/admin/scan#twir" },
-  { label: "GitHub OSS", href: "/admin/scan#github" },
-]
-
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const host = (await headers()).get("host") ?? ""
   const isLocal = host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("::1")
 
-  if (!isLocal) {
-    const session = await getSession()
-    if (!session?.user?.email || session.user.email !== ADMIN_EMAIL) {
-      notFound()
-    }
+  if (!isLocal) notFound()
+
+  const session = await getSession()
+  if (!session?.user?.email || session.user.email !== ADMIN_EMAIL) {
+    notFound()
   }
 
   const counts = getPendingCounts()
   const publishedCounts = getPublishedCounts()
   const total = Object.values(counts).reduce((a, b) => a + b, 0)
 
-  const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
+  const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
   return (
     <div className="adm">
@@ -56,11 +50,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           <div className="adm-nav__section">Scan</div>
           <Link href="/admin/scan" className="adm-nav__item">Scan sources</Link>
-          {SCAN_LINKS.map((s) => (
-            <Link key={s.href} href={s.href} className="adm-nav__item adm-nav__item--sub">
-              {s.label}
-            </Link>
-          ))}
           <Link href="/admin/test-deepseek" className="adm-nav__item adm-nav__item--sub">
             Test DeepSeek API
           </Link>

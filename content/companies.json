@@ -1,22 +1,192 @@
 [
-  { "name": "Cloudflare",           "sector": "Edge / Security",    "href": "https://cloudflare.com" },
-  { "name": "Mozilla",              "sector": "Browser / Open Web", "href": "https://mozilla.org" },
-  { "name": "AWS",                  "sector": "Cloud / Infra",      "href": "https://aws.amazon.com" },
-  { "name": "Microsoft",            "sector": "Cloud / Systems",    "href": "https://microsoft.com" },
-  { "name": "Google",               "sector": "Android / Fuchsia",  "href": "https://google.com" },
-  { "name": "Discord",              "sector": "Backend / Infra",    "href": "https://discord.com" },
-  { "name": "Dropbox",              "sector": "Storage",            "href": "https://dropbox.com" },
-  { "name": "1Password",            "sector": "Security",           "href": "https://1password.com" },
-  { "name": "Oxide Computer",       "sector": "Systems / Hardware", "href": "https://oxide.computer" },
-  { "name": "Parity Technologies",  "sector": "Blockchain / Infra", "href": "https://parity.io" },
-  { "name": "Deno",                 "sector": "Runtimes",           "href": "https://deno.com" },
-  { "name": "Zed Industries",       "sector": "Developer Tools",    "href": "https://zed.dev" },
-  { "name": "Fly.io",               "sector": "Cloud / PaaS",       "href": "https://fly.io" },
-  { "name": "Turso",                "sector": "Databases",          "href": "https://turso.tech" },
-  { "name": "PingCAP",              "sector": "Databases / TiKV",   "href": "https://pingcap.com" },
-  { "name": "SurrealDB",            "sector": "Databases",          "href": "https://surrealdb.com" },
-  { "name": "Embark Studios",       "sector": "Games / Graphics",   "href": "https://embark.dev" },
-  { "name": "Ferrous Systems",      "sector": "Safety / Toolchain", "href": "https://ferrous-systems.com" },
-  { "name": "Linkerd (Buoyant)",    "sector": "Service Mesh",       "href": "https://buoyant.io" },
-  { "name": "Vercel",               "sector": "Build / Tooling",    "href": "https://vercel.com" }
+  {
+    "name": "Cloudflare",
+    "sector": "Edge / Security",
+    "href": "https://cloudflare.com"
+  },
+  {
+    "name": "Mozilla",
+    "sector": "Browser / Open Web",
+    "href": "https://mozilla.org"
+  },
+  {
+    "name": "AWS",
+    "sector": "Cloud / Infra",
+    "href": "https://aws.amazon.com"
+  },
+  {
+    "name": "Microsoft",
+    "sector": "Cloud / Systems",
+    "href": "https://microsoft.com"
+  },
+  {
+    "name": "Google",
+    "sector": "Android / Fuchsia",
+    "href": "https://google.com"
+  },
+  {
+    "name": "Discord",
+    "sector": "Backend / Infra",
+    "href": "https://discord.com"
+  },
+  {
+    "name": "Dropbox",
+    "sector": "Storage",
+    "href": "https://dropbox.com"
+  },
+  {
+    "name": "1Password",
+    "sector": "Security",
+    "href": "https://1password.com"
+  },
+  {
+    "name": "Oxide Computer",
+    "sector": "Systems / Hardware",
+    "href": "https://oxide.computer"
+  },
+  {
+    "name": "Parity Technologies",
+    "sector": "Blockchain / Infra",
+    "href": "https://parity.io"
+  },
+  {
+    "name": "Deno",
+    "sector": "Runtimes",
+    "href": "https://deno.com"
+  },
+  {
+    "name": "Zed Industries",
+    "sector": "Developer Tools",
+    "href": "https://zed.dev"
+  },
+  {
+    "name": "Fly.io",
+    "sector": "Cloud / PaaS",
+    "href": "https://fly.io"
+  },
+  {
+    "name": "Turso",
+    "sector": "Databases",
+    "href": "https://turso.tech"
+  },
+  {
+    "name": "PingCAP",
+    "sector": "Databases / TiKV",
+    "href": "https://pingcap.com"
+  },
+  {
+    "name": "SurrealDB",
+    "sector": "Databases",
+    "href": "https://surrealdb.com"
+  },
+  {
+    "name": "Embark Studios",
+    "sector": "Games / Graphics",
+    "href": "https://embark.dev"
+  },
+  {
+    "name": "Ferrous Systems",
+    "sector": "Safety / Toolchain",
+    "href": "https://ferrous-systems.com"
+  },
+  {
+    "name": "Linkerd (Buoyant)",
+    "sector": "Service Mesh",
+    "href": "https://buoyant.io"
+  },
+  {
+    "name": "Vercel",
+    "sector": "Build / Tooling",
+    "href": "https://vercel.com"
+  },
+  {
+    "name": "Ultraworkers",
+    "sector": "Gaming",
+    "href": "https://discord.gg/6ztZB9jvWq",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "The Rust Programming Language",
+    "sector": "Programming Language",
+    "href": "https://www.rust-lang.org",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Fuel Labs",
+    "sector": "Blockchain",
+    "href": "https://fuel.network",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Astral",
+    "sector": "Developer Tools",
+    "href": "https://astral.sh",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Tauri",
+    "sector": "Desktop Application Framework",
+    "href": "https://tauri.app",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Bun",
+    "sector": "Runtime",
+    "href": "https://bun.com/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "OpenAI",
+    "sector": "AI",
+    "href": "https://openai.com/",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Union",
+    "sector": "Blockchain",
+    "href": "https://union.build",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Alacritty",
+    "sector": "Terminal Emulator",
+    "href": "https://github.com/alacritty/alacritty",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Warp",
+    "sector": "Developer Tools",
+    "href": "https://warp.dev",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "rtk-ai",
+    "sector": "Developer Tools",
+    "href": "https://www.rtk-ai.app",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Starship",
+    "sector": "Developer Tools",
+    "href": "https://starship.rs",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Meilisearch",
+    "sector": "Search",
+    "href": "https://github.com/meilisearch",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Ultraworkers",
+    "sector": "Gaming",
+    "href": "https://discord.gg/6ztZB9jvWq",
+    "checkedAt": "2026-06-08"
+  },
+  {
+    "name": "Starship",
+    "sector": "Developer Tools",
+    "href": "https://starship.rs",
+    "checkedAt": "2026-06-08"
+  }
 ]

@@ -25,7 +25,7 @@ export default async function PulseArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Archive</div>
+              <div className="e-section__num">Community</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Ecosystem Pulse</h1>
               <p className="e-archive-meta">
                 Community spaces, forums, newsletters, and podcasts worth following.

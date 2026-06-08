@@ -79,7 +79,7 @@ export function removeContent(type: ContentType, index: number) {
 
 // ── Counts (for sidebar badges) ──────────────────────────────────────────────
 
-const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
+const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
 export function getPendingCounts(): Record<ContentType, number> {
   return Object.fromEntries(

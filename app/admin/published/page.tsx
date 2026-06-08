@@ -4,8 +4,9 @@ import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import type { ContentType } from "@/lib/admin/types"
 import { DeleteButton } from "@/components/admin/delete-button"
 import { EditPublishedButton } from "@/components/admin/edit-published-button"
+import { BulkDeleteButton } from "@/components/admin/bulk-delete-button"
 
-const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
+const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
 interface PageProps {
   searchParams: Promise<{ type?: string }>
@@ -15,7 +16,7 @@ function getItemLabel(item: Record<string, unknown>, type: ContentType): string 
   if (type === "jobs") return `${item.role ?? "?"} — ${item.company ?? "?"}`
   if (type === "oss")  return String(item.name ?? "?")
   if (type === "grants" || type === "events") return String(item.name ?? item.title ?? "?")
-  if (type === "pulse") return String(item.title ?? "?")
+  if (type === "pulse" || type === "portals") return String(item.title ?? item.name ?? "?")
   if (type === "companies") return String(item.name ?? "?")
   return "?"
 }
@@ -24,7 +25,7 @@ function getItemMeta(item: Record<string, unknown>, type: ContentType): string {
   if (type === "jobs") return [item.checkedAt, item.expiresAt ? `exp ${item.expiresAt}` : ""].filter(Boolean).join(" · ")
   if (type === "oss")  return String(item.eco ?? "")
   if (type === "grants") return String(item.status ?? "")
-  if (type === "pulse") return String(item.kind ?? "")
+  if (type === "pulse" || type === "portals") return String(item.kind ?? "")
   if (type === "events") return String(item.meta ?? "")
   if (type === "companies") return String(item.sector ?? "")
   return ""
@@ -52,6 +53,7 @@ export default async function PublishedPage({ searchParams }: PageProps) {
       <div className="adm-page-header">
         <span className="adm-page-title">Published — {CONTENT_TYPE_LABELS[activeType]}</span>
         <span className="adm-page-meta">{items.length} entries</span>
+        <BulkDeleteButton contentType={activeType} count={items.length} />
       </div>
 
       <div className="adm-content">

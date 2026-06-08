@@ -1,117 +1,113 @@
 [
   {
-    "company": "Parity Technologies",
-    "role": "Rust / Substrate Engineer",
-    "href": "https://www.parity.io/careers",
-    "note": "Core infra work on Polkadot and Substrate — a large, production Rust codebase with active releases. Fully distributed team.",
+    "company": "Rerun",
+    "role": "Rust Backend Engineers",
+    "href": "https://rerun.io/careers",
+    "note": "Rerun is the data layer for Physical AI, using Rust for core performance-critical code. They are hiring for multiple roles including Rust Backend Engineers.",
     "tags": [
       "Remote",
-      "Global"
-    ],
-    "topics": [
-      "blockchain",
-      "infra",
-      "systems"
-    ],
-    "source": "Direct",
-    "rustMentioned": true,
-    "remoteConfirmed": true,
-    "checkedAt": "2026-05-28",
-    "expiresAt": "2026-09-01"
-  },
-  {
-    "company": "Ferrocene (Ferrous Systems)",
-    "role": "Safety Engineer",
-    "href": "https://ferrocene.dev/careers",
-    "note": "Safety-critical Rust toolchain for automotive and industrial use. ISO 26262 / IEC 61508 qualification work. Small, focused team.",
-    "tags": [
-      "Remote",
-      "Europe-weighted"
-    ],
-    "topics": [
-      "embedded",
-      "safety",
-      "tooling"
-    ],
-    "source": "Direct",
-    "rustMentioned": true,
-    "remoteConfirmed": true,
-    "checkedAt": "2026-05-28",
-    "expiresAt": "2026-09-01"
-  },
-  {
-    "company": "Embark Studios",
-    "role": "Rust Game / Engine Engineer",
-    "href": "https://www.embark-studios.com/jobs",
-    "note": "Game studio with a public Rust commitment — engine, rendering, and tooling work. Unusual mix of game development and systems programming.",
-    "tags": [
-      "Remote",
-      "EU / Americas"
-    ],
-    "topics": [
-      "gamedev",
-      "graphics",
-      "systems"
-    ],
-    "source": "Direct",
-    "rustMentioned": true,
-    "remoteConfirmed": true,
-    "checkedAt": "2026-05-28",
-    "expiresAt": "2026-09-01"
-  },
-  {
-    "note": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time |",
-    "rustMentioned": true,
-    "remoteConfirmed": true,
-    "tags": [
-      "Remote",
-      "US"
+      "Stockholm",
+      "Sweden",
+      "Full-time"
     ],
     "topics": [
       "backend",
-      "infra"
+      "infrastructure",
+      "dataframe",
+      "robotics",
+      "ML"
     ],
-    "href": "https://news.ycombinator.com/item?id=47986563",
-    "description": "Radar Labs | Software Engineers (SRE, data platform, backend, full-stack, mobile) | Remote (US), NYC | Full Time | <a href=\"https://radar.com\" rel=\"nofollow\">https://radar.com</a>\n- Radar is the geo-l",
-    "checkedAt": "2026-05-28",
-    "expiresAt": "2026-08-28",
-    "company": "Radar Labs ",
-    "role": "Software Engineers (SRE, data platform, backend, full-stack, mobile) "
-  },
-  {
-    "note": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
     "rustMentioned": true,
     "remoteConfirmed": true,
+    "description": "Rerun is the data layer for Physical AI, using Rust for core performance-critical code. They are hiring for multiple roles including Rust Backend Engineers.",
+    "checkedAt": "2026-06-07",
+    "expiresAt": "2026-09-07"
+  },
+  {
+    "company": "yeet",
+    "role": "Rust Developer / Backend Engineer",
+    "href": "https://yeet.cx/careers",
+    "note": "Building a dynamic runtime on top of the Linux BPF sub-system. Looking for Rust developers with deep interest in Linux internals, distributed systems, and systems programming.",
+    "tags": [
+      "Chicago",
+      "IL",
+      "Remote",
+      "Full-Time"
+    ],
+    "topics": [
+      "infra",
+      "backend",
+      "systems programming"
+    ],
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "description": "Building a dynamic runtime on top of the Linux BPF sub-system. Looking for Rust developers with deep interest in Linux internals, distributed systems, and systems programming.",
+    "checkedAt": "2026-06-07",
+    "expiresAt": "2026-09-07"
+  },
+  {
+    "company": "Radar Labs",
+    "role": "Software Engineers (SRE, data platform, backend, full-stack, mobile)",
+    "href": "https://radar.com/jobs#jobs",
+    "note": "Radar is a geo-location dev tool handling 1B+ API calls per day. Main languages are Rust and TypeScript, with Python, Scala, and Terraform for mobile and offline pipelines.",
     "tags": [
       "Remote",
-      "US"
+      "US",
+      "NYC"
     ],
     "topics": [
-      "backend"
+      "infra",
+      "backend",
+      "full-stack",
+      "mobile",
+      "data platform",
+      "SRE"
     ],
-    "href": "https://news.ycombinator.com/item?id=47980297",
-    "description": "yeet | Chicago, IL / Remote | Full-Time\nBuilding a dynamic runtime on top of the Linux BPF sub-system. Looking for extremely talented / passionate Rust developers / Backend Engineers with a deep inter",
-    "checkedAt": "2026-05-28",
-    "expiresAt": "2026-08-28",
-    "company": "yeet",
-    "role": "Rust developers / Backend Engineers"
-  },
-  {
-    "note": "Foxglove | Onsite (San Francisco) + Remote | Full Time |\nFoxglove is the leading data infrastructure & observability platform f",
     "rustMentioned": true,
     "remoteConfirmed": true,
+    "description": "Radar is a geo-location dev tool handling 1B+ API calls per day. Main languages are Rust and TypeScript, with Python, Scala, and Terraform for mobile and offline pipelines.",
+    "checkedAt": "2026-06-07",
+    "expiresAt": "2026-09-07"
+  },
+  {
+    "company": "FUTO",
+    "role": "Rust Developer - Polycentric",
+    "href": "http://futo.tech/jobs/rust-developer-polycentric",
+    "note": "FUTO is hiring a Rust Developer for their Polycentric project, focusing on decentralized technologies. The role is remote or onsite in Austin, TX, full-time.",
     "tags": [
-      "Remote"
+      "Remote",
+      "Onsite",
+      "Austin",
+      "TX"
     ],
     "topics": [
-      "wasm",
+      "decentralization",
+      "software"
+    ],
+    "rustMentioned": true,
+    "remoteConfirmed": true,
+    "description": "FUTO is hiring a Rust Developer for their Polycentric project, focusing on decentralized technologies. The role is remote or onsite in Austin, TX, full-time.",
+    "checkedAt": "2026-06-07",
+    "expiresAt": "2026-09-07"
+  },
+  {
+    "company": "Kepler",
+    "role": "Full Stack Engineer",
+    "href": "https://jobs.ashbyhq.com/kepler-ai/52624a4e-33e3-4f16-8028-026c94fb2eb8",
+    "note": "Kepler builds a trust layer for AI in high-stakes industries, starting with finance. The role involves building UI, extraction pipelines, and agent orchestrators with a Rust backend and TypeScript/React frontend.",
+    "tags": [
+      "ONSITE",
+      "New York"
+    ],
+    "topics": [
+      "fullstack",
+      "backend",
       "infra"
     ],
-    "company": "Foxglove",
-    "role": "Remote | Full Time",
-    "href": "https://news.ycombinator.com/item?id=47977183",
-    "description": "Foxglove | Onsite (San Francisco) + Remote | Full Time | <a href=\"https://foxglove.dev/\" rel=\"nofollow\">https://foxglove.dev/</a>\nFoxglove is the leading data infrastructure & observability platform f",
-    "checkedAt": "2026-06-06",
-    "expiresAt": "2026-09-06"
+    "rustMentioned": true,
+    "remoteConfirmed": false,
+    "description": "Kepler builds a trust layer for AI in high-stakes industries, starting with finance. The role involves building UI, extraction pipelines, and agent orchestrators with a Rust backend and TypeScript/React frontend.",
+    "checkedAt": "2026-06-07",
+    "expiresAt": "2026-09-07"
   }
 ]

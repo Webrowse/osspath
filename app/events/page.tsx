@@ -26,7 +26,7 @@ export default async function EventsArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Archive</div>
+              <div className="e-section__num">Calendar</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Events & Learning</h1>
               <p className="e-archive-meta">
                 Conferences, workshops, and recurring community sessions. Temporary opportunities only.

@@ -1,1 +1,268 @@
-[]
+[
+  {
+    "id": "hn-event-45468102",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=45468102",
+    "foundAt": "2025-10-03T21:38:28Z",
+    "confidence": 0.65,
+    "whyMatched": "Memory Safety Is Merely Table Stakes (RustConf 2025 Talk)",
+    "rawText": "Memory Safety Is Merely Table Stakes (RustConf 2025 Talk)\nURL: https://www.youtube.com/watch?v=cOP219vkax8",
+    "extracted": {
+      "title": "Memory Safety Is Merely Table Stakes (RustConf 2025 Talk)",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "YouTube",
+      "href": "https://www.youtube.com/watch?v=cOP219vkax8",
+      "recurring": true
+    }
+  },
+  {
+    "id": "hn-event-48117010",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=48117010",
+    "foundAt": "2026-05-13T02:09:02Z",
+    "confidence": 0.65,
+    "whyMatched": "\"Cancelling Async Rust\" – RustConf 2025",
+    "rawText": "\"Cancelling Async Rust\" – RustConf 2025\nURL: https://www.youtube.com/watch?v=zrv5Cy1R7r4",
+    "extracted": {
+      "title": "Cancelling Async Rust",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "YouTube",
+      "href": "https://www.youtube.com/watch?v=zrv5Cy1R7r4",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-45063506",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=45063506",
+    "foundAt": "2025-08-29T12:56:46Z",
+    "confidence": 0.65,
+    "whyMatched": "Redox OS Self-hosted Presentation for RustConf 2025 [video]",
+    "rawText": "Redox OS Self-hosted Presentation for RustConf 2025 [video]\nURL: https://www.youtube.com/watch?v=UQAS6i9Z9wc",
+    "extracted": {
+      "title": "Redox OS Self-hosted Presentation for RustConf 2025 [video]",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "video",
+      "href": "https://www.youtube.com/watch?v=UQAS6i9Z9wc",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-46687082",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=46687082",
+    "foundAt": "2026-01-20T02:13:38Z",
+    "confidence": 0.65,
+    "whyMatched": "Rain: \"Cancelling Async Rust\" – RustConf 2025",
+    "rawText": "Rain: \"Cancelling Async Rust\" – RustConf 2025\nURL: https://www.youtube.com/watch?v=zrv5Cy1R7r4",
+    "extracted": {
+      "title": "Rain: \"Cancelling Async Rust\" – RustConf 2025",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Online",
+      "href": "https://www.youtube.com/watch?v=zrv5Cy1R7r4",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-45469310",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=45469310",
+    "foundAt": "2025-10-04T00:22:43Z",
+    "confidence": 0.65,
+    "whyMatched": "10 Years of Redox OS and Rust – RustConf 2025",
+    "rawText": "10 Years of Redox OS and Rust – RustConf 2025\nURL: https://www.youtube.com/watch?v=xlccq9EbXGA",
+    "extracted": {
+      "title": "10 Years of Redox OS and Rust – RustConf 2025",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Online",
+      "href": "https://www.youtube.com/watch?v=xlccq9EbXGA",
+      "recurring": true
+    }
+  },
+  {
+    "id": "hn-event-37890314",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=37890314",
+    "foundAt": "2023-10-15T15:01:16Z",
+    "confidence": 0.65,
+    "whyMatched": "EuroRust 2023 Reflections: What's a Conference For?",
+    "rawText": "EuroRust 2023 Reflections: What's a Conference For?\nURL: https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
+    "extracted": {
+      "title": "EuroRust 2023 Reflections: What's a Conference For?",
+      "day": "14",
+      "month": "Oct",
+      "meta": "Blog post",
+      "href": "https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-39319645",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=39319645",
+    "foundAt": "2024-02-09T19:51:54Z",
+    "confidence": 0.65,
+    "whyMatched": "All EuroRust 2023 talks ordered by the view count",
+    "rawText": "All EuroRust 2023 talks ordered by the view count\nURL: https://techtalksweekly.substack.com/p/all-eurorust-2023-talks-ordered-by",
+    "extracted": {
+      "title": "All EuroRust 2023 talks ordered by the view count",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Online",
+      "href": "https://techtalksweekly.substack.com/p/all-eurorust-2023-talks-ordered-by",
+      "recurring": true
+    }
+  },
+  {
+    "id": "hn-event-38293264",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=38293264",
+    "foundAt": "2023-11-16T18:16:45Z",
+    "confidence": 0.65,
+    "whyMatched": "EuroRust 2023",
+    "rawText": "EuroRust 2023\nURL: https://www.youtube.com/playlist?list=PLH6-VpZ3SvUUKFSEPEWiHQi4JqebBj9Tq",
+    "extracted": {
+      "title": "EuroRust 2023",
+      "day": "—",
+      "month": "Oct",
+      "meta": "Recordings",
+      "href": "https://www.youtube.com/playlist?list=PLH6-VpZ3SvUUKFSEPEWiHQi4JqebBj9Tq",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-42301580",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=42301580",
+    "foundAt": "2024-12-02T23:39:40Z",
+    "confidence": 0.65,
+    "whyMatched": "Helsing at Eurorust and the Oxidation of Defense",
+    "rawText": "Helsing at Eurorust and the Oxidation of Defense\nURL: https://cafkafk.dev/p/eurorust-2024-helsing/",
+    "extracted": {
+      "title": "Helsing at Eurorust and the Oxidation of Defense",
+      "day": "—",
+      "month": "Oct",
+      "meta": "Conference",
+      "href": "https://cafkafk.dev/p/eurorust-2024-helsing/",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-37897190",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=37897190",
+    "foundAt": "2023-10-16T08:45:33Z",
+    "confidence": 0.65,
+    "whyMatched": "A bitter commentary on EuroRust conf",
+    "rawText": "A bitter commentary on EuroRust conf\nURL: https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
+    "extracted": {
+      "title": "A bitter commentary on EuroRust conf",
+      "day": "14",
+      "month": "Oct",
+      "meta": "—",
+      "href": "https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-22568792",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=22568792",
+    "foundAt": "2020-03-13T16:49:04Z",
+    "confidence": 0.65,
+    "whyMatched": "Oxidize 1K: A Remote Rust Conference",
+    "rawText": "Oxidize 1K: A Remote Rust Conference\nURL: https://oxidizeconf.com/oxidize-1k/",
+    "extracted": {
+      "title": "Oxidize 1K: A Remote Rust Conference",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Remote, Free",
+      "href": "https://oxidizeconf.com/oxidize-1k/",
+      "recurring": true
+    }
+  },
+  {
+    "id": "hn-event-22639115",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=22639115",
+    "foundAt": "2020-03-20T16:55:51Z",
+    "confidence": 0.65,
+    "whyMatched": "Oxidize – Remote-Only Embedded Rust Conference [Happening Now]",
+    "rawText": "Oxidize – Remote-Only Embedded Rust Conference [Happening Now]\nURL: https://oxidizeconf.com/",
+    "extracted": {
+      "title": "Oxidize – Remote-Only Embedded Rust Conference",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Remote",
+      "href": "https://oxidizeconf.com/",
+      "recurring": true
+    }
+  },
+  {
+    "id": "hn-event-22743311",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=22743311",
+    "foundAt": "2020-03-31T22:16:26Z",
+    "confidence": 0.65,
+    "whyMatched": "Oxidize 1K – Remote lightning conference for Embedded Rust – 2020-3-20",
+    "rawText": "Oxidize 1K – Remote lightning conference for Embedded Rust – 2020-3-20\nURL: https://www.youtube.com/watch?v=zPuELAzJyno",
+    "extracted": {
+      "title": "Oxidize 1K – Remote lightning conference for Embedded Rust",
+      "day": "20",
+      "month": "Mar",
+      "meta": "Remote",
+      "href": "https://www.youtube.com/watch?v=zPuELAzJyno",
+      "recurring": false
+    }
+  },
+  {
+    "id": "hn-event-33033323",
+    "type": "events",
+    "status": "pending",
+    "source": "hn-events",
+    "sourceUrl": "https://news.ycombinator.com/item?id=33033323",
+    "foundAt": "2022-09-30T10:57:36Z",
+    "confidence": 0.65,
+    "whyMatched": "Rust Nation – A UK Conference for Rustaceans",
+    "rawText": "Rust Nation – A UK Conference for Rustaceans\nURL: https://www.rustnationuk.com",
+    "extracted": {
+      "title": "Rust Nation",
+      "day": "—",
+      "month": "Monthly",
+      "meta": "Conference",
+      "href": "https://www.rustnationuk.com",
+      "recurring": true
+    }
+  }
+]

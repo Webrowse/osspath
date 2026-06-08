@@ -5,7 +5,7 @@ import { addManualPending, extractWithAI } from "@/lib/admin/actions"
 import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 
-const TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies"]
+const TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
 const RAW_TEXT_LABELS: Record<ContentType, string> = {
   jobs:      "Job listing text",
@@ -14,6 +14,7 @@ const RAW_TEXT_LABELS: Record<ContentType, string> = {
   pulse:     "Newsletter or forum post",
   events:    "Event description",
   companies: "Company description",
+  portals:   "Job portal description",
 }
 
 const RAW_TEXT_PLACEHOLDERS: Record<ContentType, string> = {
@@ -23,6 +24,7 @@ const RAW_TEXT_PLACEHOLDERS: Record<ContentType, string> = {
   pulse:     "Paste the newsletter excerpt or forum post…",
   events:    "Paste the event announcement or CFP description…",
   companies: "Paste the company description or About page text…",
+  portals:   "Portal name, URL, and a brief description of what it covers…",
 }
 
 export function ManualAddForm() {

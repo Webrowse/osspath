@@ -24,7 +24,7 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
         <div className="e-col e-col--wide">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Archive</div>
+              <div className="e-section__num">Directory</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Companies Using Rust</h1>
               <p className="e-archive-meta">
                 Not all companies listed here are hiring. This page is for ecosystem orientation — who builds what.

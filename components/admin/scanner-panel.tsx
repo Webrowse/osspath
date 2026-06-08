@@ -1,11 +1,16 @@
 "use client"
 
-import { useState, useTransition } from "react"
-import { scanHNHiring, scanTWIR, scanGitHubOSS } from "@/lib/admin/scanners"
+import { useState } from "react"
+import {
+  scanHNHiring, scanGitHubOSS,
+  scanGrants, scanPulse, scanEvents, scanPortals, scanCompanies,
+} from "@/lib/admin/scanners"
 import type { ScanLog } from "@/lib/admin/types"
 
+type ScannerId = "hn" | "github" | "grants" | "pulse" | "events" | "portals" | "companies"
+
 interface ScannerPanelProps {
-  id: "hn" | "twir" | "github"
+  id: ScannerId
   title: string
   description: string
   source: string
@@ -13,17 +18,34 @@ interface ScannerPanelProps {
 
 export function ScannerPanel({ id, title, description }: ScannerPanelProps) {
   const [log, setLog]       = useState<ScanLog | null>(null)
-  const [useAI, setUseAI]   = useState(false)
-  const [pending, start]    = useTransition()
+  const [pending, setPending] = useState(false)
 
   function run() {
+    if (pending) return
     setLog(null)
-    start(async () => {
-      let result: ScanLog
-      if (id === "hn")         result = await scanHNHiring(useAI)
-      else if (id === "twir")  result = await scanTWIR(useAI)
-      else                     result = await scanGitHubOSS()
+    setPending(true)
+
+    const scanFn =
+      id === "hn"        ? scanHNHiring  :
+      id === "grants"    ? scanGrants    :
+      id === "pulse"     ? scanPulse     :
+      id === "events"    ? scanEvents    :
+      id === "portals"   ? scanPortals   :
+      id === "companies" ? scanCompanies :
+      scanGitHubOSS
+
+    scanFn().then(result => {
       setLog(result)
+      setPending(false)
+    }).catch(err => {
+      setLog({
+        source: id,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        found: 0, added: 0, skipped: 0,
+        errors: [String(err)],
+      })
+      setPending(false)
     })
   }
 
@@ -64,24 +86,6 @@ export function ScannerPanel({ id, title, description }: ScannerPanelProps) {
     <div className="adm-scan-card" id={id}>
       <div className="adm-scan-card__title">{title}</div>
       <div className="adm-scan-card__desc">{description}</div>
-
-      {id !== "github" && (
-        <label style={{
-          display: "flex", alignItems: "center", gap: 7,
-          fontSize: 12, color: "var(--fg-2)", cursor: "pointer",
-        }}>
-          <input
-            type="checkbox"
-            checked={useAI}
-            onChange={(e) => setUseAI(e.target.checked)}
-            style={{ accentColor: "oklch(0.62 0.14 42)" }}
-          />
-          Use DeepSeek AI extraction
-          <span style={{ color: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-geist-mono)" }}>
-            (test key at <a href="/admin/test-deepseek" style={{ color: "oklch(0.62 0.14 42)" }}>/admin/test-deepseek</a>)
-          </span>
-        </label>
-      )}
 
       <button
         className="adm-btn adm-btn--primary"

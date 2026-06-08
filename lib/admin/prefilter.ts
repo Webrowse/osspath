@@ -48,14 +48,6 @@ export function classifyRustSignal(text: string): "strong" | "weak" | "none" {
   return "weak"
 }
 
-export function isLikelyRustJob(text: string): boolean {
-  const signal = classifyRustSignal(text)
-  if (signal === "none") return false
-  // Allow weak only if it's clearly a job posting structure
-  if (signal === "weak") return false
-  return true
-}
-
 // ── Scoring ───────────────────────────────────────────────────────────────────
 
 export type ScoreBreakdown = {

@@ -1,8 +1,10 @@
 import { Suspense } from "react"
 import { WorkspaceSidebar } from "@/components/workspace-sidebar"
+import { WorkspaceProviders } from "@/components/workspace-providers"
 
 export default function SourcesLayout({ children }: { children: React.ReactNode }) {
   return (
+    <WorkspaceProviders>
     <div
       style={{
         position: "fixed",
@@ -28,5 +30,6 @@ export default function SourcesLayout({ children }: { children: React.ReactNode 
         {children}
       </main>
     </div>
+    </WorkspaceProviders>
   )
 }

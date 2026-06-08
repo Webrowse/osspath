@@ -3,7 +3,12 @@ import { PrismaPg } from "@prisma/adapter-pg"
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL!
-  const adapter = new PrismaPg({ connectionString })
+  const adapter = new PrismaPg({
+    connectionString,
+    connectionTimeoutMillis: 8_000,  // fail in 8s not 20s when DB is unreachable
+    idleTimeoutMillis: 60_000,        // release idle connections after 60s
+    max: 10,
+  })
   return new PrismaClient({ adapter })
 }
 

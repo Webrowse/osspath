@@ -2,10 +2,6 @@ import type { Metadata } from "next"
 import { Geist, Geist_Mono, Newsreader, IBM_Plex_Mono } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
-import { SessionProvider } from "@/components/session-provider"
-import { UIPreferencesProvider } from "@/lib/theme"
-import { CommandPaletteMount } from "@/components/command-palette"
-import { PostHogProvider } from "@/components/posthog-provider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -91,15 +87,8 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: preferencesScript }} />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SessionProvider>
-          <PostHogProvider>
-            <UIPreferencesProvider>
-              {children}
-              {modal}
-              <CommandPaletteMount />
-            </UIPreferencesProvider>
-          </PostHogProvider>
-        </SessionProvider>
+        {children}
+        {modal}
         <Toaster />
       </body>
     </html>

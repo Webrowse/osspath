@@ -26,7 +26,7 @@ export default async function GrantsArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Archive</div>
+              <div className="e-section__num">Funding</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Grants & Bounties</h1>
               <p className="e-archive-meta">
                 Funding for Rust ecosystem work. Click through to the source for current terms and deadlines.

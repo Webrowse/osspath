@@ -45,6 +45,12 @@ const FIELD_CONFIGS: Record<ContentType, { key: string; label: string; multiline
     { key: "sector", label: "Sector" },
     { key: "href",   label: "URL" },
   ],
+  portals: [
+    { key: "name",        label: "Name" },
+    { key: "kind",        label: "Kind" },
+    { key: "href",        label: "URL" },
+    { key: "description", label: "Description", multiline: true },
+  ],
 }
 
 interface EditPublishedButtonProps {

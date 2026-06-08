@@ -6,7 +6,8 @@ export const SITE_NAV = [
   { label: "Grants",    anchor: "#grants",    archive: "/grants" },
   { label: "Pulse",     anchor: "#pulse",     archive: "/pulse" },
   { label: "Events",    anchor: "#events",    archive: "/events" },
-  { label: "Ecosystem", anchor: "#companies", archive: "/ecosystem" },
+  { label: "Companies", anchor: "#companies", archive: "/ecosystem" },
+  { label: "Portals",   anchor: "#portals",   archive: "/portals" },
 ] as const
 
 export type NavEntry = (typeof SITE_NAV)[number]
