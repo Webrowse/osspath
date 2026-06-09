@@ -3,10 +3,11 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSCard } from "@/components/editorial/oss-card"
-import { getCompanionIndex, DEP_PAGE_THRESHOLD } from "@/lib/deps-data"
+import { getCompanionIndex, getDepPageCounts, DEP_PAGE_THRESHOLD } from "@/lib/deps-data"
 import {
   getTopicRepos,
   getQualifiedTopics,
+  getOSSReposForTopics,
   TOPIC_DISPLAY_NAMES,
   TOPIC_DESCRIPTIONS,
   TOPIC_PAGE_THRESHOLD,
@@ -85,8 +86,16 @@ export default async function TopicPage({ params }: PageProps) {
   const count        = allRepos.length
   const repoLabel    = count === 1 ? "repository" : "repositories"
 
-  // Find dep-page crates most prevalent in this topic's repos, sorted by frequency.
+  // Find dep-page crates with highest topic affinity (lift), not raw frequency.
+  // lift = topicCoverage / globalCoverage
+  // topicCoverage = repos_in_topic_using_dep / total_repos_in_topic
+  // globalCoverage = repos_using_dep_globally / total_repos_globally
+  // Only deps present in >= 15% of topic repos qualify.
   const companionIndex = getCompanionIndex()
+  const depPageCounts  = getDepPageCounts()
+  const totalRepoCount = getOSSReposForTopics().length // cached; no extra I/O
+  const MIN_TOPIC_COVERAGE = 0.15
+
   const depFreq: Record<string, number> = {}
   for (const r of allRepos) {
     for (const d of r.dependencies ?? []) {
@@ -95,10 +104,24 @@ export default async function TopicPage({ params }: PageProps) {
       }
     }
   }
-  const topDepLinks = Object.entries(depFreq)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([crate, freq]) => ({ crate, pct: Math.round((freq / count) * 100) }))
+  const rankedDeps = Object.entries(depFreq)
+    .filter(([, freq]) => freq / count >= MIN_TOPIC_COVERAGE)
+    .map(([crate, freq]) => {
+      const topicCoverage  = freq / count
+      const globalCoverage = (companionIndex[crate]?.repoCount ?? 0) / totalRepoCount
+      const lift = globalCoverage > 0 ? topicCoverage / globalCoverage : 0
+      return { crate, pct: Math.round(topicCoverage * 100), lift }
+    })
+    .sort(
+      (a, b) =>
+        b.lift - a.lift ||
+        b.pct  - a.pct  ||
+        a.crate.localeCompare(b.crate)
+    )
+  const depLimit = (rankedDeps[5]?.lift ?? 0) >= 3.0 ? 8 : 5
+  const topDepLinks = rankedDeps
+    .slice(0, depLimit)
+    .map(({ crate, pct }) => ({ crate, pct }))
 
   const description = TOPIC_DESCRIPTIONS[topic]?.(count) ?? `Browse ${count} open source Rust ${displayName.toLowerCase()} projects.`
 
@@ -232,7 +255,7 @@ export default async function TopicPage({ params }: PageProps) {
             </div>
             <div className="e-oss-grid">
               {topRepos.map((repo) => (
-                <OSSCard key={repo.href} repo={repo} />
+                <OSSCard key={repo.href} repo={repo} depPageCounts={depPageCounts} />
               ))}
             </div>
           </div>

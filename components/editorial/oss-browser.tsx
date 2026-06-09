@@ -143,7 +143,13 @@ function buildFacets(items: NormalizedRepo[]) {
 
 // ── Main component ─────────────────────────────────────────────────────────
 
-export function OSSBrowser({ repos }: { repos: OSSPath[] }) {
+export function OSSBrowser({
+  repos,
+  depPageCounts,
+}: {
+  repos: OSSPath[]
+  depPageCounts?: Record<string, number>
+}) {
   const normalized = useMemo(() => repos.map(normalize), [repos])
 
   // Filter state
@@ -536,7 +542,7 @@ export function OSSBrowser({ repos }: { repos: OSSPath[] }) {
           {sorted.length > 0 ? (
             <div className="e-oss-grid">
               {sorted.map(repo => (
-                <OSSCard key={repo.href} repo={repo as NormalizedRepo} />
+                <OSSCard key={repo.href} repo={repo as NormalizedRepo} depPageCounts={depPageCounts} />
               ))}
             </div>
           ) : (

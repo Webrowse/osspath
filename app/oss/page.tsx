@@ -1,7 +1,9 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSBrowser } from "@/components/editorial/oss-browser"
 import { OSS_PATHS } from "@/content/oss-paths"
+import { getCompanionIndex, getDepPageCounts, DEP_PAGE_THRESHOLD } from "@/lib/deps-data"
 
 export const metadata: Metadata = {
   title: "OSS Paths — Approachable Rust Repositories",
@@ -23,6 +25,13 @@ export const metadata: Metadata = {
 }
 
 export default function OSSArchivePage() {
+  const depPageCounts = getDepPageCounts()
+  const featuredDeps = Object.entries(getCompanionIndex())
+    .filter(([, v]) => v.repoCount >= DEP_PAGE_THRESHOLD)
+    .sort((a, b) => b[1].repoCount - a[1].repoCount)
+    .slice(0, 24)
+    .map(([name]) => name)
+
   return (
     <EditorialLayout>
       <section style={{ paddingTop: "clamp(40px, 6vw, 64px)", paddingBottom: "clamp(64px, 9vw, 104px)" }}>
@@ -40,7 +49,36 @@ export default function OSSArchivePage() {
             </div>
           </div>
 
-          <OSSBrowser repos={OSS_PATHS} />
+          {/* ── Popular dependencies ──────────────────────────────────────────── */}
+          {featuredDeps.length > 0 && (
+            <div style={{ marginBottom: 40 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--color-muted)",
+                  marginBottom: 12,
+                }}
+              >
+                Popular Rust Dependencies
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {featuredDeps.map((crate) => (
+                  <Link key={crate} href={`/deps/${crate}`} style={{ textDecoration: "none" }}>
+                    <span
+                      className="e-tag e-tag--soft"
+                      style={{ cursor: "pointer", fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}
+                    >
+                      {crate}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <OSSBrowser repos={OSS_PATHS} depPageCounts={depPageCounts} />
         </div>
       </section>
     </EditorialLayout>

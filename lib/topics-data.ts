@@ -1,21 +1,11 @@
-import { readFileSync } from "fs"
-import { join } from "path"
-import type { OSSPath } from "@/content/oss-paths"
+import { TOPIC_ALIASES, TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
+import { getOSSRepos } from "@/lib/oss-data"
+
+// Re-export so existing imports from this module continue to work unchanged.
+export { TOPIC_ALIASES, TOPIC_DISPLAY_NAMES, getTopicPageSlug } from "@/lib/topic-config"
 
 export const TOPIC_PAGE_THRESHOLD = 25
 export const TOPIC_MAX_REPOS = 50
-
-// Secondary tags that are merged into each canonical slug before counting.
-export const TOPIC_ALIASES: Record<string, string[]> = {
-  cli:       ["command-line", "command-line-tool"],
-  wasm:      ["webassembly"],
-  ai:        ["ai-agents", "agent", "agents", "artificial-intelligence", "agentic", "agentic-ai"],
-  embedded:  ["embedded-hal", "embedded-rust"],
-  async:     ["asynchronous", "async-rust"],
-  "no-std":  ["no_std"],
-  database:  ["db", "embedded-database"],
-  crypto:    ["cryptography"],
-}
 
 // Topics that never receive pages regardless of repo count.
 export const EXCLUDED_TOPICS = new Set([
@@ -23,25 +13,6 @@ export const EXCLUDED_TOPICS = new Set([
   "bash", "python", "javascript", "react", "linux", "macos", "android",
   "aws", "kubernetes", "docker", "tokio", "http",
 ])
-
-// Canonical display names for the 15 approved topics (ordered by repo count desc).
-export const TOPIC_DISPLAY_NAMES: Record<string, string> = {
-  cli:        "CLI",
-  web:        "Web",
-  wasm:       "WebAssembly",
-  database:   "Database",
-  embedded:   "Embedded",
-  ai:         "AI",
-  sql:        "SQL",
-  async:      "Async",
-  parser:     "Parser",
-  security:   "Security",
-  game:       "Game",
-  compiler:   "Compiler",
-  blockchain: "Blockchain",
-  crypto:     "Crypto",
-  "no-std":   "no_std",
-}
 
 // Deterministic SEO descriptions. Count is injected at render time.
 export const TOPIC_DESCRIPTIONS: Record<string, (count: number) => string> = {
@@ -62,16 +33,9 @@ export const TOPIC_DESCRIPTIONS: Record<string, (count: number) => string> = {
   "no-std":   (n) => `Browse ${n} Rust no_std projects targeting embedded systems, kernel development, and constrained environments.`,
 }
 
-const ROOT = process.cwd()
-
-// Module-level cache — read once per build worker, not once per page.
-let _ossRepos: OSSPath[] | null = null
-
-export function getOSSReposForTopics(): OSSPath[] {
-  if (!_ossRepos) {
-    _ossRepos = JSON.parse(readFileSync(join(ROOT, "content/oss.json"), "utf-8"))
-  }
-  return _ossRepos!
+// Backward-compat alias — callers that import getOSSReposForTopics() keep working.
+export function getOSSReposForTopics() {
+  return getOSSRepos()
 }
 
 // Returns the full tag set for a canonical topic (canonical + all aliases).
@@ -81,9 +45,9 @@ export function getTopicTags(topic: string): string[] {
 
 // Returns all repos that match a topic (via canonical tag or any alias),
 // sorted stars desc → pushedAt desc → name asc.
-export function getTopicRepos(topic: string): OSSPath[] {
+export function getTopicRepos(topic: string) {
   const tags = new Set(getTopicTags(topic))
-  return getOSSReposForTopics()
+  return getOSSRepos()
     .filter((r) => (r.topics ?? []).some((t) => tags.has(t)))
     .sort(
       (a, b) =>

@@ -7,9 +7,12 @@ import {
   getCompanionIndex,
   getOSSRepos,
   getQualifiedCrates,
+  getDepTopicAffinity,
+  getDepPageCounts,
   DEP_PAGE_THRESHOLD,
   DEP_MAX_REPOS,
 } from "@/lib/deps-data"
+import { TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
 
 // No fallback for params not in generateStaticParams — return 404 instead.
 export const dynamicParams = false
@@ -87,10 +90,28 @@ export default async function DepPage({ params }: PageProps) {
   const activeCount = allRepos.filter((r) => r.activityTier === "active").length
   const uniqueOwners = new Set(allRepos.map((r) => r.owner).filter(Boolean)).size
 
-  // Companions that also qualify for their own dep page → internal links
-  const linkedCompanions = entry.companions.filter(
-    (c) => (index[c.name]?.repoCount ?? 0) >= DEP_PAGE_THRESHOLD
-  )
+  // Companions ranked by lift (topic affinity), not raw co-occurrence frequency.
+  // lift = companionCoverage / globalCoverage
+  // companionCoverage = repos_using_both / repos_using_target
+  // globalCoverage    = repos_using_companion / total_repos
+  const totalRepoCount = getOSSRepos().length // cache already warm from allRepos above
+  const linkedCompanions = entry.companions
+    .filter((c) => (index[c.name]?.repoCount ?? 0) >= DEP_PAGE_THRESHOLD)
+    .map((c) => {
+      const companionCoverage = c.count / entry.repoCount
+      const globalCoverage    = (index[c.name]?.repoCount ?? 0) / totalRepoCount
+      const lift              = globalCoverage > 0 ? companionCoverage / globalCoverage : 0
+      return { ...c, lift }
+    })
+    .sort(
+      (a, b) =>
+        b.lift    - a.lift    ||
+        b.percent - a.percent ||
+        a.name.localeCompare(b.name)
+    )
+
+  const relatedTopics  = getDepTopicAffinity(allRepos)
+  const depPageCounts  = getDepPageCounts()
 
   const repoLabel = allRepos.length === 1 ? "repository" : "repositories"
 
@@ -168,6 +189,36 @@ export default async function DepPage({ params }: PageProps) {
             ))}
           </div>
 
+          {/* ── Related topics ──────────────────────────────────────────────── */}
+          {relatedTopics.length > 0 && (
+            <div style={{ marginBottom: 40 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--color-muted)",
+                  marginBottom: 12,
+                }}
+              >
+                Related topics
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {relatedTopics.map((topic) => (
+                  <Link
+                    key={topic}
+                    href={`/topics/${topic}`}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <span className="e-tag e-tag--soft" style={{ cursor: "pointer" }}>
+                      {TOPIC_DISPLAY_NAMES[topic] ?? topic}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ── Companion crates ────────────────────────────────────────────── */}
           {linkedCompanions.length > 0 && (
             <div style={{ marginBottom: 40 }}>
@@ -216,7 +267,7 @@ export default async function DepPage({ params }: PageProps) {
             </div>
             <div className="e-oss-grid">
               {topRepos.map((repo) => (
-                <OSSCard key={repo.href} repo={repo} />
+                <OSSCard key={repo.href} repo={repo} depPageCounts={depPageCounts} />
               ))}
             </div>
           </div>

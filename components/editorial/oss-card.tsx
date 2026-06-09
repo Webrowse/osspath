@@ -1,4 +1,6 @@
+import Link from "next/link"
 import type { OSSPath } from "@/content/oss-paths"
+import { getTopicPageSlug } from "@/lib/topic-config"
 
 function ArrowUR() {
   return (
@@ -15,13 +17,48 @@ function fmt(n: number): string {
   return String(n)
 }
 
-export function OSSCard({ repo }: { repo: OSSPath }) {
+// Minimum repoCount preferred for card dep links.
+// Keeps proc-macro helpers, test-only crates, and sys bindings out of slot 1-3.
+// The >=25 pool is still used as fallback when fewer than `limit` qualify at >=40.
+const CARD_DEP_FLOOR = 40
+
+// Selects up to `limit` dep links for a card.
+// Primary set: repoCount >= CARD_DEP_FLOOR, sorted ascending (most specific first).
+// Fallback: fills remaining slots from the full >=25 qualified pool, also ascending.
+function pickDepLinks(
+  deps: string[] | undefined,
+  depPageCounts: Record<string, number>,
+  limit: number
+): string[] {
+  if (!deps?.length) return []
+  const qualified = deps.filter((d) => d in depPageCounts)
+  const preferred = qualified
+    .filter((d) => (depPageCounts[d] ?? 0) >= CARD_DEP_FLOOR)
+    .sort((a, b) => (depPageCounts[a] ?? 0) - (depPageCounts[b] ?? 0))
+    .slice(0, limit)
+  if (preferred.length >= limit) return preferred
+  const preferredSet = new Set(preferred)
+  const fallback = qualified
+    .filter((d) => !preferredSet.has(d))
+    .sort((a, b) => (depPageCounts[a] ?? 0) - (depPageCounts[b] ?? 0))
+    .slice(0, limit - preferred.length)
+  return [...preferred, ...fallback]
+}
+
+export function OSSCard({
+  repo,
+  depPageCounts,
+}: {
+  repo: OSSPath
+  depPageCounts?: Record<string, number>
+}) {
   const stars      = repo.stars      ?? 0
   const forks      = repo.forks      ?? 0
   const openIssues = repo.openIssuesCount ?? 0
   const owner      = repo.owner      ?? ""
   const tier       = repo.activityTier ?? "dormant"
   const topics     = (repo.topics ?? []).filter(t => t !== "rust").slice(0, 4)
+  const depLinks   = depPageCounts ? pickDepLinks(repo.dependencies, depPageCounts, 3) : []
 
   const statParts: string[] = []
   if (forks      > 0) statParts.push(`⑂ ${fmt(forks)} forks`)
@@ -52,11 +89,34 @@ export function OSSCard({ repo }: { repo: OSSPath }) {
       <div className="e-oss__foot">
         {topics.length > 0 && (
           <div className="e-oss__topics">
-            {topics.map(t => (
-              <span key={t} className="e-tag e-tag--soft">{t}</span>
+            {topics.map(t => {
+              const slug = getTopicPageSlug(t)
+              return slug ? (
+                <Link key={t} href={`/topics/${slug}`} className="e-tag e-tag--soft">
+                  {t}
+                </Link>
+              ) : (
+                <span key={t} className="e-tag e-tag--soft">{t}</span>
+              )
+            })}
+          </div>
+        )}
+
+        {depLinks.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 4 }}>
+            {depLinks.map((dep) => (
+              <Link
+                key={dep}
+                href={`/deps/${dep}`}
+                className="e-tag e-tag--soft"
+                style={{ fontFamily: "var(--font-ibm-plex-mono)", fontSize: 11 }}
+              >
+                {dep}
+              </Link>
             ))}
           </div>
         )}
+
         <a
           className="e-ext-link"
           href={repo.href}
