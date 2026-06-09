@@ -68,6 +68,10 @@ export interface RepoInput {
   help_wanted_issues_count?: number
   forks_count: number
   html_url: string
+  // Fields present in GitHub API response but previously untyped
+  language?: string | null
+  owner_login?: string
+  license_spdx_id?: string | null
 }
 
 export interface RepoClassification {
@@ -240,7 +244,7 @@ export async function classifyReposWithDeepSeek(
   return { results }
 }
 
-function inferEcoFromRepo(topics: string[], name: string, description: string): string {
+export function inferEcoFromRepo(topics: string[], name: string, description: string): string {
   const lc = [topics.join(" "), name, description].join(" ").toLowerCase()
   if (lc.includes("tui") || lc.includes("terminal")) return "UI · TUI"
   if (lc.includes("cli") || lc.includes("command-line")) return "CLI · Tooling"
@@ -256,7 +260,7 @@ function inferEcoFromRepo(topics: string[], name: string, description: string): 
   return "Libraries · General"
 }
 
-function deriveTopicsFromRepo(r: RepoInput): string[] {
+export function deriveTopicsFromRepo(r: RepoInput): string[] {
   const lc = [r.topics.join(" "), r.name, r.description ?? ""].join(" ").toLowerCase()
   const tags: string[] = []
   const checks: [string, string][] = [
@@ -377,7 +381,7 @@ export async function extractWithDeepSeek(
   let json: unknown
   try {
     json = await res.json()
-  } catch (parseErr) {
+  } catch {
     const raw = await res.text().catch(() => "(could not read body)")
     return { ok: false, error: `DeepSeek response was not valid JSON. Raw: ${raw.slice(0, 200)}` }
   }

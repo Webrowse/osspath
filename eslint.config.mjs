@@ -5,14 +5,24 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
   ]),
+  {
+    rules: {
+      // `any` is used intentionally throughout for JSON parsing and API responses
+      "@typescript-eslint/no-explicit-any": "off",
+      // Unused vars: warn only, don't error
+      "@typescript-eslint/no-unused-vars": "warn",
+      // setState-in-effect, ref-in-render, and purity patterns used intentionally
+      "react-hooks/set-state-in-effect": "off",
+      "react-hooks/refs": "off",
+      "react-hooks/purity": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

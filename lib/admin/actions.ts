@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { readPending, writePending, archiveItem, appendContent, readContent, writeContent } from "./storage"
+import { readPending, writePending, archiveItem, appendContent, writeContent } from "./storage"
 import type { ContentType, PendingItem } from "./types"
 import { auth } from "@/lib/auth"
 

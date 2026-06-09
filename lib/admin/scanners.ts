@@ -1,7 +1,7 @@
 "use server"
 
 import { addPendingItems, readPending, readContent, readRejected } from "./storage"
-import { extractWithDeepSeek, classifyReposWithDeepSeek } from "./deepseek"
+import { extractWithDeepSeek, inferEcoFromRepo, deriveTopicsFromRepo } from "./deepseek"
 import type { RepoInput } from "./deepseek"
 import {
   classifyRustSignal,
@@ -308,7 +308,114 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
   return log
 }
 
-// ── GitHub OSS Scanner ────────────────────────────────────────────────────────
+// ── GitHub OSS Scanner (metadata-first, no AI required) ──────────────────────
+
+// Deterministic quality filter — no AI needed.
+// Returns { junk: true, reason } for repos that should not enter the corpus.
+function ossJunkFilter(r: RepoInput & { archived?: boolean; disabled?: boolean }): { junk: boolean; reason: string } {
+  if (r.archived || r.disabled) return { junk: true, reason: "archived or disabled" }
+  if ((r.stargazers_count ?? 0) < 20) return { junk: true, reason: "under 20 stars" }
+
+  const nameLc = r.name.toLowerCase()
+  const descLc = (r.description ?? "").toLowerCase()
+
+  // Awesome lists and curated link collections
+  if (nameLc.startsWith("awesome-") || nameLc.startsWith("awesome_") || nameLc === "awesome") {
+    return { junk: true, reason: "awesome-list" }
+  }
+  if (/^(list-of|curated|resources|links)-/.test(nameLc)) {
+    return { junk: true, reason: "resource list" }
+  }
+  if (descLc.includes("curated list") || descLc.includes("a list of") ||
+      descLc.includes("collection of resources") || descLc.includes("a collection of awesome")) {
+    return { junk: true, reason: "curated list (description)" }
+  }
+
+  // Learning / tutorial / course repos
+  if (/-(tutorial|tutorials|guide|guides|course|courses|workshop|workshops|book|exercises|kata)s?$/.test(nameLc)) {
+    return { junk: true, reason: "learning resource" }
+  }
+  if (/^(learn|learning|tutorial|guide|course|workshop|book|study)-/.test(nameLc)) {
+    return { junk: true, reason: "learning resource" }
+  }
+
+  // Documentation repos
+  if (nameLc === "docs" || nameLc === "documentation" || nameLc.endsWith("-docs") || nameLc.endsWith(".github.io")) {
+    return { junk: true, reason: "documentation repo" }
+  }
+
+  // Mirror / fork repos
+  if (descLc.startsWith("mirror of") || descLc.startsWith("[mirror]") || descLc.includes("auto-mirror")) {
+    return { junk: true, reason: "mirror repository" }
+  }
+  if (nameLc.endsWith("-mirror") || nameLc.startsWith("mirror-")) {
+    return { junk: true, reason: "mirror repository" }
+  }
+
+  // Empty repos (no code at all)
+  if (r.size === 0) return { junk: true, reason: "empty repository" }
+
+  return { junk: false, reason: "" }
+}
+
+// Derive activityTier deterministically from pushed_at timestamp
+function ossActivityTier(pushedAt: string): "active" | "maintenance" | "dormant" {
+  if (!pushedAt) return "dormant"
+  const days = (Date.now() - new Date(pushedAt).getTime()) / 86_400_000
+  if (days <= 30) return "active"
+  if (days <= 90) return "maintenance"
+  return "dormant"
+}
+
+// Build the complete extracted object from raw GitHub API data — no AI required.
+function buildOSSExtracted(repo: RepoInput): Record<string, unknown> {
+  const tier = ossActivityTier(repo.pushed_at)
+  const eco  = inferEcoFromRepo(repo.topics, repo.name, repo.description ?? "")
+  return {
+    // Display fields
+    name:  repo.name,
+    eco,
+    href:  repo.html_url,
+    note:  repo.description ?? "",
+    topics: deriveTopicsFromRepo(repo),
+    // GitHub objective metadata
+    stars:                 repo.stargazers_count,
+    forks:                 repo.forks_count,
+    openIssuesCount:       repo.open_issues_count,
+    goodFirstIssuesCount:  repo.good_first_issues_count ?? 0,
+    helpWantedIssuesCount: repo.help_wanted_issues_count ?? 0,
+    language:              repo.language ?? null,
+    owner:                 repo.owner_login ?? "",
+    license:               repo.license_spdx_id ?? null,
+    pushedAt:              repo.pushed_at,
+    activityTier:          tier,
+    // AI-score fields kept at neutral defaults for schema compatibility.
+    // These are no longer used in the OSS browser (Phase 1 removed them).
+    maintainerFriendliness: 0.5,
+    issueQuality:           0.5,
+    beginnerSuitability:    0.5,
+    maintainerLabel:        "",
+    issueLabel:             `${repo.open_issues_count} open issues`,
+    beginnerLabel:          "",
+    ecosystem:              [],
+    beginnerFriendly:       (repo.good_first_issues_count ?? 0) > 0,
+    queue:                  true,
+    skipReason:             "",
+  }
+}
+
+// Paginated GitHub search — fetches up to `pages` pages at 100 results each.
+// Inserts a polite delay between pages to respect the 30 req/min search limit.
+async function ossSearchPage(query: string, page: number): Promise<any[]> {
+  try {
+    const data = await ghFetch(
+      `https://api.github.com/search/repositories?q=${query}&sort=updated&per_page=100&page=${page}`
+    ) as { items?: any[] }
+    return data?.items ?? []
+  } catch {
+    return []
+  }
+}
 
 export async function scanGitHubOSS(): Promise<ScanLog> {
   await requireAdmin()
@@ -323,140 +430,187 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
     notes: [],
   }
 
-  const since = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0]
+  const since365 = new Date(Date.now() - 365 * 86_400_000).toISOString().split("T")[0]
 
-  // Dedup against already-known items
-  const existingIds = new Set<string>()
+  // Build dedup sets against everything already in the corpus
+  const existingIds   = new Set<string>()
+  const existingHrefs = new Set<string>()
   try {
-    for (const item of readPending("oss")) existingIds.add(item.id)
+    for (const item of readPending("oss")) {
+      existingIds.add(item.id)
+      if (item.sourceUrl) existingHrefs.add(item.sourceUrl)
+    }
     for (const item of readContent("oss")) {
       const href = String(item.href ?? "")
-      if (href) existingIds.add(`gh-${href}`)
+      if (href) existingHrefs.add(href)
     }
   } catch { /* non-fatal */ }
 
   const rawRepos: RepoInput[] = []
   const seenIds = new Set<number>()
 
-  // ── 1. Search queries: good-first-issues, help-wanted, star ranges ────────
-  const searchQueries = [
-    `language:Rust+good-first-issues:>5+pushed:>${since}`,
-    `language:Rust+help-wanted-issues:>3+pushed:>${since}`,
-    `language:Rust+stars:20..500+pushed:>${since}`,
-    `language:Rust+stars:501..2000+pushed:>${since}`,
+  function ingest(r: any) {
+    if (seenIds.has(r.id)) return
+    if (r.archived || r.disabled) return
+    seenIds.add(r.id)
+    rawRepos.push(mapRepoResponse(r))
+  }
+
+  // ── 1. GitHub Search (multiple star ranges + topic-based + issue signals) ──
+  // Split by star range so each query stays inside GitHub's 1000-result cap.
+  // Two pages at 100 per page = up to 200 repos per query.
+  // Sort by `updated` for freshness; GitHub Search API caps results at 10 pages.
+  const SEARCH_QUERIES: Array<{ label: string; q: string }> = [
+    { label: "stars:20-99",        q: `language:Rust+stars:20..99+pushed:>${since365}` },
+    { label: "stars:100-499",      q: `language:Rust+stars:100..499+pushed:>${since365}` },
+    { label: "stars:500-1999",     q: `language:Rust+stars:500..1999+pushed:>${since365}` },
+    { label: "stars:2000-9999",    q: `language:Rust+stars:2000..9999+pushed:>${since365}` },
+    { label: "stars:10000+",       q: `language:Rust+stars:>=10000` },
+    { label: "good-first-issues",  q: `language:Rust+good-first-issues:>0+stars:>=20+pushed:>${since365}` },
+    { label: "help-wanted",        q: `language:Rust+help-wanted-issues:>0+stars:>=20+pushed:>${since365}` },
+    { label: "topic:embedded",     q: `language:Rust+topic:embedded+stars:>=20` },
+    { label: "topic:webassembly",  q: `language:Rust+topic:webassembly+stars:>=20` },
+    { label: "topic:async-rust",   q: `language:Rust+topic:async-rust+stars:>=20` },
+    { label: "topic:database",     q: `language:Rust+topic:database+stars:>=20` },
+    { label: "topic:command-line", q: `language:Rust+topic:command-line+stars:>=20` },
   ]
 
-  for (const q of searchQueries) {
-    try {
-      const data = await ghFetch(
-        `https://api.github.com/search/repositories?q=${q}&sort=updated&per_page=50`
-      ) as { items?: RepoInput[] }
-      const items = data?.items ?? []
-      log.stages![`search_${q.slice(0, 30)}`] = items.length
-      for (const r of items) {
-        if (seenIds.has(r.id)) continue
-        if ((r as any).archived || (r as any).disabled) continue
-        if (r.stargazers_count < 10) continue
-        seenIds.add(r.id)
-        rawRepos.push(r)
-      }
-    } catch (e) {
-      log.errors.push(`Search failed (${q.slice(0, 40)}): ${String(e)}`)
+  let searchTotal = 0
+  for (const { label, q } of SEARCH_QUERIES) {
+    let queryCount = 0
+    for (let page = 1; page <= 2; page++) {
+      const items = await ossSearchPage(q, page)
+      for (const r of items) ingest(r)
+      queryCount += items.length
+      if (items.length < 100) break // no more pages
+      if (page < 2) await sleep(2000) // stay under search rate limit (30 req/min)
     }
+    log.stages![`search_${label}`] = queryCount
+    searchTotal += queryCount
   }
+  log.notes!.push(`Search API: ${searchTotal} results across ${SEARCH_QUERIES.length} queries`)
 
-  // ── 2. Org scans (parallel) ───────────────────────────────────────────────
-  const cutoff = new Date(Date.now() - 90 * 86400000)
-  const orgResults = await Promise.allSettled(
-    RUST_ORGS.map((org) =>
-      ghFetch(`https://api.github.com/orgs/${org}/repos?type=public&sort=pushed&per_page=50`)
-        .then((data) => ({ org, repos: data as RepoInput[] }))
+  // ── 2. Org scans (parallel batches to avoid overwhelming the API) ─────────
+  const ORG_BATCH_SIZE = 10
+  let orgTotal = 0
+  for (let i = 0; i < RUST_ORGS.length; i += ORG_BATCH_SIZE) {
+    const batch = RUST_ORGS.slice(i, i + ORG_BATCH_SIZE)
+    const results = await Promise.allSettled(
+      batch.map((org) =>
+        ghFetch(`https://api.github.com/orgs/${org}/repos?type=public&sort=pushed&per_page=100`)
+          .then((data) => ({ org, repos: (data as any[]) ?? [] }))
+      )
     )
-  )
-  for (const result of orgResults) {
-    if (result.status === "rejected") {
-      log.errors.push(`Org scan failed: ${String(result.reason)}`)
-      continue
-    }
-    const { org, repos } = result.value
-    let orgAdded = 0
-    for (const r of repos) {
-      if (seenIds.has(r.id)) continue
-      if ((r as any).language && (r as any).language !== "Rust") continue
-      if (r.stargazers_count < 10) continue
-      if (new Date(r.pushed_at) < cutoff) continue
-      if ((r as any).archived || (r as any).disabled) continue
-      seenIds.add(r.id)
-      rawRepos.push(r)
-      orgAdded++
-    }
-    log.stages![`org_${org}`] = orgAdded
-  }
-
-  // Cap before DeepSeek: top 60 by stars
-  rawRepos.sort((a, b) => b.stargazers_count - a.stargazers_count)
-  const toClassify = rawRepos.slice(0, 60)
-
-  log.found = rawRepos.length
-  log.notes!.push(`${rawRepos.length} unique repos collected, classifying top ${toClassify.length} with DeepSeek`)
-
-  if (toClassify.length === 0) {
-    log.finishedAt = new Date().toISOString()
-    return log
-  }
-
-  // ── 3. DeepSeek batch classification ─────────────────────────────────────
-  const BATCH = 15
-  const pendingItems: PendingItem[] = []
-  let dsSkipped = 0
-  let dsErrors = 0
-
-  for (let i = 0; i < toClassify.length; i += BATCH) {
-    const batch = toClassify.slice(i, i + BATCH)
-    const { results, error } = await classifyReposWithDeepSeek(batch)
-    if (error) {
-      log.errors.push(`DeepSeek batch ${i / BATCH + 1}: ${error}`)
-      dsErrors += batch.length
-    }
-
-    for (let j = 0; j < batch.length; j++) {
-      const repo = batch[j]
-      const cls = results[j]
-      const id = `gh-${repo.id}`
-
-      if (existingIds.has(id)) { dsSkipped++; continue }
-      if (!cls.queue) {
-        dsSkipped++
-        log.notes!.push(`Skipped ${repo.full_name}: ${cls.skipReason}`)
+    for (const result of results) {
+      if (result.status === "rejected") {
+        log.errors.push(`Org scan: ${String(result.reason).slice(0, 80)}`)
         continue
       }
-
-      const whyParts: string[] = []
-      if (cls.ecosystem.length > 0) whyParts.push(cls.ecosystem.join(" · "))
-      whyParts.push(cls.activityTier)
-      if (cls.beginnerFriendly) whyParts.push("beginner-friendly")
-      whyParts.push(`${repo.stargazers_count} stars`)
-
-      pendingItems.push({
-        id,
-        type: "oss",
-        status: "pending",
-        source: "github-oss",
-        sourceUrl: repo.html_url,
-        foundAt: new Date().toISOString(),
-        confidence: cls.beginnerSuitability,
-        whyMatched: whyParts.join(" · "),
-        rawText: `${repo.full_name}: ${repo.description ?? ""}`,
-        extracted: cls as unknown as Record<string, unknown>,
-      })
+      const { repos } = result.value
+      let added = 0
+      for (const r of repos) {
+        if (r.language && r.language !== "Rust") continue
+        ingest(r)
+        added++
+      }
+      orgTotal += added
     }
   }
+  log.notes!.push(`Org scans: ${orgTotal} Rust repos across ${RUST_ORGS.length} orgs`)
 
-  log.stages!.deepseekSkipped = dsSkipped
-  log.stages!.deepseekErrors  = dsErrors
-  log.stages!.queued          = pendingItems.length
-  log.added   = addPendingItems("oss", pendingItems)
-  log.skipped = toClassify.length - pendingItems.length
+  log.found = rawRepos.length
+
+  // ── 3. Quality filter (deterministic — no AI) ─────────────────────────────
+  const toQueue: PendingItem[] = []
+  const rejectionReasons: Record<string, number> = {}
+  let dupCount = 0
+  let junkCount = 0
+
+  for (const repo of rawRepos) {
+    const id = `gh-${repo.id}`
+
+    // Skip repos already in corpus or pending queue
+    if (existingIds.has(id) || existingHrefs.has(repo.html_url)) {
+      dupCount++
+      continue
+    }
+
+    // Deterministic quality rules
+    const { junk, reason } = ossJunkFilter(repo as any)
+    if (junk) {
+      junkCount++
+      rejectionReasons[reason] = (rejectionReasons[reason] ?? 0) + 1
+      continue
+    }
+
+    const tier       = ossActivityTier(repo.pushed_at)
+    const stars      = repo.stargazers_count
+    const confidence = Math.min(0.9, 0.5 + Math.log10(Math.max(1, stars)) / 10)
+
+    toQueue.push({
+      id,
+      type:       "oss",
+      status:     "pending",
+      source:     "github-oss",
+      sourceUrl:  repo.html_url,
+      foundAt:    new Date().toISOString(),
+      confidence,
+      whyMatched: `${tier} · ★${stars} · ${repo.owner_login}`,
+      rawText:    `${repo.full_name}: ${repo.description ?? ""}`,
+      extracted:  buildOSSExtracted(repo),
+    })
+  }
+
+  // ── 4. Queue ──────────────────────────────────────────────────────────────
+  log.added   = addPendingItems("oss", toQueue)
+  log.skipped = dupCount + junkCount
+  log.stages!.queued      = toQueue.length
+  log.stages!.duplicates  = dupCount
+  log.stages!.junkFiltered = junkCount
+
+  // ── 5. Scan report ────────────────────────────────────────────────────────
+  if (Object.keys(rejectionReasons).length > 0) {
+    const reasonStr = Object.entries(rejectionReasons)
+      .sort((a, b) => b[1] - a[1])
+      .map(([r, n]) => `${r}(${n})`)
+      .join(", ")
+    log.notes!.push(`Quality rejections: ${reasonStr}`)
+  }
+
+  // Star bucket distribution of queued repos
+  const starBuckets: Record<string, number> = {
+    "20-99": 0, "100-499": 0, "500-1999": 0, "2k-9999": 0, "10k+": 0,
+  }
+  const activityBuckets: Record<string, number> = { active: 0, maintenance: 0, dormant: 0 }
+  const ownerCounts: Record<string, number> = {}
+
+  for (const item of toQueue) {
+    const s = (item.extracted.stars as number) ?? 0
+    if (s < 100)        starBuckets["20-99"]++
+    else if (s < 500)   starBuckets["100-499"]++
+    else if (s < 2000)  starBuckets["500-1999"]++
+    else if (s < 10000) starBuckets["2k-9999"]++
+    else                starBuckets["10k+"]++
+
+    const tier = item.extracted.activityTier as string ?? "dormant"
+    activityBuckets[tier] = (activityBuckets[tier] ?? 0) + 1
+
+    const owner = item.extracted.owner as string ?? "unknown"
+    ownerCounts[owner] = (ownerCounts[owner] ?? 0) + 1
+  }
+
+  const starReport = Object.entries(starBuckets).map(([k, v]) => `${k}:${v}`).join(" | ")
+  const actReport  = Object.entries(activityBuckets).map(([k, v]) => `${k}:${v}`).join(" | ")
+  const topOwners  = Object.entries(ownerCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([o, n]) => `${o}(${n})`)
+    .join(", ")
+
+  log.notes!.push(`★ buckets: ${starReport}`)
+  log.notes!.push(`Activity: ${actReport}`)
+  log.notes!.push(`Top owners: ${topOwners}`)
+  log.notes!.push(`Unique repos found: ${rawRepos.length} | already in corpus: ${dupCount} | quality-rejected: ${junkCount} | queued: ${log.added}`)
 
   log.finishedAt = new Date().toISOString()
   return log
@@ -1025,10 +1179,46 @@ export async function scanCompanies(): Promise<ScanLog> {
 
 // ── GitHub shared helpers ─────────────────────────────────────────────────────
 
+function sleep(ms: number) { return new Promise<void>(r => setTimeout(r, ms)) }
+
+// Expanded organization list covering the broad Rust ecosystem.
+// Orgs with mixed-language repos are fine — the org scan already filters by language:Rust.
 const RUST_ORGS = [
-  "tokio-rs", "hyperium", "embassy-rs", "rustwasm", "bytecodealliance",
-  "tauri-apps", "bevyengine", "linebender", "rust-lang", "rust-cli",
-  "diesel-rs", "smol-rs",
+  // Core language and toolchain
+  "rust-lang", "rust-cli",
+  // Async / networking
+  "tokio-rs", "hyperium", "smol-rs", "quinn-rs", "libp2p",
+  // Embedded / systems
+  "embassy-rs", "oxidecomputer", "redox-os",
+  // WebAssembly
+  "rustwasm", "bytecodealliance", "fermyon", "wasmerio",
+  // Application frameworks / UI
+  "tauri-apps", "slint-ui", "bevyengine", "linebender",
+  // ORM / serialization / core libs
+  "diesel-rs", "serde-rs", "rayon-rs",
+  // FFI / interop
+  "PyO3",
+  // Data / ML
+  "pola-rs", "tracel-ai", "lance-format",
+  // Search / databases / storage
+  "meilisearch", "qdrant", "paradedb", "databend-labs",
+  "risingwavelabs", "quickwit-oss", "GreptimeTeam", "pgcentralfoundation",
+  // Observability / DevTools
+  "vectordotdev", "rerun-io", "gitbutlerapp",
+  // Shell / terminal
+  "nushell", "zellij-org",
+  // Package / environment management
+  "astral-sh", "prefix-dev",
+  // VCS tooling
+  "jj-vcs",
+  // Runtimes / languages
+  "denoland", "firecracker-microvm",
+  // Big-tech Rust projects (filtered by language=Rust in scan)
+  "awslabs", "cloudflare", "microsoft", "google", "mozilla",
+  // Database / distributed systems
+  "tikv", "pingcap", "apache",
+  // Infrastructure
+  "cachix",
 ]
 
 const GH_HEADERS = {
@@ -1042,5 +1232,26 @@ async function ghFetch(url: string): Promise<unknown> {
   if (res.status === 403) throw new Error("GitHub rate-limited (403). Set GITHUB_TOKEN in .env.local.")
   if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`)
   return res.json()
+}
+
+function mapRepoResponse(r: any): RepoInput {
+  return {
+    id:                       r.id,
+    name:                     r.name,
+    full_name:                r.full_name,
+    description:              r.description ?? null,
+    topics:                   r.topics ?? [],
+    stargazers_count:         r.stargazers_count ?? 0,
+    pushed_at:                r.pushed_at ?? "",
+    size:                     r.size ?? 0,
+    open_issues_count:        r.open_issues_count ?? 0,
+    good_first_issues_count:  r.good_first_issues_count,
+    help_wanted_issues_count: r.help_wanted_issues_count,
+    forks_count:              r.forks_count ?? 0,
+    html_url:                 r.html_url ?? "",
+    language:                 r.language ?? null,
+    owner_login:              r.owner?.login ?? "",
+    license_spdx_id:          r.license?.spdx_id ?? null,
+  }
 }
 
