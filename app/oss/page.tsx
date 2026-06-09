@@ -1,9 +1,8 @@
 import type { Metadata } from "next"
-import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSBrowser } from "@/components/editorial/oss-browser"
 import { OSS_PATHS } from "@/content/oss-paths"
-import { getCompanionIndex, getDepPageCounts, DEP_PAGE_THRESHOLD } from "@/lib/deps-data"
+import { getDepPageCounts } from "@/lib/deps-data"
 
 export const metadata: Metadata = {
   title: "OSS Paths — Approachable Rust Repositories",
@@ -26,57 +25,22 @@ export const metadata: Metadata = {
 
 export default function OSSArchivePage() {
   const depPageCounts = getDepPageCounts()
-  const featuredDeps = Object.entries(getCompanionIndex())
-    .filter(([, v]) => v.repoCount >= DEP_PAGE_THRESHOLD)
-    .sort((a, b) => b[1].repoCount - a[1].repoCount)
-    .slice(0, 24)
-    .map(([name]) => name)
 
   return (
     <EditorialLayout>
-      <section style={{ paddingTop: "clamp(40px, 6vw, 64px)", paddingBottom: "clamp(64px, 9vw, 104px)" }}>
+      <section style={{ paddingTop: "clamp(32px, 4vw, 48px)", paddingBottom: "clamp(64px, 9vw, 104px)" }}>
         <div className="e-col e-col--wide">
-          <div className="e-archive-header" style={{ marginBottom: 28 }}>
+          <div className="e-archive-header" style={{ marginBottom: 20 }}>
             <div>
               <div className="e-section__num">Directory</div>
-              <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>
+              <h1 className="e-section__title" style={{ fontSize: "clamp(22px, 2.8vw, 28px)" }}>
                 OSS Paths
               </h1>
               <p className="e-archive-meta">
-                {OSS_PATHS.length} repositories — curated for active maintenance and real contribution opportunities.
-                Filter by stars, activity, license, owner, or topic.
+                {OSS_PATHS.length} curated Rust repositories — filter by stars, activity, license, owner, topic, or dependency.
               </p>
             </div>
           </div>
-
-          {/* ── Popular dependencies ──────────────────────────────────────────── */}
-          {featuredDeps.length > 0 && (
-            <div style={{ marginBottom: 40 }}>
-              <div
-                style={{
-                  fontSize: 11,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  color: "var(--color-muted)",
-                  marginBottom: 12,
-                }}
-              >
-                Popular Rust Dependencies
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {featuredDeps.map((crate) => (
-                  <Link key={crate} href={`/deps/${crate}`} style={{ textDecoration: "none" }}>
-                    <span
-                      className="e-tag e-tag--soft"
-                      style={{ cursor: "pointer", fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}
-                    >
-                      {crate}
-                    </span>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
 
           <OSSBrowser repos={OSS_PATHS} depPageCounts={depPageCounts} />
         </div>

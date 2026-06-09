@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { OSSCard } from "./oss-card"
 import type { OSSPath } from "@/content/oss-paths"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
-type SortKey      = "stars-desc" | "stars-asc" | "forks-desc" | "updated" | "issues"
+type SortKey       = "stars-desc" | "stars-asc" | "forks-desc" | "updated" | "issues"
 type StarBucketKey = "any" | "20-59" | "60-99" | "100-499" | "500-1999" | "2000-9999" | "10000+"
+type DropdownId    = "license" | "topics" | "owner" | "deps"
 
 // ── Normalization ──────────────────────────────────────────────────────────
 
@@ -165,20 +166,35 @@ export function OSSBrowser({
   const [selectedDeps,      setSelectedDeps]      = useState<Set<string>>(new Set())
   const [depSearch,         setDepSearch]         = useState("")
   const [sort,              setSort]              = useState<SortKey>("stars-desc")
-  const [filtersOpen,       setFiltersOpen]       = useState(false)
+  const [openDropdown,      setOpenDropdown]      = useState<DropdownId | null>(null)
 
-  // Shared filter options (everything except star bucket) — for bucket count computation
+  // Close open dropdown on outside click
+  const fbRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!openDropdown) return
+    function onDown(e: MouseEvent) {
+      if (!fbRef.current?.contains(e.target as Node)) {
+        setOpenDropdown(null)
+      }
+    }
+    document.addEventListener("mousedown", onDown)
+    return () => document.removeEventListener("mousedown", onDown)
+  }, [openDropdown])
+
+  function toggleDropdown(id: DropdownId) {
+    setOpenDropdown(prev => prev === id ? null : id)
+  }
+
   const filterOpts = {
     q, selectedActivity, selectedLanguages, selectedLicenses,
     selectedOwners, selectedTopics, selectedDeps,
   }
 
-  // Active bucket object; undefined when "any" so buildFilter skips the star check
   const activeBucket = starBucket === "any"
     ? undefined
     : STAR_BUCKETS.find(b => b.key === starBucket)
 
-  // Full filtered set — drives card display and non-star facets
+  // Filtered set — all active filters applied
   const filtered = useMemo(
     () => buildFilter(normalized, { ...filterOpts, star: activeBucket }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -186,7 +202,7 @@ export function OSSBrowser({
      selectedLicenses, selectedOwners, selectedTopics, selectedDeps]
   )
 
-  // Filtered set WITHOUT the star constraint — drives bucket counts
+  // Filtered without star constraint — drives bucket counts
   const filteredNoStars = useMemo(
     () => buildFilter(normalized, { ...filterOpts }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -194,23 +210,25 @@ export function OSSBrowser({
      selectedLicenses, selectedOwners, selectedTopics, selectedDeps]
   )
 
-  // Sorted result — final display order
+  // Sorted display list
   const sorted = useMemo(() => {
     return [...filtered].sort((a, b) => {
       if (sort === "stars-desc") return b.stars - a.stars
       if (sort === "stars-asc")  return a.stars - b.stars
       if (sort === "forks-desc") return b.forks - a.forks
-      if (sort === "updated")
-        return (b.pushedAt ?? "").localeCompare(a.pushedAt ?? "")
-      if (sort === "issues") return b.openIssuesCount - a.openIssuesCount
+      if (sort === "updated")    return (b.pushedAt ?? "").localeCompare(a.pushedAt ?? "")
+      if (sort === "issues")     return b.openIssuesCount - a.openIssuesCount
       return 0
     })
   }, [filtered, sort])
 
-  // Facets from the filtered set (reflect currently applied filters)
+  // Facets from full corpus — option lists never shrink when filters are applied
+  const allFacets = useMemo(() => buildFacets(normalized), [normalized])
+
+  // Facets from filtered set — counts reflect current selection
   const facets = useMemo(() => buildFacets(filtered), [filtered])
 
-  // Per-bucket counts from the no-star-filter set — each count is repos inside that bucket only
+  // Per-bucket counts (no-star filter so all buckets stay populated)
   const bucketCounts = useMemo(() =>
     STAR_BUCKETS.map(b => ({
       ...b,
@@ -221,36 +239,16 @@ export function OSSBrowser({
     [filteredNoStars]
   )
 
-  // Visible topics (top 20 + selected always shown)
-  const visibleTopics = useMemo(() => {
-    const lc = topicSearch.toLowerCase().trim()
-    const list = lc
-      ? facets.topics.filter(([t]) => t.includes(lc))
-      : facets.topics
-    const slice = list.slice(0, 20).map(([t]) => t)
-    for (const t of selectedTopics) {
-      if (!slice.includes(t)) slice.push(t)
+  // Language options from full corpus — prevents control disappearing on selection
+  const allLanguages = useMemo(() => {
+    const counts: Record<string, number> = {}
+    for (const r of normalized) {
+      if (r.language) counts[r.language] = (counts[r.language] ?? 0) + 1
     }
-    return slice
-  }, [facets.topics, topicSearch, selectedTopics])
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])
+  }, [normalized])
 
-  // Visible owners (top 12 + selected always shown)
-  const visibleOwners = useMemo(() => {
-    const lc = ownerSearch.toLowerCase().trim()
-    const list = lc
-      ? facets.owners.filter(([o]) => o.toLowerCase().includes(lc))
-      : facets.owners
-    const slice = list.slice(0, 12).map(([o]) => o)
-    for (const o of selectedOwners) {
-      if (!slice.includes(o)) slice.push(o)
-    }
-    return slice
-  }, [facets.owners, ownerSearch, selectedOwners])
-
-  // Global dep counts — over the full corpus, used as a noise gate.
-  // A crate must appear in >= 6 repos globally to show in the default facet,
-  // and in >= 2 repos globally to appear in search results.
-  // Computed once from normalized (stable after mount).
+  // Dep counts from full corpus — option stability for the deps dropdown
   const globalDepCounts = useMemo(() => {
     const counts: Record<string, number> = {}
     for (const r of normalized) {
@@ -261,7 +259,7 @@ export function OSSBrowser({
     return counts
   }, [normalized])
 
-  // Dependency facets — top crates by frequency across current filtered set
+  // Dep counts from filtered set — for counts shown in the panel
   const depFacets = useMemo(() => {
     const counts: Record<string, number> = {}
     for (const r of filtered) {
@@ -269,37 +267,90 @@ export function OSSBrowser({
         counts[d] = (counts[d] ?? 0) + 1
       }
     }
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])
+    return counts
   }, [filtered])
 
-  // Visible deps with noise gate:
-  //   default  → global count >= 6  (hides internal workspace / monorepo-only crates)
-  //   search   → global count >= 2  (hides pure singletons, surfaces niche real crates)
-  //   selected → always shown so they can be deselected
+  // Topics panel options — from full corpus, filtered by search
+  const visibleTopics = useMemo(() => {
+    const lc = topicSearch.toLowerCase().trim()
+    const list = lc
+      ? allFacets.topics.filter(([t]) => t.includes(lc))
+      : allFacets.topics
+    const slice = list.slice(0, 20).map(([t]) => t)
+    for (const t of selectedTopics) {
+      if (!slice.includes(t)) slice.push(t)
+    }
+    return slice
+  }, [allFacets.topics, topicSearch, selectedTopics])
+
+  // Owners panel options — from full corpus, filtered by search
+  const visibleOwners = useMemo(() => {
+    const lc = ownerSearch.toLowerCase().trim()
+    const list = lc
+      ? allFacets.owners.filter(([o]) => o.toLowerCase().includes(lc))
+      : allFacets.owners
+    const slice = list.slice(0, 12).map(([o]) => o)
+    for (const o of selectedOwners) {
+      if (!slice.includes(o)) slice.push(o)
+    }
+    return slice
+  }, [allFacets.owners, ownerSearch, selectedOwners])
+
+  // Deps panel options — from full corpus, filtered by search
   const visibleDeps = useMemo(() => {
-    const lc      = depSearch.toLowerCase().trim()
+    const lc = depSearch.toLowerCase().trim()
     const minFreq = lc ? 2 : 6
-    const list    = depFacets.filter(
-      ([d]) => (globalDepCounts[d] ?? 0) >= minFreq && (!lc || d.includes(lc))
-    )
+    const list = Object.entries(globalDepCounts)
+      .filter(([d, c]) => c >= minFreq && (!lc || d.includes(lc)))
+      .sort((a, b) => b[1] - a[1])
     const slice = list.slice(0, 40).map(([d]) => d)
     for (const d of selectedDeps) {
       if (!slice.includes(d)) slice.push(d)
     }
     return slice
-  }, [depFacets, depSearch, selectedDeps, globalDepCounts])
+  }, [globalDepCounts, depSearch, selectedDeps])
 
-  // Active filter count (for mobile badge)
-  const activeFilterCount =
-    (starBucket !== "any" ? 1 : 0) +
-    selectedActivity.size  +
-    selectedLanguages.size +
-    selectedLicenses.size  +
-    selectedOwners.size    +
-    selectedTopics.size    +
-    selectedDeps.size
-
-  const hasFilters = q !== "" || activeFilterCount > 0
+  // Active chip descriptors for the chips strip
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; onRemove: () => void }[] = []
+    if (q) {
+      chips.push({ key: `q:${q}`, label: `"${q}"`,
+        onRemove: () => setQ("") })
+    }
+    if (starBucket !== "any") {
+      const b = STAR_BUCKETS.find(b => b.key === starBucket)!
+      chips.push({ key: `stars:${starBucket}`, label: `★ ${b.label}`,
+        onRemove: () => setStarBucket("any") })
+    }
+    for (const a of selectedActivity) {
+      const label = ACTIVITY_OPTIONS.find(o => o.value === a)?.label ?? a
+      chips.push({ key: `activity:${a}`, label,
+        onRemove: () => setSelectedActivity(prev => toggleSet(prev, a)) })
+    }
+    for (const lang of selectedLanguages) {
+      chips.push({ key: `lang:${lang}`, label: lang,
+        onRemove: () => setSelectedLanguages(new Set()) })
+    }
+    for (const lic of selectedLicenses) {
+      chips.push({ key: `lic:${lic}`, label: lic,
+        onRemove: () => setSelectedLicenses(prev => toggleSet(prev, lic)) })
+    }
+    for (const o of selectedOwners) {
+      chips.push({ key: `owner:${o}`, label: o,
+        onRemove: () => setSelectedOwners(prev => toggleSet(prev, o)) })
+    }
+    for (const t of selectedTopics) {
+      chips.push({ key: `topic:${t}`, label: `#${t}`,
+        onRemove: () => setSelectedTopics(prev => toggleSet(prev, t)) })
+    }
+    for (const d of selectedDeps) {
+      chips.push({ key: `dep:${d}`, label: d,
+        onRemove: () => setSelectedDeps(prev => toggleSet(prev, d)) })
+    }
+    return chips
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, starBucket, selectedActivity, selectedLanguages, selectedLicenses,
+      selectedOwners, selectedTopics, selectedDeps])
 
   function clearAll() {
     setQ("")
@@ -313,253 +364,293 @@ export function OSSBrowser({
     setTopicSearch("")
     setOwnerSearch("")
     setDepSearch("")
+    setOpenDropdown(null)
   }
-
-  // ── Sidebar ──────────────────────────────────────────────────────────────
-
-  const sidebar = (
-    <aside className="oss-sidebar">
-      <div className="oss-filters">
-
-        {/* Sort */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">Sort by</div>
-          <select
-            className="oss-filter-select"
-            value={sort}
-            onChange={e => setSort(e.target.value as SortKey)}
-          >
-            {SORT_OPTIONS.map(o => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Stars */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">Stars</div>
-          {bucketCounts.map(b => (
-            <label key={b.key} className="oss-filter-row">
-              <input
-                type="radio"
-                name="stars"
-                checked={starBucket === b.key}
-                onChange={() => setStarBucket(b.key)}
-                className="oss-filter-radio"
-              />
-              <span style={{ flex: 1 }}>{b.label}</span>
-              <span className="oss-filter-count">{b.count}</span>
-            </label>
-          ))}
-        </div>
-
-        {/* Activity */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">Activity</div>
-          {ACTIVITY_OPTIONS.map(o => {
-            const count = facets.activity.find(([k]) => k === o.value)?.[1] ?? 0
-            return (
-              <label key={o.value} className="oss-filter-row">
-                <input
-                  type="checkbox"
-                  checked={selectedActivity.has(o.value)}
-                  onChange={() => setSelectedActivity(prev => toggleSet(prev, o.value))}
-                  className="oss-filter-radio"
-                />
-                <span style={{ flex: 1 }}>{o.label}</span>
-                <span className="oss-filter-count">{count}</span>
-              </label>
-            )
-          })}
-        </div>
-
-        {/* Language — only shown when multiple languages exist */}
-        {facets.languages.length > 1 && (
-          <div className="oss-filter-group">
-            <div className="oss-filter-label">Language</div>
-            {facets.languages.map(([lang, count]) => (
-              <label key={lang} className="oss-filter-row">
-                <input
-                  type="checkbox"
-                  checked={selectedLanguages.has(lang)}
-                  onChange={() => setSelectedLanguages(prev => toggleSet(prev, lang))}
-                  className="oss-filter-radio"
-                />
-                <span style={{ flex: 1 }}>{lang}</span>
-                <span className="oss-filter-count">{count}</span>
-              </label>
-            ))}
-          </div>
-        )}
-
-        {/* License */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">License</div>
-          {facets.licenses.map(([lic, count]) => (
-            <label key={lic} className="oss-filter-row">
-              <input
-                type="checkbox"
-                checked={selectedLicenses.has(lic)}
-                onChange={() => setSelectedLicenses(prev => toggleSet(prev, lic))}
-                className="oss-filter-radio"
-              />
-              <span style={{ flex: 1 }}>{lic}</span>
-              <span className="oss-filter-count">{count}</span>
-            </label>
-          ))}
-        </div>
-
-        {/* Owner / Org */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">Owner / Org</div>
-          <input
-            className="oss-filter-input"
-            placeholder="Search owners…"
-            value={ownerSearch}
-            onChange={e => setOwnerSearch(e.target.value)}
-          />
-          <div className="oss-topic-list">
-            {visibleOwners.map(owner => {
-              const count = facets.owners.find(([o]) => o === owner)?.[1] ?? 0
-              return (
-                <label key={owner} className="oss-filter-row">
-                  <input
-                    type="checkbox"
-                    checked={selectedOwners.has(owner)}
-                    onChange={() => setSelectedOwners(prev => toggleSet(prev, owner))}
-                    className="oss-filter-radio"
-                  />
-                  <span style={{ flex: 1 }} className="oss-filter-mono">{owner}</span>
-                  <span className="oss-filter-count">{count}</span>
-                </label>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Topics */}
-        <div className="oss-filter-group">
-          <div className="oss-filter-label">Topics</div>
-          <input
-            className="oss-filter-input"
-            placeholder="Search topics…"
-            value={topicSearch}
-            onChange={e => setTopicSearch(e.target.value)}
-          />
-          <div className="oss-topic-list">
-            {visibleTopics.map(topic => {
-              const count = facets.topics.find(([t]) => t === topic)?.[1] ?? 0
-              return (
-                <label key={topic} className="oss-filter-row">
-                  <input
-                    type="checkbox"
-                    checked={selectedTopics.has(topic)}
-                    onChange={() => setSelectedTopics(prev => toggleSet(prev, topic))}
-                    className="oss-filter-radio"
-                  />
-                  <span style={{ flex: 1 }}>{topic}</span>
-                  <span className="oss-filter-count">{count}</span>
-                </label>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Dependencies */}
-        {depFacets.length > 0 && (
-          <div className="oss-filter-group">
-            <div className="oss-filter-label">Dependencies</div>
-            <input
-              className="oss-filter-input"
-              placeholder="Search crates…"
-              value={depSearch}
-              onChange={e => setDepSearch(e.target.value)}
-            />
-            <div className="oss-topic-list">
-              {visibleDeps.map(dep => {
-                const count = depFacets.find(([d]) => d === dep)?.[1] ?? 0
-                return (
-                  <label key={dep} className="oss-filter-row">
-                    <input
-                      type="checkbox"
-                      checked={selectedDeps.has(dep)}
-                      onChange={() => setSelectedDeps(prev => toggleSet(prev, dep))}
-                      className="oss-filter-radio"
-                    />
-                    <span style={{ flex: 1 }} className="oss-filter-mono">{dep}</span>
-                    <span className="oss-filter-count">{count}</span>
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-        )}
-
-        {hasFilters && (
-          <button className="oss-filter-clear" onClick={clearAll}>
-            ✕ Clear all filters
-          </button>
-        )}
-      </div>
-    </aside>
-  )
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div>
-      {/* Top bar */}
-      <div className="oss-topbar">
+    <div className="oss-discovery">
+
+      {/* Sticky filter bar */}
+      <div className="oss-fb" ref={fbRef}>
         <input
-          className="oss-search"
-          placeholder="Search by name, owner, or topic…"
+          className="oss-fb-search"
+          placeholder="Search repos…"
           value={q}
           onChange={e => setQ(e.target.value)}
         />
-        <div className="oss-topbar-meta">
-          <span className="e-section__meta">
-            {sorted.length}{hasFilters ? ` of ${repos.length}` : ""}{" "}
-            {sorted.length === 1 ? "repository" : "repositories"}
-          </span>
-          <button
-            className="oss-filter-toggle-btn"
-            onClick={() => setFiltersOpen(v => !v)}
-            aria-expanded={filtersOpen}
-          >
-            {filtersOpen ? "Hide filters" : "Filters"}
-            {activeFilterCount > 0 && (
-              <span className="oss-filter-badge">{activeFilterCount}</span>
+
+        <div className="oss-fb-dropdowns">
+
+          {/* License */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedLicenses.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("license")}
+            >
+              License{selectedLicenses.size > 0 ? ` (${selectedLicenses.size})` : ""} ▾
+            </button>
+            {openDropdown === "license" && (
+              <div className="oss-dd-panel">
+                <div className="oss-dd-list">
+                  {allFacets.licenses.map(([lic]) => {
+                    const count = facets.licenses.find(([l]) => l === lic)?.[1] ?? 0
+                    return (
+                      <label key={lic} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedLicenses.has(lic)}
+                          onChange={() => setSelectedLicenses(prev => toggleSet(prev, lic))}
+                        />
+                        <span className="oss-dd-option">{lic}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
             )}
-          </button>
+          </div>
+
+          {/* Topics */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedTopics.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("topics")}
+            >
+              Topics{selectedTopics.size > 0 ? ` (${selectedTopics.size})` : ""} ▾
+            </button>
+            {openDropdown === "topics" && (
+              <div className="oss-dd-panel oss-dd-panel--wide">
+                <input
+                  className="oss-dd-input"
+                  placeholder="Search topics…"
+                  value={topicSearch}
+                  onChange={e => setTopicSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="oss-dd-list">
+                  {visibleTopics.map(topic => {
+                    const count = facets.topics.find(([t]) => t === topic)?.[1] ?? 0
+                    return (
+                      <label key={topic} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedTopics.has(topic)}
+                          onChange={() => setSelectedTopics(prev => toggleSet(prev, topic))}
+                        />
+                        <span className="oss-dd-option">{topic}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Owners */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedOwners.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("owner")}
+            >
+              Owner{selectedOwners.size > 0 ? ` (${selectedOwners.size})` : ""} ▾
+            </button>
+            {openDropdown === "owner" && (
+              <div className="oss-dd-panel oss-dd-panel--wide">
+                <input
+                  className="oss-dd-input"
+                  placeholder="Search owners…"
+                  value={ownerSearch}
+                  onChange={e => setOwnerSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="oss-dd-list">
+                  {visibleOwners.map(owner => {
+                    const count = facets.owners.find(([o]) => o === owner)?.[1] ?? 0
+                    return (
+                      <label key={owner} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedOwners.has(owner)}
+                          onChange={() => setSelectedOwners(prev => toggleSet(prev, owner))}
+                        />
+                        <span className="oss-dd-option oss-filter-mono">{owner}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dependencies */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedDeps.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("deps")}
+            >
+              Deps{selectedDeps.size > 0 ? ` (${selectedDeps.size})` : ""} ▾
+            </button>
+            {openDropdown === "deps" && (
+              <div className="oss-dd-panel oss-dd-panel--wide oss-dd-panel--right">
+                <input
+                  className="oss-dd-input"
+                  placeholder="Search crates…"
+                  value={depSearch}
+                  onChange={e => setDepSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="oss-dd-list">
+                  {visibleDeps.map(dep => {
+                    const count = depFacets[dep] ?? 0
+                    return (
+                      <label key={dep} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedDeps.has(dep)}
+                          onChange={() => setSelectedDeps(prev => toggleSet(prev, dep))}
+                        />
+                        <span className="oss-dd-option oss-filter-mono">{dep}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
+
+        <span className="oss-fb-count">
+          {sorted.length !== repos.length
+            ? `${sorted.length} / ${repos.length}`
+            : String(repos.length)}
+        </span>
       </div>
 
-      {/* Layout */}
-      <div className={`oss-browser${filtersOpen ? " oss-browser--open" : ""}`}>
-        {sidebar}
+      {/* Active chips strip */}
+      {activeChips.length > 0 && (
+        <div className="oss-chips-strip">
+          {activeChips.map(chip => (
+            <button key={chip.key} className="oss-chip" type="button" onClick={chip.onRemove}>
+              {chip.label}<span className="oss-chip-x">×</span>
+            </button>
+          ))}
+          <button type="button" className="oss-chip-clear" onClick={clearAll}>
+            Clear all
+          </button>
+        </div>
+      )}
 
+      {/* Main layout — left rail + grid */}
+      <div className="oss-layout">
+
+        {/* Sticky left rail */}
+        <aside className="oss-rail">
+
+          <div className="oss-rail-group">
+            <div className="oss-rail-label">Sort</div>
+            <select
+              className="oss-filter-select"
+              value={sort}
+              onChange={e => setSort(e.target.value as SortKey)}
+            >
+              {SORT_OPTIONS.map(o => (
+                <option key={o.value} value={o.value}>{o.label}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="oss-rail-group">
+            <div className="oss-rail-label">Stars</div>
+            <select
+              className="oss-filter-select"
+              value={starBucket}
+              onChange={e => setStarBucket(e.target.value as StarBucketKey)}
+            >
+              {bucketCounts.map(b => (
+                <option key={b.key} value={b.key}>
+                  {b.label} ({b.count})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="oss-rail-group">
+            <div className="oss-rail-label">Activity</div>
+            {ACTIVITY_OPTIONS.map(o => {
+              const count = facets.activity.find(([k]) => k === o.value)?.[1] ?? 0
+              return (
+                <label key={o.value} className="oss-filter-row">
+                  <input
+                    type="checkbox"
+                    className="oss-filter-radio"
+                    checked={selectedActivity.has(o.value)}
+                    onChange={() => setSelectedActivity(prev => toggleSet(prev, o.value))}
+                  />
+                  <span style={{ flex: 1 }}>{o.label}</span>
+                  <span className="oss-filter-count">{count}</span>
+                </label>
+              )
+            })}
+          </div>
+
+          {allLanguages.length > 1 && (
+            <div className="oss-rail-group">
+              <div className="oss-rail-label">Language</div>
+              <select
+                className="oss-filter-select"
+                value={selectedLanguages.size > 0 ? [...selectedLanguages][0] : ""}
+                onChange={e => {
+                  const v = e.target.value
+                  setSelectedLanguages(v ? new Set([v]) : new Set())
+                }}
+              >
+                <option value="">Any</option>
+                {allLanguages.map(([lang, count]) => (
+                  <option key={lang} value={lang}>{lang} ({count})</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+        </aside>
+
+        {/* Repository grid */}
         <div>
           {sorted.length > 0 ? (
             <div className="e-oss-grid">
               {sorted.map(repo => (
-                <OSSCard key={repo.href} repo={repo as NormalizedRepo} depPageCounts={depPageCounts} />
+                <OSSCard
+                  key={repo.href}
+                  repo={repo as NormalizedRepo}
+                  depPageCounts={depPageCounts}
+                />
               ))}
             </div>
           ) : (
             <div className="e-archive-empty">
-              No repositories match your filters.{" "}
-              {hasFilters && (
-                <button
-                  className="oss-filter-clear"
-                  style={{ display: "inline", marginLeft: 4 }}
-                  onClick={clearAll}
-                >
-                  Clear filters
-                </button>
-              )}
+              No repositories match.{" "}
+              <button type="button" className="oss-chip-clear" onClick={clearAll}>
+                Clear filters
+              </button>
             </div>
           )}
         </div>
+
       </div>
     </div>
   )
