@@ -3,7 +3,6 @@
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { useCallback, useTransition } from "react"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Search, X } from "lucide-react"
 import { ALL_TAGS } from "@/types"

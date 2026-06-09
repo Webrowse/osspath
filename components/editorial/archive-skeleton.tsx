@@ -1,3 +1,4 @@
+import Link from "next/link"
 import type { CSSProperties } from "react"
 
 interface Props {
@@ -38,15 +39,15 @@ export function EditorialArchiveSkeleton({ title, wide = false }: Props) {
       {/* Nav shell — identical markup to EditorialLayout */}
       <header className="e-nav">
         <div className="e-col e-col--wide e-nav__inner">
-          <a href="/" className="e-nav__brand" aria-label="Rust Opportunities — home">
+          <Link href="/" className="e-nav__brand" aria-label="Rust Opportunities — home">
             <span className="e-nav__mark" />
             <span>rust opportunities</span>
-          </a>
+          </Link>
           <div className="e-nav__spacer" />
-          <a className="e-nav__workspace" href="/companies">
+          <Link className="e-nav__workspace" href="/companies">
             <span>Job Tracker</span>
             <span aria-hidden="true">→</span>
-          </a>
+          </Link>
         </div>
       </header>
 
