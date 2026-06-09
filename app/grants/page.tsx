@@ -8,7 +8,21 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Rust Grants & Bounties",
-  description: "Funding opportunities for Rust ecosystem work — grants, sponsorships, and bounties.",
+  description: "Funding opportunities for Rust ecosystem work — Rust Foundation grants, fellowships, sponsorships, and open-source bounties.",
+  alternates: { canonical: "https://jobs.adarshrust.com/grants" },
+  openGraph: {
+    title: "Rust Grants & Bounties",
+    description: "Rust Foundation grants, fellowships, sponsorships, and open-source bounties — curated funding opportunities.",
+    url: "https://jobs.adarshrust.com/grants",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rust Grants & Bounties",
+    description: "Funding opportunities for Rust ecosystem work — grants, fellowships, and bounties.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {

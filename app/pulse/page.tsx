@@ -8,7 +8,21 @@ import { matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Ecosystem Pulse — Rust Community",
-  description: "Important Rust community spaces — forums, newsletters, and community resources.",
+  description: "The important Rust community spaces — This Week in Rust, the Rust Users Forum, community newsletters, podcasts, and working-group channels.",
+  alternates: { canonical: "https://jobs.adarshrust.com/pulse" },
+  openGraph: {
+    title: "Ecosystem Pulse — Rust Community",
+    description: "Curated Rust community spaces — newsletters, forums, podcasts, and working-group channels worth following.",
+    url: "https://jobs.adarshrust.com/pulse",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ecosystem Pulse — Rust Community",
+    description: "Rust newsletters, forums, podcasts, and community channels — curated.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {

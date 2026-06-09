@@ -7,8 +7,22 @@ import { EVENTS } from "@/content/events"
 import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
-  title: "Rust Events & Learning",
-  description: "Upcoming Rust conferences, workshops, and community events.",
+  title: "Rust Events & Conferences",
+  description: "Upcoming Rust conferences, workshops, and community events — RustConf, EuroRust, Oxidize, and recurring community calls.",
+  alternates: { canonical: "https://jobs.adarshrust.com/events" },
+  openGraph: {
+    title: "Rust Events & Conferences",
+    description: "Upcoming Rust conferences, workshops, and community events — curated and kept current.",
+    url: "https://jobs.adarshrust.com/events",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rust Events & Conferences",
+    description: "Upcoming Rust conferences, workshops, and recurring community events.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {

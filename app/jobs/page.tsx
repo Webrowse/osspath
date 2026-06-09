@@ -8,7 +8,21 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Remote Rust Jobs",
-  description: "Curated remote Rust engineering roles — explicit Rust only, manually verified.",
+  description: "Curated remote Rust engineering roles — explicit Rust only, manually verified before listing. No job board noise.",
+  alternates: { canonical: "https://jobs.adarshrust.com/jobs" },
+  openGraph: {
+    title: "Remote Rust Jobs",
+    description: "Curated remote Rust engineering roles — explicit Rust only, manually verified before listing.",
+    url: "https://jobs.adarshrust.com/jobs",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Remote Rust Jobs",
+    description: "Curated remote Rust engineering roles — explicit Rust only, manually verified.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {

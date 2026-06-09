@@ -2,8 +2,15 @@ import type { Metadata } from "next"
 import { Navbar } from "@/components/navbar"
 
 export const metadata: Metadata = {
-  title: "Workflow",
-  description: "How jobs.adarshrust.com works — discover remote engineering companies, track applications, monitor pipeline, and follow up without manual effort.",
+  title: "How It Works — Rust Opportunities",
+  description: "How jobs.adarshrust.com works — discover remote engineering companies, track applications, monitor your pipeline, and follow up without manual effort.",
+  alternates: { canonical: "https://jobs.adarshrust.com/workflow" },
+  openGraph: {
+    title: "How It Works — Rust Opportunities",
+    description: "Discover Rust companies, track applications, monitor your pipeline, and follow up — all in one place.",
+    url: "https://jobs.adarshrust.com/workflow",
+    type: "website",
+  },
 }
 
 const STEPS = [

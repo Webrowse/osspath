@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import Link from "next/link"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { ArchiveSearch } from "@/components/editorial/archive-search"
@@ -6,8 +7,22 @@ import { COMPANIES } from "@/content/companies"
 import { matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
-  title: "Companies Using Rust",
-  description: "Ecosystem orientation — who builds what with Rust. Not all companies listed are hiring.",
+  title: "Companies Using Rust in Production",
+  description: "Ecosystem orientation — who builds what with Rust. Tokio, Cloudflare, Microsoft, Mozilla, and more. Not all companies listed are actively hiring.",
+  alternates: { canonical: "https://jobs.adarshrust.com/ecosystem" },
+  openGraph: {
+    title: "Companies Using Rust in Production",
+    description: "Who builds what with Rust — ecosystem orientation across infrastructure, databases, networking, and tooling.",
+    url: "https://jobs.adarshrust.com/ecosystem",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Companies Using Rust in Production",
+    description: "Who builds what with Rust — ecosystem orientation across infrastructure, databases, and tooling.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {
@@ -66,12 +81,12 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
           <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid var(--e-line-soft)" }}>
             <p style={{ fontSize: 14, color: "var(--e-fg-dim)", fontFamily: "var(--e-mono)", margin: 0 }}>
               Track companies, save notes, and monitor hiring signals in the{" "}
-              <a
+              <Link
                 href="/companies"
                 style={{ color: "var(--e-accent)", textDecoration: "none", borderBottom: "1px dashed currentColor" }}
               >
                 Research Workspace →
-              </a>
+              </Link>
             </p>
           </div>
         </div>

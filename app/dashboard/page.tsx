@@ -10,7 +10,10 @@ import type { Metadata } from "next"
 const ACTIVE_STATUSES_QS =
   "status=APPLIED&status=OA&status=RECRUITER_CALL&status=INTERVIEWING&status=FINAL_ROUND&status=OFFER"
 
-export const metadata: Metadata = { title: "Dashboard" }
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: { index: false, follow: false },
+}
 
 export default async function DashboardPage() {
   const data = await getDashboardData()

@@ -7,8 +7,22 @@ import { PORTALS } from "@/content/portals"
 import { matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
-  title: "Job Portals",
-  description: "Rust-relevant job boards and aggregators to search alongside this site.",
+  title: "Rust Job Portals & Boards",
+  description: "Rust-relevant job boards and aggregators — LinkedIn, Indeed, We Work Remotely, Arc.dev, and more. Complementary sources to search alongside this site.",
+  alternates: { canonical: "https://jobs.adarshrust.com/portals" },
+  openGraph: {
+    title: "Rust Job Portals & Boards",
+    description: "Rust-filtered pages on major job boards — LinkedIn, Indeed, We Work Remotely, Arc.dev, and more.",
+    url: "https://jobs.adarshrust.com/portals",
+    type: "website",
+    images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Rust Job Portals & Boards",
+    description: "Rust-filtered pages on major job boards and remote-work platforms.",
+    images: ["/opengraph-image"],
+  },
 }
 
 interface PageProps {
