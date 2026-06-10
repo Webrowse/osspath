@@ -1396,6 +1396,144 @@
   font-size: 11.5px;
 }
 
+/* ── Ecosystem badges on OSS cards ──────────────────────────── */
+
+.e-oss__eco {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.e-oss__eco-badge {
+  font-family: var(--e-mono);
+  font-size: 9px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.e-oss__eco-badge--lg {
+  font-size: 11px;
+  padding: 3px 8px;
+}
+
+/* Colors per ecosystem */
+.e-oss__eco-badge--tokio      { color: #2e6da4; border-color: #6bade0; background: rgba(43, 110, 164, 0.07); }
+.e-oss__eco-badge--axum       { color: #5a3fa0; border-color: #9d82d8; background: rgba(90,63,160,0.07); }
+.e-oss__eco-badge--grpc       { color: #4a6e3a; border-color: #8ab87a; background: rgba(74,110,58,0.07); }
+.e-oss__eco-badge--database   { color: #2e6888; border-color: #6ab4cc; background: rgba(46,104,136,0.07); }
+.e-oss__eco-badge--wasm       { color: #8c4b1a; border-color: #d4936a; background: rgba(140,75,26,0.07); }
+.e-oss__eco-badge--embedded   { color: #7a5c1a; border-color: #c9a84c; background: rgba(122,92,26,0.07); }
+.e-oss__eco-badge--tauri      { color: #1e6b4a; border-color: #5ab891; background: rgba(30,107,74,0.07); }
+.e-oss__eco-badge--bevy       { color: #4e3884; border-color: #9c7ed4; background: rgba(78,56,132,0.07); }
+.e-oss__eco-badge--ai         { color: #963870; border-color: #d87ab8; background: rgba(150,56,112,0.07); }
+.e-oss__eco-badge--blockchain { color: #7a5c00; border-color: #c9a000; background: rgba(122,92,0,0.07); }
+.e-oss__eco-badge--cli        { color: #2e7a3a; border-color: #5fb86a; background: rgba(46,122,58,0.07); }
+
+/* Eco badges are now <a> links — hover affordance */
+a.e-oss__eco-badge { cursor: pointer; transition: opacity 0.12s; }
+a.e-oss__eco-badge:hover { opacity: 0.75; }
+
+/* Warm open-issues stat (active project with ≥5 issues) */
+.e-oss__stat--issues { color: var(--e-accent); }
+
+/* ── Deps index page ────────────────────────────────────────── */
+
+.deps-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-muted);
+  margin-bottom: 16px;
+}
+
+.deps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.deps-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--e-line-soft);
+  border-radius: 6px;
+  text-decoration: none;
+  background: var(--e-surface);
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.deps-card:hover {
+  border-color: var(--e-accent);
+  background: color-mix(in oklab, var(--e-accent) 4%, var(--e-surface));
+}
+
+.deps-card__name {
+  font-family: var(--e-mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--e-fg);
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.deps-card__meta {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.deps-card__count {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+.deps-card__stars {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
+/* ── OSS browser load-more ──────────────────────────────────── */
+
+.oss-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0 16px;
+}
+
+.oss-load-more-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 28px;
+  border: 1px solid var(--e-line-soft);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-foreground);
+  font-size: 13px;
+  font-family: var(--e-mono);
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+}
+
+.oss-load-more-btn:hover {
+  border-color: var(--e-accent);
+  background: color-mix(in oklab, var(--e-accent) 4%, transparent);
+}
+
+.oss-load-more-meta {
+  font-size: 11px;
+  color: var(--color-muted);
+}
+
 /* ── OSS Discovery layout ────────────────────────────────────── */
 
 /* Sticky filter bar — sits just below the navbar */
