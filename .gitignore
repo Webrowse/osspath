@@ -52,3 +52,11 @@ next-env.d.ts
 !.dev.vars.example
 .env.local
 .aider*
+
+# research and planning docs (root only, named with underscores)
+/[A-Z]*_*.md
+/[A-Z]*_*.json
+/posthog-setup-report.md
+
+# generated cache
+/data/oss-deps-cache.json
