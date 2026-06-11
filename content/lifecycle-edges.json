@@ -1,0 +1,23 @@
+[
+  {
+    "edge_type": "acquired_by",
+    "from_slug": "astral",
+    "to_slug": "openai",
+    "effective_date": "2026-03-19",
+    "source": "https://openai.com/index/openai-to-acquire-astral/"
+  },
+  {
+    "edge_type": "acquired_by",
+    "from_slug": "quickwit-oss",
+    "to_slug": "datadog",
+    "effective_date": "2025-01",
+    "source": "https://www.datadoghq.com/blog/datadog-acquires-quickwit/"
+  },
+  {
+    "edge_type": "acquired_by",
+    "from_slug": "bun",
+    "to_slug": "anthropic",
+    "effective_date": "2025-12-02",
+    "source": "https://bun.com/blog/bun-joins-anthropic"
+  }
+]

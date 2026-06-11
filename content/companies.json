@@ -1,192 +1,672 @@
 [
   {
     "name": "Cloudflare",
+    "slug": "cloudflare",
+    "type": "company",
     "sector": "Edge / Security",
-    "href": "https://cloudflare.com"
+    "href": "https://cloudflare.com",
+    "github_org": "cloudflare",
+    "description": "Builds core networking infrastructure in Rust. Pingora is their open-source proxy framework; quiche implements QUIC and HTTP/3; boringtun is a WireGuard VPN kernel bypass."
   },
   {
     "name": "Mozilla",
+    "slug": "mozilla",
+    "type": "company",
     "sector": "Browser / Open Web",
-    "href": "https://mozilla.org"
+    "href": "https://mozilla.org",
+    "github_org": "mozilla",
+    "description": "Originated Rust. Uses it throughout Firefox's rendering engine, sccache for distributed compilation, and Uniffi for cross-platform API bindings."
   },
   {
     "name": "AWS",
+    "slug": "aws",
+    "type": "company",
     "sector": "Cloud / Infra",
-    "href": "https://aws.amazon.com"
+    "href": "https://aws.amazon.com",
+    "github_org": "awslabs",
+    "description": "Ships Rust in production for Firecracker (microVM hypervisor), the AWS SDK for Rust, and LLRT (low-latency JavaScript runtime). Multiple teams maintain open-source Rust tooling under awslabs."
   },
   {
     "name": "Microsoft",
+    "slug": "microsoft",
+    "type": "company",
     "sector": "Cloud / Systems",
-    "href": "https://microsoft.com"
+    "href": "https://microsoft.com",
+    "github_org": "microsoft",
+    "description": "Invests in Rust for Windows kernel integration, the windows-rs bindings crate, and their edit CLI tool. Hosts the widely-used Rust Training curriculum."
   },
   {
     "name": "Google",
+    "slug": "google",
+    "type": "company",
     "sector": "Android / Fuchsia",
-    "href": "https://google.com"
+    "href": "https://google.com",
+    "github_org": "google",
+    "description": "Uses Rust in Android platform code, the Fuchsia OS, and ChromeOS. Publishes Comprehensive Rust — the official course used internally to onboard engineers."
   },
   {
     "name": "Discord",
+    "slug": "discord",
+    "type": "company",
     "sector": "Backend / Infra",
-    "href": "https://discord.com"
+    "href": "https://discord.com",
+    "description": "Switched from Go to Rust for their Read States service, eliminating latency spikes caused by garbage collection pauses. Published as a case study in production Rust adoption."
   },
   {
     "name": "Dropbox",
+    "slug": "dropbox",
+    "type": "company",
     "sector": "Storage",
-    "href": "https://dropbox.com"
+    "href": "https://dropbox.com",
+    "description": "Rewrote core sync engine components in Rust. Early large-scale production adopter; the rewrite enabled significant performance improvements in their desktop client."
   },
   {
     "name": "1Password",
+    "slug": "1password",
+    "type": "company",
     "sector": "Security",
-    "href": "https://1password.com"
+    "href": "https://1password.com",
+    "description": "Uses Rust for their cross-platform secrets management core. The 1Password 8 client shares a single Rust codebase across desktop, browser extension, and CLI targets."
   },
   {
     "name": "Oxide Computer",
+    "slug": "oxide-computer",
+    "type": "company",
     "sector": "Systems / Hardware",
-    "href": "https://oxide.computer"
+    "href": "https://oxide.computer",
+    "github_org": "oxidecomputer",
+    "description": "Builds a rack-scale cloud computer where the entire stack — firmware, OS, hypervisor, and management plane — is written in Rust. Hubris is their open-source RTOS."
   },
   {
     "name": "Parity Technologies",
+    "slug": "parity",
+    "type": "company",
     "sector": "Blockchain / Infra",
-    "href": "https://parity.io"
+    "href": "https://parity.io",
+    "github_org": "paritytech",
+    "description": "Builds the Polkadot SDK and Substrate blockchain framework in Rust. One of the largest Rust codebases in the blockchain space."
   },
   {
     "name": "Deno",
+    "slug": "deno",
+    "type": "company",
     "sector": "Runtimes",
-    "href": "https://deno.com"
+    "href": "https://deno.com",
+    "github_org": "denoland",
+    "description": "JavaScript/TypeScript runtime built in Rust. The Deno core and V8 bindings (rusty_v8) are open source; Deno Deploy runs on a Rust-powered edge network."
   },
   {
     "name": "Zed Industries",
+    "slug": "zed",
+    "type": "company",
     "sector": "Developer Tools",
-    "href": "https://zed.dev"
+    "href": "https://zed.dev",
+    "github_org": "zed-industries",
+    "description": "High-performance code editor written entirely in Rust. Their custom GPU-accelerated UI framework GPUI is open source and powers the editor from scratch."
   },
   {
     "name": "Fly.io",
+    "slug": "fly",
+    "type": "company",
     "sector": "Cloud / PaaS",
-    "href": "https://fly.io"
+    "href": "https://fly.io",
+    "github_org": "superfly",
+    "description": "Application deployment platform. Uses Rust for Corrosion — their distributed SQLite replication system — and in edge networking components."
   },
   {
     "name": "Turso",
+    "slug": "turso",
+    "type": "company",
     "sector": "Databases",
-    "href": "https://turso.tech"
+    "href": "https://turso.tech",
+    "github_org": "tursodatabase",
+    "description": "Edge-first SQLite database built on libSQL, a Rust-maintained fork of SQLite. Rust powers both the server runtime and the client SDKs."
   },
   {
     "name": "PingCAP",
-    "sector": "Databases / TiKV",
-    "href": "https://pingcap.com"
+    "slug": "pingcap",
+    "type": "company",
+    "sector": "Databases",
+    "href": "https://pingcap.com",
+    "github_org": "pingcap",
+    "description": "Builds TiKV, the distributed key-value store underlying TiDB, in Rust. One of the first major production databases written in Rust."
   },
   {
     "name": "SurrealDB",
+    "slug": "surrealdb",
+    "type": "company",
     "sector": "Databases",
-    "href": "https://surrealdb.com"
+    "href": "https://surrealdb.com",
+    "github_org": "surrealdb",
+    "description": "Multi-model database engine written entirely in Rust. Supports SQL, graph, document, and key-value queries from a single engine with embedded and server modes."
   },
   {
     "name": "Embark Studios",
+    "slug": "embark",
+    "type": "company",
     "sector": "Games / Graphics",
-    "href": "https://embark.dev"
+    "href": "https://embark.dev",
+    "github_org": "EmbarkStudios",
+    "description": "Game studio betting on Rust for the entire games stack. Open-sources GPU compute tooling, asset pipelines, and Rust game engine components."
   },
   {
     "name": "Ferrous Systems",
+    "slug": "ferrous-systems",
+    "type": "company",
     "sector": "Safety / Toolchain",
-    "href": "https://ferrous-systems.com"
+    "href": "https://ferrous-systems.com",
+    "github_org": "ferrous-systems",
+    "description": "Builds Ferrocene, the safety-qualified Rust toolchain certified for use in automotive, medical, and aerospace applications. Leading commercial Rust consultancy."
   },
   {
-    "name": "Linkerd (Buoyant)",
+    "name": "Buoyant",
+    "slug": "buoyant",
+    "type": "company",
     "sector": "Service Mesh",
-    "href": "https://buoyant.io"
+    "href": "https://buoyant.io",
+    "github_org": "linkerd",
+    "description": "Company behind the Linkerd service mesh. The Linkerd2-proxy data plane is written in Rust using Tokio and Hyper, replacing the original Scala implementation."
   },
   {
     "name": "Vercel",
+    "slug": "vercel",
+    "type": "company",
     "sector": "Build / Tooling",
-    "href": "https://vercel.com"
+    "href": "https://vercel.com",
+    "github_org": "vercel",
+    "description": "Uses Rust for Turbopack (incremental JavaScript bundler) and Turborepo (monorepo build orchestrator). Both are open source and production-grade."
   },
   {
-    "name": "Ultraworkers",
-    "sector": "Gaming",
-    "href": "https://discord.gg/6ztZB9jvWq",
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "name": "The Rust Programming Language",
+    "name": "The Rust Project",
+    "slug": "rust-lang",
+    "type": "nonprofit",
     "sector": "Programming Language",
     "href": "https://www.rust-lang.org",
-    "checkedAt": "2026-06-08"
+    "github_org": "rust-lang",
+    "description": "The official Rust programming language organization. Maintains the compiler (rustc), standard library, Cargo package manager, and all core language infrastructure."
   },
   {
     "name": "Fuel Labs",
+    "slug": "fuel-labs",
+    "type": "company",
     "sector": "Blockchain",
     "href": "https://fuel.network",
-    "checkedAt": "2026-06-08"
+    "github_org": "FuelLabs",
+    "description": "Builds Fuel, a modular execution layer for Ethereum. The Sway programming language, FuelVM, and Forc toolchain are all implemented in Rust."
   },
   {
     "name": "Astral",
+    "slug": "astral",
+    "type": "company",
     "sector": "Developer Tools",
     "href": "https://astral.sh",
-    "checkedAt": "2026-06-08"
+    "github_org": "astral-sh",
+    "description": "Builds Python tooling in Rust. Ruff is an extremely fast Python linter; uv is a Rust-powered pip replacement. Both are open source and see wide adoption.",
+    "status": "acquired",
+    "parent_org": "openai",
+    "effective_date": "2026-03-19"
   },
   {
     "name": "Tauri",
+    "slug": "tauri",
+    "type": "project",
     "sector": "Desktop Application Framework",
     "href": "https://tauri.app",
-    "checkedAt": "2026-06-08"
+    "github_org": "tauri-apps",
+    "description": "Framework for building desktop applications with web frontends and Rust backends. Lighter and more secure than Electron. Fiscally hosted by the Commons Conservancy; all contributors are volunteers."
   },
   {
     "name": "Bun",
-    "sector": "Runtime",
-    "href": "https://bun.com/",
-    "checkedAt": "2026-06-08"
+    "slug": "bun",
+    "type": "company",
+    "sector": "Runtimes",
+    "href": "https://bun.sh",
+    "github_org": "oven-sh",
+    "description": "Fast all-in-one JavaScript runtime. The core runtime is written in Zig and C, but bundles significant Rust-implemented components for HTTP, SQL, and process management.",
+    "status": "acquired",
+    "parent_org": "anthropic",
+    "effective_date": "2025-12-02"
   },
   {
     "name": "OpenAI",
+    "slug": "openai",
+    "type": "company",
     "sector": "AI",
-    "href": "https://openai.com/",
-    "checkedAt": "2026-06-08"
+    "href": "https://openai.com",
+    "github_org": "openai",
+    "description": "Uses Rust in systems and tooling. The Codex CLI — the open-source AI coding assistant — is built in Rust and is one of the most-starred Rust repositories on GitHub."
   },
   {
     "name": "Union",
+    "slug": "union",
+    "type": "company",
     "sector": "Blockchain",
     "href": "https://union.build",
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "name": "Alacritty",
-    "sector": "Terminal Emulator",
-    "href": "https://github.com/alacritty/alacritty",
-    "checkedAt": "2026-06-08"
+    "github_org": "unionlabs",
+    "description": "Builds a trust-minimized interoperability protocol. The Union node and proving infrastructure are written in Rust."
   },
   {
     "name": "Warp",
+    "slug": "warp",
+    "type": "company",
     "sector": "Developer Tools",
     "href": "https://warp.dev",
-    "checkedAt": "2026-06-08"
+    "github_org": "warpdotdev",
+    "description": "GPU-accelerated terminal with AI integration, built entirely in Rust. Uses a custom rendering pipeline and the wgpu graphics library."
   },
   {
-    "name": "rtk-ai",
+    "name": "Alacritty",
+    "slug": "alacritty",
+    "type": "project",
     "sector": "Developer Tools",
-    "href": "https://www.rtk-ai.app",
-    "checkedAt": "2026-06-08"
+    "href": "https://alacritty.org",
+    "github_org": "alacritty",
+    "description": "Cross-platform, GPU-accelerated terminal emulator. One of the pioneering Rust desktop applications; entirely open source under the Apache 2.0 license."
   },
   {
     "name": "Starship",
+    "slug": "starship",
+    "type": "project",
     "sector": "Developer Tools",
     "href": "https://starship.rs",
-    "checkedAt": "2026-06-08"
+    "github_org": "starship",
+    "description": "Minimal, fast, and customizable shell prompt written in Rust. Runs on any shell and any operating system; used by hundreds of thousands of developers."
   },
   {
     "name": "Meilisearch",
+    "slug": "meilisearch",
+    "type": "company",
     "sector": "Search",
-    "href": "https://github.com/meilisearch",
-    "checkedAt": "2026-06-08"
+    "href": "https://meilisearch.com",
+    "github_org": "meilisearch",
+    "description": "Open-source, fast full-text search engine with a focus on developer experience. The search core, ranking algorithm, and all official SDKs are open source."
   },
   {
-    "name": "Ultraworkers",
-    "sector": "Gaming",
-    "href": "https://discord.gg/6ztZB9jvWq",
-    "checkedAt": "2026-06-08"
+    "name": "Rerun",
+    "slug": "rerun",
+    "type": "company",
+    "sector": "Physical AI / Developer Tools",
+    "href": "https://rerun.io",
+    "github_org": "rerun-io",
+    "description": "Multimodal data logging and visualization platform for robotics and Physical AI. The core engine and SDK are written in Rust; used by teams building autonomous systems, computer vision pipelines, and sensor fusion."
   },
   {
-    "name": "Starship",
+    "name": "Radar Labs",
+    "slug": "radar-labs",
+    "type": "company",
+    "sector": "Location Infrastructure",
+    "href": "https://radar.com",
+    "github_org": "radarlabs",
+    "description": "Developer-first location infrastructure processing over 1 billion API calls per day. Rust powers the core SDK and data pipeline; TypeScript handles the API layer."
+  },
+  {
+    "name": "FUTO",
+    "slug": "futo",
+    "type": "company",
+    "sector": "Privacy / Open Source",
+    "href": "https://futo.org",
+    "github_org": "futo-org",
+    "description": "Technology organization building open, privacy-respecting alternatives to mainstream platforms. Polycentric is their decentralized social protocol — a federated, cryptographically-verified content graph implemented in Rust."
+  },
+  {
+    "name": "Kepler",
+    "slug": "kepler",
+    "type": "company",
+    "sector": "AI / Finance",
+    "href": "https://kepler.ai",
+    "github_org": "kepler-ai",
+    "description": "Builds a trust and verification layer for AI agents in high-stakes industries, starting with finance. Rust backend powers the extraction pipelines and agent orchestration infrastructure."
+  },
+  {
+    "name": "yeet",
+    "slug": "yeet",
+    "type": "company",
+    "sector": "Systems / Infrastructure",
+    "href": "https://yeet.cx",
+    "description": "Building a dynamic runtime on top of the Linux BPF subsystem. Targets low-level infrastructure where Rust's systems-programming capabilities and safety model are essential."
+  },
+  {
+    "name": "Tokio",
+    "slug": "tokio-rs",
+    "type": "project",
+    "sector": "Async Runtime",
+    "href": "https://tokio.rs",
+    "github_org": "tokio-rs",
+    "description": "The Tokio Project maintains the async runtime ecosystem for Rust: tokio (the runtime), axum (web framework), tower (service abstractions), tracing (observability), and mio (I/O event loop). The foundation of most production Rust services."
+  },
+  {
+    "name": "Bevy Engine",
+    "slug": "bevyengine",
+    "type": "project",
+    "sector": "Game Engine",
+    "href": "https://bevyengine.org",
+    "github_org": "bevyengine",
+    "description": "Open source, data-driven game engine built entirely in Rust. The most active Rust game engine project, with a modular ECS architecture and a large contributor community."
+  },
+  {
+    "name": "Bytecode Alliance",
+    "slug": "bytecodealliance",
+    "type": "nonprofit",
+    "sector": "WASM / Runtime",
+    "href": "https://bytecodealliance.org",
+    "github_org": "bytecodealliance",
+    "description": "Industry nonprofit (members include Microsoft, Intel, Arm, Fastly, Mozilla) advancing WebAssembly and WASI. Maintains wasmtime (the reference Wasm runtime), cranelift (code generator), and the component model spec."
+  },
+  {
+    "name": "Linebender",
+    "slug": "linebender",
+    "type": "project",
+    "sector": "UI / Graphics",
+    "href": "https://linebender.org",
+    "github_org": "linebender",
+    "description": "Research collective building next-generation Rust UI infrastructure. Projects include Vello (GPU 2D renderer), Xilem (native UI architecture), Parley (rich text layout), and Peniko (rendering primitives). Primarily funded by Google."
+  },
+  {
+    "name": "Nushell",
+    "slug": "nushell",
+    "type": "project",
+    "sector": "Shell / CLI",
+    "href": "https://www.nushell.sh",
+    "github_org": "nushell",
+    "description": "Nu is a new type of shell written in Rust. Structured data pipelines, cross-platform, with a strong plugin ecosystem."
+  },
+  {
+    "name": "Qdrant",
+    "slug": "qdrant",
+    "type": "company",
+    "sector": "Vector Database",
+    "href": "https://qdrant.tech",
+    "github_org": "qdrant",
+    "description": "Vector similarity search engine and database written entirely in Rust. Purpose-built for AI embeddings and semantic search at scale. Qdrant the company offers managed cloud; the core engine is open source."
+  },
+  {
+    "name": "Polars",
+    "slug": "pola-rs",
+    "type": "company",
+    "sector": "Data / Analytics",
+    "href": "https://pola.rs",
+    "github_org": "pola-rs",
+    "description": "Blazing-fast dataframe library written in Rust with bindings for Python, Node.js, and R. The fastest-growing Rust data library. Polars Inc. was founded in 2023 to provide commercial support."
+  },
+  {
+    "name": "Quickwit",
+    "slug": "quickwit-oss",
+    "type": "company",
+    "sector": "Search / Observability",
+    "href": "https://quickwit.io",
+    "github_org": "quickwit-oss",
+    "description": "Rust search and observability infrastructure: tantivy (fast full-text search library) and quickwit (cloud-native distributed search engine). Team joined Datadog in January 2025.",
+    "status": "acquired",
+    "parent_org": "datadog",
+    "effective_date": "2025-01"
+  },
+  {
+    "name": "Datadog",
+    "slug": "datadog",
+    "type": "company",
+    "sector": "Observability",
+    "href": "https://datadoghq.com",
+    "github_org": "datadog",
+    "description": "Cloud monitoring, security, and analytics platform. Acquired Quickwit (Rust distributed search) in January 2025 to accelerate their distributed logging infrastructure.",
+    "ecosystems": ["database", "grpc"]
+  },
+  {
+    "name": "Anthropic",
+    "slug": "anthropic",
+    "type": "company",
+    "sector": "AI",
+    "href": "https://anthropic.com",
+    "github_org": "anthropic-ai",
+    "description": "AI safety company and maker of Claude. Acquired Bun (Oven-sh JavaScript runtime) in December 2025. The Bun runtime is undergoing a Zig-to-Rust rewrite as of 2026.",
+    "ecosystems": ["ai"]
+  },
+  {
+    "name": "Hyperium",
+    "slug": "hyperium",
+    "type": "project",
+    "sector": "HTTP / Networking",
+    "href": "https://hyper.rs",
+    "github_org": "hyperium",
+    "description": "hyper, h2, http, and h3 — the HTTP primitive layer underlying axum, reqwest, and most of the Rust HTTP ecosystem. Referenced by four corpus funding programs.",
+    "ecosystems": ["axum", "grpc"]
+  },
+  {
+    "name": "Embassy",
+    "slug": "embassy-rs",
+    "type": "project",
+    "sector": "Embedded",
+    "href": "https://embassy.dev",
+    "github_org": "embassy-rs",
+    "description": "Async embedded Rust framework enabling async/await on microcontrollers. The dominant async embedded project in the corpus. NGI Zero funded.",
+    "ecosystems": ["embedded"]
+  },
+  {
+    "name": "Actix",
+    "slug": "actix",
+    "type": "project",
+    "sector": "Web Frameworks",
+    "href": "https://actix.rs",
+    "github_org": "actix",
+    "description": "actix-web — the most downloaded Rust web framework, consistently topping TechEmpower performance benchmarks. Community-maintained with no corporate parent.",
+    "ecosystems": ["axum", "grpc"]
+  },
+  {
+    "name": "gfx-rs",
+    "slug": "gfx-rs",
+    "type": "project",
+    "sector": "Graphics / WASM",
+    "href": "https://wgpu.rs",
+    "github_org": "gfx-rs",
+    "description": "wgpu — cross-platform GPU API implementing WebGPU in Rust. The rendering backend used by Bevy, Dioxus, Iced, and Zed.",
+    "ecosystems": ["wasm", "bevy"]
+  },
+  {
+    "name": "probe-rs",
+    "slug": "probe-rs-org",
+    "type": "project",
+    "sector": "Embedded / Debug",
+    "href": "https://probe.rs",
+    "github_org": "probe-rs",
+    "description": "Embedded debugging and flashing toolkit for Rust. NGI Zero funded; referenced in nlnet-ngi-zero funding records for embedded Rust toolchain support.",
+    "ecosystems": ["embedded"]
+  },
+  {
+    "name": "Helix",
+    "slug": "helix-editor",
+    "type": "project",
     "sector": "Developer Tools",
-    "href": "https://starship.rs",
-    "checkedAt": "2026-06-08"
+    "href": "https://helix-editor.com",
+    "github_org": "helix-editor",
+    "description": "Post-modern modal text editor written entirely in Rust. Tree-sitter and LSP native from the ground up. Community-maintained with 44k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Zellij",
+    "slug": "zellij-org",
+    "type": "project",
+    "sector": "Developer Tools",
+    "href": "https://zellij.dev",
+    "github_org": "zellij-org",
+    "description": "Terminal workspace and multiplexer written in Rust with a WASM plugin system enabling arbitrary language plugins. Community-maintained with 33k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "PyO3",
+    "slug": "pyo3-org",
+    "type": "project",
+    "sector": "Language Interop",
+    "href": "https://pyo3.rs",
+    "github_org": "pyo3",
+    "description": "pyo3 and maturin — the standard Python↔Rust interoperability toolkit. Used by Polars, HuggingFace tokenizers, orjson, and hundreds of Rust libraries exposing Python bindings.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Yew",
+    "slug": "yewstack",
+    "type": "project",
+    "sector": "Frontend / WASM",
+    "href": "https://yew.rs",
+    "github_org": "yewstack",
+    "description": "React-inspired frontend framework for building web applications in Rust compiled to WebAssembly. One of the oldest and most mature Rust WASM UI frameworks.",
+    "ecosystems": ["wasm"]
+  },
+  {
+    "name": "Iced",
+    "slug": "iced-rs",
+    "type": "project",
+    "sector": "GUI Frameworks",
+    "href": "https://iced.rs",
+    "github_org": "iced-rs",
+    "description": "Elm-inspired cross-platform GUI library for Rust. Runs natively on desktop and in the browser via WASM. 30k+ stars.",
+    "ecosystems": ["cli", "wasm"]
+  },
+  {
+    "name": "Ratatui",
+    "slug": "ratatui-org",
+    "type": "project",
+    "sector": "TUI / Developer Tools",
+    "href": "https://ratatui.rs",
+    "github_org": "ratatui",
+    "description": "Terminal UI library forked from tui-rs. The de facto toolkit for building TUI applications in Rust. 22k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "uutils",
+    "slug": "uutils-org",
+    "type": "project",
+    "sector": "CLI / Systems",
+    "href": "https://uutils.github.io",
+    "github_org": "uutils",
+    "description": "Cross-platform GNU coreutils rewrite in Rust. Drop-in replacement for ls, cp, cat, and 100+ other core utilities on macOS, Linux, and Windows. 24k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Leptos",
+    "slug": "leptos-rs",
+    "type": "project",
+    "sector": "Frontend / WASM",
+    "href": "https://leptos.dev",
+    "github_org": "leptos-rs",
+    "description": "Reactive fullstack Rust web framework with SSR and WASM hydration. Uses axum as the server backend. 20k+ stars.",
+    "ecosystems": ["wasm", "axum"]
+  },
+  {
+    "name": "Pocket",
+    "slug": "pocket",
+    "type": "company",
+    "sector": "Desktop Applications / Hardware",
+    "href": "https://www.ycombinator.com/companies/pocket",
+    "description": "YC W26 company building personal hardware devices with Tauri desktop applications. Shipped 30,000+ units. Rust backend powers Tauri plugins, system commands, and hardware integration.",
+    "ecosystems": ["tauri", "cli"]
+  },
+  {
+    "name": "Wasmer",
+    "slug": "wasmer",
+    "type": "company",
+    "sector": "WASM Runtime",
+    "href": "https://wasmer.io",
+    "github_org": "wasmerio",
+    "description": "Builds the leading standalone WebAssembly runtime in Rust. wasmer (20k+ stars) supports LLVM, Cranelift, and Singlepass backends and runs Wasm in servers, edge, and embedded contexts.",
+    "ecosystems": ["wasm"]
+  },
+  {
+    "name": "Typst",
+    "slug": "typst",
+    "type": "company",
+    "sector": "Developer Tools / Publishing",
+    "href": "https://typst.app",
+    "github_org": "typst",
+    "description": "Modern typesetting system written entirely in Rust, positioned as a LaTeX alternative. typst (54k+ stars) compiles to PDF with a live-preview workflow. Berlin-based.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Tracel AI",
+    "slug": "tracel-ai",
+    "type": "company",
+    "sector": "AI / Machine Learning",
+    "href": "https://tracel.ai",
+    "github_org": "tracel-ai",
+    "description": "Builds Burn, the Rust-native deep learning framework (15k+ stars), and cubecl, a unified compute language for GPU programming in Rust. Focused on training and inference performance.",
+    "ecosystems": ["ai"]
+  },
+  {
+    "name": "smol async",
+    "slug": "smol-rs",
+    "type": "project",
+    "sector": "Async Runtime",
+    "href": "https://github.com/smol-rs",
+    "github_org": "smol-rs",
+    "description": "23 async primitive crates forming an alternative async runtime ecosystem outside Tokio: async-channel, polling, async-io, async-task, async-std, and more.",
+    "ecosystems": ["tokio"]
+  },
+  {
+    "name": "Rust CLI WG",
+    "slug": "rust-cli-wg",
+    "type": "project",
+    "sector": "CLI / Developer Tools",
+    "href": "https://rust-cli.github.io",
+    "github_org": "rust-cli",
+    "description": "Rust CLI working group. Maintains config-rs, human-panic, env_logger, confy, and 8 more CLI utility crates used across the Rust ecosystem.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "libp2p",
+    "slug": "libp2p-org",
+    "type": "project",
+    "sector": "P2P / Networking",
+    "href": "https://libp2p.io",
+    "github_org": "libp2p",
+    "description": "Modular P2P networking stack in Rust. Used by IPFS, Ethereum clients, Polkadot, and other decentralized protocol implementations.",
+    "ecosystems": ["grpc"]
+  },
+  {
+    "name": "Serde",
+    "slug": "serde-rs",
+    "type": "project",
+    "sector": "Serialization",
+    "href": "https://serde.rs",
+    "github_org": "serde-rs",
+    "description": "serde and serde_json — the universal serialization framework used by virtually every Rust project in the corpus. serde_json is the most downloaded Rust crate on crates.io.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Diesel",
+    "slug": "diesel-rs",
+    "type": "project",
+    "sector": "Database",
+    "href": "https://diesel.rs",
+    "github_org": "diesel-rs",
+    "description": "Diesel ORM — safe, extensible query builder and ORM for Rust. The primary Rust ORM used in production database applications. 14k+ stars.",
+    "ecosystems": ["database"]
+  },
+  {
+    "name": "Rayon",
+    "slug": "rayon-rs",
+    "type": "project",
+    "sector": "Parallel Computing",
+    "href": "https://github.com/rayon-rs/rayon",
+    "github_org": "rayon-rs",
+    "description": "Data-parallelism library for Rust. The standard parallel iterator library used by Polars, ripgrep, and most performance-critical Rust tools. 13k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "Clap",
+    "slug": "clap-rs",
+    "type": "project",
+    "sector": "CLI",
+    "href": "https://docs.rs/clap",
+    "github_org": "clap-rs",
+    "description": "Command-line argument parser for Rust. The most widely used Rust CLI argument parsing library by download count. 16k+ stars.",
+    "ecosystems": ["cli"]
+  },
+  {
+    "name": "wasm-bindgen",
+    "slug": "wasm-bindgen-org",
+    "type": "project",
+    "sector": "WASM",
+    "href": "https://rustwasm.github.io/wasm-bindgen",
+    "github_org": "rustwasm",
+    "description": "JS↔Rust WASM interop glue layer. Required by virtually every Rust-to-WASM project targeting the browser. Maintained by the rustwasm working group.",
+    "ecosystems": ["wasm"]
   }
 ]
