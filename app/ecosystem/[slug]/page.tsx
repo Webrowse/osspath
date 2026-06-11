@@ -8,7 +8,7 @@ import { JobCard } from "@/components/editorial/job-card"
 import { COMPANIES } from "@/content/companies"
 import { buildCompanyProfile, getCompanyBySlug } from "@/lib/company-data"
 import { getDepPageCounts } from "@/lib/deps-data"
-import { getProgramsForCompany, getFunderForCompany } from "@/lib/grants-data"
+import { getProgramsForCompany, getFunderForCompany, getIncomingFundingForOrg } from "@/lib/grants-data"
 import { getActiveJobsByCompany } from "@/lib/jobs-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
 
@@ -68,6 +68,12 @@ export default async function CompanyProfilePage({ params }: PageProps) {
   const sponsorFunder     = getFunderForCompany(company.slug)
   const sponsoredPrograms = getProgramsForCompany(company.slug)
   const openJobs          = getActiveJobsByCompany(company.slug)
+
+  // Reverse traversal: programs that fund repos owned by this org.
+  // Excludes programs already shown in the sponsoredPrograms section.
+  const sponsoredSlugs  = new Set(sponsoredPrograms.map(p => p.slug))
+  const incomingFunding = getIncomingFundingForOrg(company.github_org)
+    .filter(item => !sponsoredSlugs.has(item.program.slug))
 
   const hasOSS = profile.repoCount > 0
 
@@ -231,6 +237,76 @@ export default async function CompanyProfilePage({ params }: PageProps) {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Incoming funding — programs that fund repos owned by this org */}
+          {incomingFunding.length > 0 && (
+            <div style={{ marginBottom: 40 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 16 }}>
+                Recognized by {incomingFunding.length === 1
+                  ? "1 funding program"
+                  : `${incomingFunding.length} funding programs`}
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                {incomingFunding.map(({ program: p, funder: f, repos }) => (
+                  <div
+                    key={p.slug}
+                    style={{
+                      padding: "12px 16px",
+                      border: "1px solid var(--e-line-soft)",
+                      borderRadius: 5,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8 }}>
+                      <div>
+                        <Link
+                          href={`/grants/${p.slug}`}
+                          style={{ fontSize: 14, fontWeight: 600, color: "var(--e-fg)", textDecoration: "none", fontFamily: "var(--e-mono)" }}
+                        >
+                          {p.name}
+                        </Link>
+                        {f && (
+                          <span style={{ fontSize: 12, color: "var(--e-fg-dim)", marginLeft: 8 }}>
+                            {"via "}
+                            <Link href={`/funders/${f.slug}`} style={{ color: "var(--e-accent)", textDecoration: "none" }}>
+                              {f.name}
+                            </Link>
+                          </span>
+                        )}
+                      </div>
+                      <span
+                        style={{
+                          fontSize: 11,
+                          padding: "2px 7px",
+                          borderRadius: 3,
+                          background: "var(--e-line-soft)",
+                          color: "var(--e-fg-dim)",
+                          fontFamily: "var(--e-mono)",
+                          textTransform: "uppercase",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                    <div style={{ marginTop: 8, display: "flex", flexWrap: "wrap", gap: 6 }}>
+                      {repos.map(repo => {
+                        const [owner, name] = repo.split("/")
+                        return (
+                          <Link
+                            key={repo}
+                            href={`/oss/${owner}/${name}`}
+                            style={{ fontSize: 12, fontFamily: "var(--e-mono)", color: "var(--e-accent)", textDecoration: "none" }}
+                          >
+                            {repo} →
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
