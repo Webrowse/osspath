@@ -135,7 +135,7 @@ export default function HomePage() {
             />
             <div className="e-grants">
               {featuredGrants.map((grant) => (
-                <GrantCard key={grant.name} grant={grant} />
+                <GrantCard key={grant.name} program={grant} />
               ))}
             </div>
           </div>

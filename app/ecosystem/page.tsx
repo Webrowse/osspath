@@ -5,6 +5,7 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { ArchiveSearch } from "@/components/editorial/archive-search"
 import { COMPANIES } from "@/content/companies"
 import { matchesQuery } from "@/lib/content-utils"
+import { getOwnerCompanyIndex } from "@/lib/company-data"
 
 export const metadata: Metadata = {
   title: "Companies Using Rust in Production",
@@ -31,7 +32,8 @@ interface PageProps {
 
 export default async function EcosystemPage({ searchParams }: PageProps) {
   const { q = "" } = await searchParams
-  const items = q ? COMPANIES.filter((c) => matchesQuery(c as Record<string, unknown>, q)) : COMPANIES
+  const items       = q ? COMPANIES.filter((c) => matchesQuery(c as Record<string, unknown>, q)) : COMPANIES
+  const ownerIndex  = getOwnerCompanyIndex()
 
   return (
     <EditorialLayout>
@@ -59,20 +61,38 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
 
           {items.length > 0 ? (
             <div className="e-companies">
-              {items.map((c) => (
-                <a
-                  key={c.name}
-                  className="e-company"
-                  href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={c.name}
-                >
-                  <span className="e-company__name">{c.name}</span>
-                  <span className="e-company__sector">{c.sector}</span>
-                  <span className="e-company__hint" aria-hidden="true">Visit →</span>
-                </a>
-              ))}
+              {items.map((c) => {
+                const hasProfile = !!c.slug
+                const hasRepos   = c.github_org ? ownerIndex.has(c.github_org.toLowerCase()) : false
+                if (hasProfile) {
+                  return (
+                    <Link
+                      key={c.name}
+                      href={`/ecosystem/${c.slug}`}
+                      className="e-company"
+                      aria-label={c.name}
+                    >
+                      <span className="e-company__name">{c.name}</span>
+                      <span className="e-company__sector">{c.sector}</span>
+                      <span className="e-company__hint" aria-hidden="true">{hasRepos ? "OSS →" : "Profile →"}</span>
+                    </Link>
+                  )
+                }
+                return (
+                  <a
+                    key={c.name}
+                    className="e-company"
+                    href={c.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={c.name}
+                  >
+                    <span className="e-company__name">{c.name}</span>
+                    <span className="e-company__sector">{c.sector}</span>
+                    <span className="e-company__hint" aria-hidden="true">Visit →</span>
+                  </a>
+                )
+              })}
             </div>
           ) : (
             <p className="e-archive-empty">No companies match that filter.</p>

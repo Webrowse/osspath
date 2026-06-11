@@ -1,6 +1,6 @@
 import type { OSSPath } from "@/content/oss-paths"
 import { TOPIC_ALIASES, TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
-import { getCompanionIndex as _getCompanionIndex } from "@/lib/oss-data"
+import { getCompanionIndex as _getCompanionIndex, getOSSRepos } from "@/lib/oss-data"
 export type { CompanionEntry, CompanionIndex } from "@/lib/oss-data"
 export { getOSSRepos, getCompanionIndex } from "@/lib/oss-data"
 
@@ -41,6 +41,22 @@ export const OSSCARD_DEP_DENYLIST = new Set<string>([
   // sys bindings and low-level impl detail
   "openssl", "rand_core", "serde_bytes", "fnv", "terminal_size", "objc2-app-kit",
 ])
+
+// Returns { crate → total-star-weight } for every dep across all repos.
+// Star-weight = sum of stars of all repos that use the dep.
+// Cached at module level — computed from the oss.json corpus.
+let _depStarWeights: Record<string, number> | null = null
+export function getDepStarWeights(): Record<string, number> {
+  if (!_depStarWeights) {
+    _depStarWeights = {}
+    for (const r of getOSSRepos()) {
+      for (const d of r.dependencies ?? []) {
+        _depStarWeights[d] = (_depStarWeights[d] ?? 0) + (r.stars ?? 0)
+      }
+    }
+  }
+  return _depStarWeights
+}
 
 // Returns { crate → repoCount } for every crate with a dep page that is not
 // on the denylist. Used by OSSCard to filter and rank dep links.

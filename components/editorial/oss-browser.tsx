@@ -1,7 +1,10 @@
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import { OSSCard } from "./oss-card"
+import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
+import type { EcoTag } from "@/lib/eco-tags"
 import type { OSSPath } from "@/content/oss-paths"
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -9,6 +12,8 @@ import type { OSSPath } from "@/content/oss-paths"
 type SortKey       = "stars-desc" | "stars-asc" | "forks-desc" | "updated" | "issues"
 type StarBucketKey = "any" | "20-59" | "60-99" | "100-499" | "500-1999" | "2000-9999" | "10000+"
 type DropdownId    = "license" | "topics" | "owner" | "deps"
+
+const PAGE_SIZE = 100
 
 // ── Normalization ──────────────────────────────────────────────────────────
 
@@ -22,6 +27,7 @@ export interface NormalizedRepo extends OSSPath {
   license:         string
   activityTier:    "active" | "maintenance" | "dormant"
   dependencies:    string[]
+  ecoTags:         EcoTag[]
 }
 
 function normalize(r: OSSPath): NormalizedRepo {
@@ -36,6 +42,7 @@ function normalize(r: OSSPath): NormalizedRepo {
     license:         r.license         ?? "unknown",
     activityTier:    (r.activityTier as "active" | "maintenance" | "dormant") ?? "dormant",
     dependencies:    r.dependencies    ?? [],
+    ecoTags:         getEcoTags(r.dependencies, { owner: r.owner ?? undefined, topics: r.topics ?? undefined }),
   }
 }
 
@@ -82,11 +89,12 @@ function buildFilter(
     selectedOwners:    Set<string>
     selectedTopics:    Set<string>
     selectedDeps:      Set<string>
+    selectedEcos:      Set<EcoTag>
     star?: { lo: number; hi: number }
   }
 ): NormalizedRepo[] {
   const { q, selectedActivity, selectedLanguages, selectedLicenses,
-          selectedOwners, selectedTopics, selectedDeps, star } = opts
+          selectedOwners, selectedTopics, selectedDeps, selectedEcos, star } = opts
   return items.filter(r => {
     if (q) {
       const lc = q.toLowerCase()
@@ -104,6 +112,8 @@ function buildFilter(
         ![...selectedTopics].every(t => r.topics.includes(t))) return false
     if (selectedDeps.size      > 0 &&
         ![...selectedDeps].every(d => r.dependencies.includes(d))) return false
+    if (selectedEcos.size      > 0 &&
+        !r.ecoTags.some(tag => selectedEcos.has(tag))) return false
     return true
   })
 }
@@ -144,13 +154,33 @@ function buildFacets(items: NormalizedRepo[]) {
 
 // ── Main component ─────────────────────────────────────────────────────────
 
+const ECO_OPTIONS: { value: EcoTag; label: string }[] = [
+  { value: "bevy",       label: "Bevy" },
+  { value: "tauri",      label: "Tauri" },
+  { value: "blockchain", label: "Blockchain" },
+  { value: "embedded",   label: "Embedded" },
+  { value: "ai",         label: "AI / ML" },
+  { value: "wasm",       label: "WASM" },
+  { value: "database",   label: "Database" },
+  { value: "grpc",       label: "gRPC" },
+  { value: "cli",        label: "CLI / TUI" },
+  { value: "axum",       label: "Web (axum)" },
+  { value: "tokio",      label: "Tokio" },
+]
+
 export function OSSBrowser({
   repos,
   depPageCounts,
+  initialDeps,
+  initialEcos,
 }: {
   repos: OSSPath[]
   depPageCounts?: Record<string, number>
+  initialDeps?: string[]
+  initialEcos?: string[]
 }) {
+  const router   = useRouter()
+  const pathname = usePathname()
   const normalized = useMemo(() => repos.map(normalize), [repos])
 
   // Filter state
@@ -163,10 +193,29 @@ export function OSSBrowser({
   const [selectedTopics,    setSelectedTopics]    = useState<Set<string>>(new Set())
   const [topicSearch,       setTopicSearch]       = useState("")
   const [ownerSearch,       setOwnerSearch]       = useState("")
-  const [selectedDeps,      setSelectedDeps]      = useState<Set<string>>(new Set())
+  const [selectedDeps,      setSelectedDeps]      = useState<Set<string>>(
+    () => new Set(initialDeps ?? [])
+  )
   const [depSearch,         setDepSearch]         = useState("")
+  const [selectedEcos,      setSelectedEcos]      = useState<Set<EcoTag>>(
+    () => new Set((initialEcos ?? []).filter((e): e is EcoTag =>
+      ECO_OPTIONS.some(o => o.value === e)
+    ))
+  )
   const [sort,              setSort]              = useState<SortKey>("stars-desc")
   const [openDropdown,      setOpenDropdown]      = useState<DropdownId | null>(null)
+  const [visibleCount,      setVisibleCount]      = useState(PAGE_SIZE)
+
+  // Sync selectedDeps + selectedEcos → URL
+  useEffect(() => {
+    const params = new URLSearchParams()
+    for (const d of selectedDeps) params.append("dep", d)
+    for (const e of selectedEcos) params.append("eco", e)
+    const qs = params.toString()
+    const target = qs ? `${pathname}?${qs}` : pathname
+    router.replace(target, { scroll: false })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedDeps, selectedEcos])
 
   // Close open dropdown on outside click
   const fbRef = useRef<HTMLDivElement>(null)
@@ -187,7 +236,7 @@ export function OSSBrowser({
 
   const filterOpts = {
     q, selectedActivity, selectedLanguages, selectedLicenses,
-    selectedOwners, selectedTopics, selectedDeps,
+    selectedOwners, selectedTopics, selectedDeps, selectedEcos,
   }
 
   const activeBucket = starBucket === "any"
@@ -199,7 +248,7 @@ export function OSSBrowser({
     () => buildFilter(normalized, { ...filterOpts, star: activeBucket }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [normalized, q, starBucket, selectedActivity, selectedLanguages,
-     selectedLicenses, selectedOwners, selectedTopics, selectedDeps]
+     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
   )
 
   // Filtered without star constraint — drives bucket counts
@@ -207,7 +256,7 @@ export function OSSBrowser({
     () => buildFilter(normalized, { ...filterOpts }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [normalized, q, selectedActivity, selectedLanguages,
-     selectedLicenses, selectedOwners, selectedTopics, selectedDeps]
+     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
   )
 
   // Sorted display list
@@ -221,6 +270,21 @@ export function OSSBrowser({
       return 0
     })
   }, [filtered, sort])
+
+  // Reset visible count when sorted set changes (filter or sort applied)
+  useEffect(() => { setVisibleCount(PAGE_SIZE) }, [sorted])
+
+  // Eco counts from full corpus (stable regardless of eco filter)
+  const allEcoCounts = useMemo(() => {
+    const counts: Partial<Record<EcoTag, number>> = {}
+    for (const r of normalized) {
+      for (const tag of r.ecoTags) counts[tag] = (counts[tag] ?? 0) + 1
+    }
+    return counts
+  }, [normalized])
+
+  // Displayed repos (pagination slice)
+  const displayed = sorted.slice(0, visibleCount)
 
   // Facets from full corpus — option lists never shrink when filters are applied
   const allFacets = useMemo(() => buildFacets(normalized), [normalized])
@@ -347,10 +411,15 @@ export function OSSBrowser({
       chips.push({ key: `dep:${d}`, label: d,
         onRemove: () => setSelectedDeps(prev => toggleSet(prev, d)) })
     }
+    for (const e of selectedEcos) {
+      const label = ECO_OPTIONS.find(o => o.value === e)?.label ?? e
+      chips.push({ key: `eco:${e}`, label,
+        onRemove: () => setSelectedEcos(prev => toggleSet(prev, e)) })
+    }
     return chips
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, starBucket, selectedActivity, selectedLanguages, selectedLicenses,
-      selectedOwners, selectedTopics, selectedDeps])
+      selectedOwners, selectedTopics, selectedDeps, selectedEcos])
 
   function clearAll() {
     setQ("")
@@ -361,6 +430,7 @@ export function OSSBrowser({
     setSelectedOwners(new Set())
     setSelectedTopics(new Set())
     setSelectedDeps(new Set())
+    setSelectedEcos(new Set())
     setTopicSearch("")
     setOwnerSearch("")
     setDepSearch("")
@@ -535,8 +605,8 @@ export function OSSBrowser({
         </div>
 
         <span className="oss-fb-count">
-          {sorted.length !== repos.length
-            ? `${sorted.length} / ${repos.length}`
+          {filtered.length !== repos.length
+            ? `${filtered.length} / ${repos.length}`
             : String(repos.length)}
         </span>
       </div>
@@ -627,20 +697,55 @@ export function OSSBrowser({
             </div>
           )}
 
+          <div className="oss-rail-group">
+            <div className="oss-rail-label">Ecosystem</div>
+            {ECO_OPTIONS.map(o => {
+              const count = allEcoCounts[o.value] ?? 0
+              return (
+                <label key={o.value} className="oss-filter-row">
+                  <input
+                    type="checkbox"
+                    className="oss-filter-radio"
+                    checked={selectedEcos.has(o.value)}
+                    onChange={() => setSelectedEcos(prev => toggleSet(prev, o.value))}
+                  />
+                  <span style={{ flex: 1 }}>{o.label}</span>
+                  <span className="oss-filter-count">{count}</span>
+                </label>
+              )
+            })}
+          </div>
+
         </aside>
 
         {/* Repository grid */}
         <div>
           {sorted.length > 0 ? (
-            <div className="e-oss-grid">
-              {sorted.map(repo => (
-                <OSSCard
-                  key={repo.href}
-                  repo={repo as NormalizedRepo}
-                  depPageCounts={depPageCounts}
-                />
-              ))}
-            </div>
+            <>
+              <div className="e-oss-grid">
+                {displayed.map(repo => (
+                  <OSSCard
+                    key={repo.href}
+                    repo={repo as NormalizedRepo}
+                    depPageCounts={depPageCounts}
+                  />
+                ))}
+              </div>
+              {visibleCount < sorted.length && (
+                <div className="oss-load-more">
+                  <button
+                    type="button"
+                    className="oss-load-more-btn"
+                    onClick={() => setVisibleCount(c => c + PAGE_SIZE)}
+                  >
+                    Load {Math.min(PAGE_SIZE, sorted.length - visibleCount)} more
+                    <span className="oss-load-more-meta">
+                      {visibleCount} of {sorted.length}
+                    </span>
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="e-archive-empty">
               No repositories match.{" "}

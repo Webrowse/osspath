@@ -1,4 +1,15 @@
-import type { EditorialGrant } from "@/content/grants"
+import Link from "next/link"
+import type { FundingProgram } from "@/content/programs"
+
+const KIND_LABEL: Record<string, string> = {
+  grant:           "Grant",
+  fellowship:      "Fellowship",
+  hackathon:       "Hackathon",
+  treasury:        "Treasury",
+  hardship:        "Hardship",
+  "bounty-program":"Bounties",
+  sponsorship:     "Sponsorship",
+}
 
 function ArrowUR() {
   return (
@@ -8,21 +19,24 @@ function ArrowUR() {
   )
 }
 
-export function GrantCard({ grant }: { grant: EditorialGrant }) {
+export function GrantCard({ program }: { program: FundingProgram }) {
   return (
-    <a
+    <Link
       className="e-grant"
-      href={grant.href}
-      target="_blank"
-      rel="noopener noreferrer"
+      href={`/grants/${program.slug}`}
     >
-      <span className="e-grant__kind">{grant.kind}</span>
-      <h3 className="e-grant__name">{grant.name}</h3>
-      <p className="e-grant__sub">{grant.description}</p>
+      <span className="e-grant__kind">{KIND_LABEL[program.kind] ?? program.kind}</span>
+      <h3 className="e-grant__name">{program.name}</h3>
+      <p className="e-grant__sub">{program.description}</p>
       <div className="e-grant__foot">
-        <span>{grant.status}</span>
+        <span>{program.status}</span>
+        {program.max_award && (
+          <span style={{ fontFamily: "var(--e-mono)", fontSize: 12, color: "var(--e-accent)" }}>
+            {program.max_award}
+          </span>
+        )}
         <ArrowUR />
       </div>
-    </a>
+    </Link>
   )
 }

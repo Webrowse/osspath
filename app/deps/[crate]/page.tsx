@@ -126,19 +126,26 @@ export default async function DepPage({ params }: PageProps) {
         <div className="e-col">
 
           {/* ── Breadcrumb ─────────────────────────────────────────────────── */}
-          <nav aria-label="Breadcrumb" style={{ marginBottom: 24 }}>
+          <nav aria-label="Breadcrumb" style={{ marginBottom: 24, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+            <Link
+              href="/deps"
+              style={{
+                fontSize: 13,
+                color: "var(--e-fg-mute)",
+                textDecoration: "none",
+              }}
+            >
+              ← Dependencies
+            </Link>
             <Link
               href="/oss"
               style={{
                 fontSize: 13,
-                color: "var(--color-muted)",
+                color: "var(--e-fg-mute)",
                 textDecoration: "none",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
               }}
             >
-              ← OSS Paths
+              OSS Paths
             </Link>
           </nav>
 
@@ -178,15 +185,36 @@ export default async function DepPage({ params }: PageProps) {
             ).map(([label, value]) => (
               <div key={label} style={{ minWidth: 80 }}>
                 <div
-                  style={{ fontSize: 22, fontWeight: 600, color: "var(--color-foreground)", lineHeight: 1.1 }}
+                  style={{ fontSize: 22, fontWeight: 600, color: "var(--e-fg)", lineHeight: 1.1 }}
                 >
                   {value}
                 </div>
-                <div style={{ fontSize: 11, color: "var(--color-muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                <div style={{ fontSize: 11, color: "var(--e-fg-dim)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   {label}
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* ── Browse in OSS Paths CTA ────────────────────────────────────── */}
+          <div style={{ marginBottom: 40 }}>
+            <Link
+              href={`/oss?dep=${crate}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                fontFamily: "var(--e-mono)",
+                color: "var(--e-accent)",
+                textDecoration: "none",
+                border: "1px solid color-mix(in oklab, var(--e-accent) 40%, transparent)",
+                borderRadius: 6,
+                padding: "6px 14px",
+              }}
+            >
+              Browse {allRepos.length} {repoLabel} using {crate} in OSS Paths →
+            </Link>
           </div>
 
           {/* ── Related topics ──────────────────────────────────────────────── */}
@@ -197,7 +225,7 @@ export default async function DepPage({ params }: PageProps) {
                   fontSize: 11,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "var(--color-muted)",
+                  color: "var(--e-fg-dim)",
                   marginBottom: 12,
                 }}
               >
@@ -227,7 +255,7 @@ export default async function DepPage({ params }: PageProps) {
                   fontSize: 11,
                   textTransform: "uppercase",
                   letterSpacing: "0.08em",
-                  color: "var(--color-muted)",
+                  color: "var(--e-fg-dim)",
                   marginBottom: 12,
                 }}
               >
@@ -242,7 +270,7 @@ export default async function DepPage({ params }: PageProps) {
                   >
                     <span className="e-tag e-tag--soft" style={{ cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6 }}>
                       <span style={{ fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}>{c.name}</span>
-                      <span style={{ color: "var(--color-muted)", fontSize: 11 }}>{c.percent}%</span>
+                      <span style={{ color: "var(--e-fg-dim)", fontSize: 11 }}>{c.percent}%</span>
                     </span>
                   </Link>
                 ))}
@@ -257,7 +285,7 @@ export default async function DepPage({ params }: PageProps) {
                 fontSize: 11,
                 textTransform: "uppercase",
                 letterSpacing: "0.08em",
-                color: "var(--color-muted)",
+                color: "var(--e-fg-dim)",
                 marginBottom: 16,
               }}
             >
@@ -285,7 +313,7 @@ export default async function DepPage({ params }: PageProps) {
           >
             <Link
               href="/oss"
-              style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}
+              style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}
             >
               ← Browse all OSS repositories
             </Link>

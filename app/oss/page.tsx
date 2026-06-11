@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
+import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSBrowser } from "@/components/editorial/oss-browser"
 import { OSS_PATHS } from "@/content/oss-paths"
-import { getDepPageCounts } from "@/lib/deps-data"
+import { getDepPageCounts, getQualifiedCrates } from "@/lib/deps-data"
 
 export const metadata: Metadata = {
   title: "OSS Paths — Approachable Rust Repositories",
@@ -23,8 +24,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default function OSSArchivePage() {
+interface PageProps {
+  searchParams: Promise<{ dep?: string | string[]; eco?: string | string[] }>
+}
+
+export default async function OSSArchivePage({ searchParams }: PageProps) {
+  const { dep, eco } = await searchParams
+  const initialDeps = Array.isArray(dep) ? dep : dep ? [dep] : []
+  const initialEcos = Array.isArray(eco) ? eco : eco ? [eco] : []
   const depPageCounts = getDepPageCounts()
+  const depPageCount  = getQualifiedCrates().length
 
   return (
     <EditorialLayout>
@@ -37,12 +46,20 @@ export default function OSSArchivePage() {
                 OSS Paths
               </h1>
               <p className="e-archive-meta">
-                {OSS_PATHS.length} curated Rust repositories — filter by stars, activity, license, owner, topic, or dependency.
+                {OSS_PATHS.length} curated Rust repositories — filter by stars, activity, license, owner, topic, ecosystem, or dependency.{" "}
+                <Link href="/deps" style={{ color: "var(--e-accent)", textDecoration: "none" }}>
+                  Browse {depPageCount} crate pages →
+                </Link>
               </p>
             </div>
           </div>
 
-          <OSSBrowser repos={OSS_PATHS} depPageCounts={depPageCounts} />
+          <OSSBrowser
+            repos={OSS_PATHS}
+            depPageCounts={depPageCounts}
+            initialDeps={initialDeps}
+            initialEcos={initialEcos}
+          />
         </div>
       </section>
     </EditorialLayout>

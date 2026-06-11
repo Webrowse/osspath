@@ -1,7 +1,9 @@
 "use client"
 
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { OSSPath } from "@/content/oss-paths"
+import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 
 function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
@@ -38,24 +40,41 @@ export function OSSCard({
   repo: OSSPath
   depPageCounts?: Record<string, number>
 }) {
-  const stars      = repo.stars            ?? 0
-  const forks      = repo.forks            ?? 0
-  const openIssues = repo.openIssuesCount  ?? 0
-  const tier       = repo.activityTier     ?? "dormant"
+  const router    = useRouter()
+  const stars      = repo.stars           ?? 0
+  const forks      = repo.forks           ?? 0
+  const openIssues = repo.openIssuesCount ?? 0
+  const tier       = repo.activityTier    ?? "dormant"
   const depLinks   = depPageCounts ? pickDepLinks(repo.dependencies, depPageCounts, 3) : []
+  const ecoTags    = getEcoTags(repo.dependencies, { owner: repo.owner ?? undefined, topics: repo.topics ?? undefined })
+  const issueWarm  = tier === "active" && openIssues >= 5
+
+  const detailHref = repo.owner && repo.name
+    ? `/oss/${repo.owner}/${repo.name}`
+    : null
 
   const statParts: string[] = []
-  if (forks      > 0) statParts.push(`⑂ ${fmt(forks)}`)
-  if (openIssues > 0) statParts.push(`◎ ${fmt(openIssues)}`)
+  if (forks > 0) statParts.push(`⑂ ${fmt(forks)}`)
 
-  function handleClick() {
-    window.open(repo.href, "_blank", "noopener,noreferrer")
+  function handleClick(e: React.MouseEvent) {
+    // Let link clicks (dep links, eco tags) bubble without navigating the card
+    const target = e.target as HTMLElement
+    if (target.closest("a")) return
+    if (detailHref) {
+      router.push(detailHref)
+    } else {
+      window.open(repo.href, "_blank", "noopener,noreferrer")
+    }
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault()
-      handleClick()
+      if (detailHref) {
+        router.push(detailHref)
+      } else {
+        window.open(repo.href, "_blank", "noopener,noreferrer")
+      }
     }
   }
 
@@ -66,13 +85,28 @@ export function OSSCard({
       onKeyDown={handleKeyDown}
       role="link"
       tabIndex={0}
-      aria-label={`Open ${repo.name} on GitHub`}
+      aria-label={`View ${repo.name}`}
     >
       <div className="e-oss__head">
         <span className="e-oss__name">{repo.name}</span>
         <span className="e-oss__stars">★ {fmt(stars)}</span>
         <span className={`e-oss__activity e-oss__activity--${tier}`}>{tier}</span>
       </div>
+
+      {ecoTags.length > 0 && (
+        <div className="e-oss__eco">
+          {ecoTags.map(tag => (
+            <Link
+              key={tag}
+              href={`/oss?eco=${tag}`}
+              className={`e-oss__eco-badge e-oss__eco-badge--${tag}`}
+              onClick={e => e.stopPropagation()}
+            >
+              {ECO_LABEL[tag]}
+            </Link>
+          ))}
+        </div>
+      )}
 
       <p className="e-oss__note">{repo.note}</p>
 
@@ -91,11 +125,16 @@ export function OSSCard({
             ))}
           </div>
         )}
-        {statParts.length > 0 && (
+        {(statParts.length > 0 || openIssues > 0) && (
           <div className="e-oss__stats">
             {statParts.map(s => (
               <span key={s} className="e-oss__stat">{s}</span>
             ))}
+            {openIssues > 0 && (
+              <span className={`e-oss__stat${issueWarm ? " e-oss__stat--issues" : ""}`}>
+                ◎ {fmt(openIssues)}
+              </span>
+            )}
           </div>
         )}
       </div>

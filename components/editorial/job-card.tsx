@@ -1,3 +1,4 @@
+import Link from "next/link"
 import type { EditorialJob } from "@/content/jobs"
 import { formatCheckedAt } from "@/lib/content-utils"
 
@@ -17,7 +18,6 @@ function isJuniorOrIntern(tag: string) {
 export function JobCard({ job }: { job: EditorialJob }) {
   const freshness = formatCheckedAt(job.checkedAt)
 
-  // Build a quiet trust metadata line: "Rust · Remote · Checked today"
   const trustParts: string[] = []
   if (job.rustMentioned)   trustParts.push("Rust explicit")
   if (job.remoteConfirmed) trustParts.push("Remote confirmed")
@@ -28,8 +28,22 @@ export function JobCard({ job }: { job: EditorialJob }) {
     <article className="e-job">
       <div className="e-job__main">
         <div className="e-job__head">
-          <span className="e-job__role">{job.role}</span>
-          <span className="e-job__company">— {job.company}</span>
+          <Link
+            href={`/jobs/${job.slug}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <span className="e-job__role">{job.role}</span>
+          </Link>
+          {job.company_slug ? (
+            <Link
+              href={`/ecosystem/${job.company_slug}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <span className="e-job__company">— {job.company}</span>
+            </Link>
+          ) : (
+            <span className="e-job__company">— {job.company}</span>
+          )}
         </div>
         <p className="e-job__note">{job.note}</p>
         <div className="e-job__footer">

@@ -1,15 +1,3 @@
-import rawGrants from "./grants.json"
-
-export type GrantKind = "Grant" | "Bounty" | "Hackathon" | "Sponsorship"
-
-export type EditorialGrant = {
-  kind: GrantKind
-  name: string
-  description: string
-  status: string
-  href: string
-  checkedAt: string
-  expiresAt?: string
-}
-
-export const GRANTS = rawGrants as EditorialGrant[]
+// Backward-compat re-export. New code should import from "@/content/programs".
+export type { FundingProgram as EditorialGrant } from "@/content/programs"
+export { PROGRAMS as GRANTS } from "@/content/programs"
