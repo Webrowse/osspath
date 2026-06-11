@@ -668,5 +668,61 @@
     "github_org": "rustwasm",
     "description": "JS↔Rust WASM interop glue layer. Required by virtually every Rust-to-WASM project targeting the browser. Maintained by the rustwasm working group.",
     "ecosystems": ["wasm"]
+  },
+  {
+    "name": "RustCrypto",
+    "slug": "rustcrypto",
+    "type": "project",
+    "sector": "Cryptography",
+    "href": "https://github.com/RustCrypto",
+    "github_org": "RustCrypto",
+    "description": "Collaborative collection of cryptographic algorithm implementations in pure Rust. Covers AEADs, digital signatures, hash functions, key derivation, elliptic curves, and X.509 certificate formats. No unsafe code; no_std compatible throughout. NLnet NGI Assure funded."
+  },
+  {
+    "name": "rustls",
+    "slug": "rustls",
+    "type": "project",
+    "sector": "Security / TLS",
+    "href": "https://github.com/rustls/rustls",
+    "github_org": "rustls",
+    "description": "Memory-safe TLS implementation in pure Rust. The primary alternative to OpenSSL for Rust network applications. Funded by ISRG Prossimo, NLnet NGI Zero, and the Sovereign Tech Fund."
+  },
+  {
+    "name": "Servo",
+    "slug": "servo",
+    "type": "project",
+    "sector": "Browser / Web Platform",
+    "href": "https://servo.org",
+    "github_org": "servo",
+    "description": "Independent web browser engine written in Rust, hosted by the Linux Foundation Europe. Originally created at Mozilla. Actively maintained as an embeddable web rendering engine. Funded by the Rust Foundation and NLnet."
+  },
+  {
+    "name": "esp-rs",
+    "slug": "esp-rs",
+    "type": "project",
+    "sector": "Embedded / IoT",
+    "href": "https://github.com/esp-rs",
+    "github_org": "esp-rs",
+    "description": "Community organization maintaining Rust support for Espressif chips (ESP32, ESP32-S3, ESP32-C3). Covers bare-metal and ESP-IDF-based HAL crates, toolchain support, and no_std training materials. NLnet NGI Zero funded.",
+    "ecosystems": ["embedded"]
+  },
+  {
+    "name": "Paradigm",
+    "slug": "paradigmxyz",
+    "type": "company",
+    "sector": "Blockchain / Ethereum",
+    "href": "https://www.paradigm.xyz",
+    "github_org": "paradigmxyz",
+    "description": "Crypto research and investment firm behind Reth, the modular Ethereum execution client written in Rust. Also the origin of Foundry (foundry-rs) and Alloy (alloy-rs), making Paradigm the largest single contributor to Rust Ethereum tooling.",
+    "ecosystems": ["blockchain"]
+  },
+  {
+    "name": "Matrix.org",
+    "slug": "matrix-org",
+    "type": "nonprofit",
+    "sector": "Messaging / Protocol",
+    "href": "https://matrix.org",
+    "github_org": "matrix-org",
+    "description": "Open standard and reference implementations for decentralized, real-time communication. matrix-rust-sdk is the Rust client library underpinning Element X and other Matrix clients. Funded by NLnet NGI Commons and the Sovereign Tech Fund."
   }
 ]
