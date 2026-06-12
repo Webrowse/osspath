@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { source: "/workflow",         destination: "/", permanent: true },
       { source: "/sources",          destination: "/", permanent: true },
       { source: "/demo",             destination: "/", permanent: true },
+      { source: "/opportunities",    destination: "/jobs", permanent: true },
     ]
   },
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg"],

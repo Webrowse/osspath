@@ -10,47 +10,6 @@ import { PostHog } from "posthog-node"
 
 export type AppEvent =
   | { event: "sign_in"; props: { provider: string; is_new_user: boolean } }
-  | {
-      event: "company_tracked"
-      props: {
-        company_id: string
-        company_name: string
-        status: string
-        is_new: boolean
-        had_follow_up: boolean
-      }
-    }
-  | { event: "company_untracked"; props: { company_id: string; company_name: string } }
-  | { event: "filter_applied"; props: { active_filter_count: number } }
-  | { event: "preset_applied"; props: { preset_name: string } }
-  | { event: "follow_up_set"; props: { company_id: string; days_from_now: number } }
-  | { event: "company_saved"; props: { company_id: string; company_name: string } }
-  | { event: "company_unsaved"; props: { company_id: string; company_name: string } }
-  | { event: "company_applied_quick"; props: { company_id: string; company_name: string } }
-  | { event: "company_viewed"; props: { company_id: string; company_name: string; company_slug: string; is_authenticated: boolean } }
-  | { event: "careers_page_clicked"; props: { company_id: string; company_name: string; source: "list_row" | "card" | "detail_page" } }
-  | {
-      event: "opportunity_clicked"
-      props: {
-        opportunity_id: string
-        company_name: string
-        rust_signal: string
-        source: string
-        position: number
-      }
-    }
-  | {
-      event: "opportunity_track_clicked"
-      props: { opportunity_id: string; company_name: string; company_slug: string }
-    }
-  | {
-      event: "opportunity_filter_changed"
-      props: { filter_key: string; filter_value: string; total_results: number }
-    }
-  | {
-      event: "source_clicked"
-      props: { source_id: string; source_name: string; category: string }
-    }
 
 // ─── Server-side capture ──────────────────────────────────────────────────────
 // Use in Server Actions and NextAuth callbacks.
