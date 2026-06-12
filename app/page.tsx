@@ -1,38 +1,21 @@
 import Link from "next/link"
 import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
+import { HeroGraph } from "@/components/editorial/hero-graph"
 import { SectionHeader } from "@/components/editorial/section-header"
-import { JobCard } from "@/components/editorial/job-card"
-import { OSSHomeSection } from "@/components/editorial/oss-home-section"
-import { GrantCard } from "@/components/editorial/grant-card"
-import { PulseRow } from "@/components/editorial/pulse-item"
-import { EventCard } from "@/components/editorial/event-card"
-import { CompanyGrid } from "@/components/editorial/company-grid"
-import { PortalRow } from "@/components/editorial/portal-row"
-import { JOBS } from "@/content/jobs"
-import { OSS_PATHS } from "@/content/oss-paths"
-import { GRANTS } from "@/content/grants"
-import { PULSE } from "@/content/pulse"
-import { EVENTS } from "@/content/events"
-import { COMPANIES } from "@/content/companies"
-import { PORTALS } from "@/content/portals"
-import { filterActive } from "@/lib/content-utils"
+import { getLandingData } from "@/lib/landing-data"
 import { SITE_CONFIG } from "@/lib/site-config"
 import { SITE_NAV } from "@/lib/nav-config"
 
-// Max items shown per section on the homepage — View All appears when total exceeds this
-const LIMITS = { jobs: 4, grants: 4, pulse: 4, events: 3, companies: 8 }
-
 export default function HomePage() {
-  // Auto-hide expired content at build time
-  const activeJobs   = filterActive(JOBS)
-  const activeGrants = filterActive(GRANTS)
-  const activeEvents = filterActive(EVENTS)
-
-  const featuredJobs      = activeJobs.slice(0, LIMITS.jobs)
-  const featuredGrants    = activeGrants.slice(0, LIMITS.grants)
-  const featuredPulse     = PULSE.slice(0, LIMITS.pulse)
-  const featuredEvents    = activeEvents.slice(0, LIMITS.events)
-  const featuredCompanies = COMPANIES.slice(0, LIMITS.companies)
+  const {
+    graphStats,
+    featuredJourneys,
+    featuredFundingPrograms,
+    featuredRepositories,
+    featuredOrganizations,
+    featuredEcosystems,
+    featuredCrates,
+  } = getLandingData()
 
   return (
     <div className="editorial-root">
@@ -62,150 +45,219 @@ export default function HomePage() {
             <span aria-hidden="true">→</span>
           </Link>
 
-          <EditorialMobileMenu links={
-            SITE_NAV.map((l) => ({ label: l.label, href: l.archive }))
-          } />
+          <EditorialMobileMenu links={SITE_NAV.map((l) => ({ label: l.label, href: l.archive }))} />
         </div>
       </header>
 
       <main>
 
-        {/* ── Hero ─────────────────────────────────────────────────────────── */}
-        <section className="e-hero" id="top">
-          <div className="e-col">
-            <div className="e-hero__eyebrow">
-              <span className="e-dot" />
-              <span>Curated — updated weekly</span>
+        {/* ── Hero — graph is the product ──────────────────────────────────── */}
+        <section className="e-hero hp-hero-split" id="top">
+          <div className="e-col e-col--wide hp-hero-grid">
+
+            {/* Left: text */}
+            <div className="hp-hero-text">
+              <div className="e-hero__eyebrow">
+                <span className="e-dot" />
+                <span>OSS Paths — the Rust ecosystem graph</span>
+              </div>
+              <h1 className="e-hero__title">
+                Navigate the Rust ecosystem{" "}
+                <em>as a connected graph.</em>
+              </h1>
+              <p className="e-hero__sub">
+                Find jobs through repositories. Find organizations through
+                dependencies. Find funding through projects. Start from any node.
+              </p>
+
+              <div className="hp-graph-legend">
+                {([
+                  { label: "Fund",  color: "#c2562c" },
+                  { label: "Repo",  color: "#3d6b9e" },
+                  { label: "Eco",   color: "#6a7a3f" },
+                  { label: "Org",   color: "#7a5c8c" },
+                  { label: "Crate", color: "#8a6030" },
+                  { label: "Job",   color: "#2b6b4a" },
+                ] as const).map(({ label, color }) => (
+                  <span key={label} className="hp-legend-tok" style={{ "--nc": color } as React.CSSProperties}>
+                    <span className="hp-legend-dot" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+
+              <div className="hp-stats">
+                {([
+                  { value: graphStats.totalRepos.toLocaleString("en-US"), label: "repositories" },
+                  { value: String(graphStats.totalOrgs),                   label: "organizations" },
+                  { value: String(graphStats.totalPrograms),               label: "funding programs" },
+                  { value: String(graphStats.activeJobs),                  label: "active jobs" },
+                ] as const).map(({ value, label }) => (
+                  <div key={label} className="hp-stat">
+                    <span className="hp-stat-v">{value}</span>
+                    <span className="hp-stat-l">{label}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <h1 className="e-hero__title">
-              Curated Rust ecosystem{" "}
-              <em>opportunities.</em>
-            </h1>
-            <p className="e-hero__sub">
-              Remote jobs, OSS paths, grants, and quiet ecosystem signals —
-              kept short and read by a human first.
-            </p>
+
+            {/* Right: graph — the product */}
+            <div className="hp-hero-graph">
+              <HeroGraph journeys={featuredJourneys} />
+            </div>
+
           </div>
         </section>
 
-        {/* ── 01 Remote Rust Jobs ──────────────────────────────────────────── */}
-        <section id="jobs" className="e-section">
+        {/* ── 01 Ecosystems ────────────────────────────────────────────────── */}
+        <section id="ecosystems" className="e-section">
           <div className="e-col">
             <SectionHeader
               num="01"
-              title="Remote Rust Jobs"
-              meta={activeJobs.length > 0 ? `${activeJobs.length} open · verified this week` : "checking for openings"}
-              note="Rust-explicit roles only. Each entry links directly to the company careers page."
-              archiveHref={activeJobs.length > LIMITS.jobs ? "/jobs" : undefined}
-              archiveLabel={`View all ${activeJobs.length}`}
+              title="Ecosystems"
+              meta={`${featuredEcosystems.length} domains`}
+              note="Navigate the graph by domain. Each ecosystem links to its repositories, organizations, and open jobs."
+              archiveHref="/oss"
+              archiveLabel="Browse repositories"
             />
-            <div className="e-jobs">
-              {featuredJobs.map((job) => (
-                <JobCard key={`${job.company}-${job.role}`} job={job} />
+            <div className="hp-eco-grid">
+              {featuredEcosystems.map((eco) => (
+                <Link key={eco.tag} href={eco.reposHref} className="hp-eco-card">
+                  <span className="hp-eco-name">{eco.label}</span>
+                  <div className="hp-eco-counts">
+                    <span><b>{eco.repoCount.toLocaleString("en-US")}</b> repos</span>
+                    {eco.jobCount > 0 && (
+                      <span><b>{eco.jobCount}</b> job{eco.jobCount !== 1 ? "s" : ""}</span>
+                    )}
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── 02 OSS Paths ─────────────────────────────────────────────────── */}
-        <section id="oss" className="e-section">
+        {/* ── 02 Featured Repositories ─────────────────────────────────────── */}
+        <section id="repos" className="e-section">
           <div className="e-col">
             <SectionHeader
               num="02"
-              title="OSS Paths"
-              meta={`${OSS_PATHS.length} repositories · 4 featured`}
-              note="Realistic places to make a first or fifth contribution. Maintainer responsiveness, issue quality, and a short human note on each."
+              title="Featured Repositories"
+              meta={`${graphStats.totalRepos.toLocaleString("en-US")} indexed`}
+              note="Stars, activity tier, owning organization, and ecosystem — each repo is a node with edges out."
               archiveHref="/oss"
-              archiveLabel={`View all ${OSS_PATHS.length}`}
+              archiveLabel={`Explore all ${graphStats.totalRepos.toLocaleString("en-US")}`}
             />
-            <OSSHomeSection repos={OSS_PATHS} />
+            <div className="hp-repo-grid">
+              {featuredRepositories.map((r) => (
+                <Link key={r.fullName} href={r.href} className="hp-repo-card">
+                  <div className="hp-repo-head">
+                    <span className="hp-repo-name">
+                      <span className="hp-repo-owner">{r.owner}/</span>{r.name}
+                    </span>
+                    <span className="hp-repo-stars">
+                      ★ {r.stars >= 1000
+                        ? `${(Math.round(r.stars / 100) / 10).toFixed(1)}k`
+                        : r.stars}
+                    </span>
+                  </div>
+                  <p className="hp-repo-desc">{r.description}</p>
+                  <div className="hp-repo-foot">
+                    {r.org && <span className="hp-repo-org">{r.org.name}</span>}
+                    <span className="hp-repo-eco">{r.ecoLabel}</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* ── 03 Grants & Bounties ─────────────────────────────────────────── */}
-        <section id="grants" className="e-section">
+        {/* ── 03 Popular Crates ────────────────────────────────────────────── */}
+        <section id="crates" className="e-section">
           <div className="e-col">
             <SectionHeader
               num="03"
-              title="Grants & Bounties"
-              meta={`${activeGrants.length} listed`}
-              note="Grants, sponsorships, and funded opportunities in the Rust ecosystem. Click out for current terms."
-              archiveHref={activeGrants.length > LIMITS.grants ? "/grants" : undefined}
-              archiveLabel={`View all ${activeGrants.length}`}
+              title="Popular Crates"
+              meta="by reverse-dependency count"
+              note="Dependency edges reveal which crates — and the organizations behind them — sit upstream of the whole ecosystem."
+              archiveHref="/deps"
+              archiveLabel="Explore dependency graph"
             />
-            <div className="e-grants">
-              {featuredGrants.map((grant) => (
-                <GrantCard key={grant.name} program={grant} />
+            <div className="hp-crate-panel">
+              <div className="hp-crate-head">
+                <span>crate</span>
+                <span>used by · {graphStats.totalRepos.toLocaleString("en-US")} repos indexed</span>
+              </div>
+              {featuredCrates.map((c) => (
+                <Link key={c.name} href={c.href} className="hp-crate-row">
+                  <span className="hp-crate-name">{c.name}</span>
+                  <div className="hp-crate-bar-wrap">
+                    <div className="hp-crate-bar" style={{ width: `${Math.min(c.pctOfCorpus, 100)}%` }} />
+                  </div>
+                  <span className="hp-crate-pct">{c.pctOfCorpus}%</span>
+                  <span className="hp-crate-n">{c.repoCount.toLocaleString("en-US")}</span>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── 04 Ecosystem Pulse ───────────────────────────────────────────── */}
-        <section id="pulse" className="e-section">
+        {/* ── 04 Funding Programs ──────────────────────────────────────────── */}
+        <section id="funding" className="e-section">
           <div className="e-col">
             <SectionHeader
               num="04"
-              title="Ecosystem Pulse"
-              meta="important internet places"
-              note="Forums, newsletters, working-group notes, and community spaces worth following."
-              archiveHref={PULSE.length > LIMITS.pulse ? "/pulse" : undefined}
-              archiveLabel={`View all ${PULSE.length}`}
+              title="Funding Programs"
+              meta={`${graphStats.totalPrograms} programs · ${graphStats.fundingLinks} funded repos`}
+              note="Rolling grants, sponsored bounties, and program funding — the money that keeps the ecosystem moving."
+              archiveHref="/grants"
+              archiveLabel={`View all ${graphStats.totalPrograms}`}
             />
-            <div className="e-pulse">
-              {featuredPulse.map((item) => (
-                <PulseRow key={item.title} item={item} />
+            <div className="hp-fund-grid">
+              {featuredFundingPrograms.map((p) => (
+                <Link key={p.slug} href={p.href} className="hp-fund-card">
+                  <div className="hp-fund-head">
+                    <span className="hp-fund-name">{p.name}</span>
+                    <span className={"hp-fund-badge hp-fund-badge--" + p.status}>{p.status}</span>
+                  </div>
+                  {p.funder && (
+                    <span className="hp-fund-funder">{p.funder.name}</span>
+                  )}
+                  <p className="hp-fund-desc">{p.description}</p>
+                  <div className="hp-fund-foot">
+                    <span className="hp-fund-repos">{p.fundedCount} funded repos</span>
+                    {p.maxAward && <span className="hp-fund-award">{p.maxAward}</span>}
+                  </div>
+                </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* ── 05 Events & Learning ─────────────────────────────────────────── */}
-        <section id="events" className="e-section">
+        {/* ── 05 Organizations ─────────────────────────────────────────────── */}
+        <section id="organizations" className="e-section">
           <div className="e-col">
             <SectionHeader
               num="05"
-              title="Events & Learning"
-              meta="time-bound · free"
-              note="Conferences, workshops, and recurring community calls. Temporary opportunities worth knowing about."
-              archiveHref={activeEvents.length > LIMITS.events ? "/events" : undefined}
-              archiveLabel={`View all ${activeEvents.length}`}
+              title="Organizations"
+              meta={`${graphStats.totalOrgs} indexed`}
+              note="Companies, projects, and nonprofits — each linked to the repos it owns, the programs that fund it, and the roles it's hiring for."
+              archiveHref="/ecosystem"
+              archiveLabel={`Browse all ${graphStats.totalOrgs}`}
             />
-            <div className="e-events">
-              {featuredEvents.map((event) => (
-                <EventCard key={event.title} event={event} />
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 06 Companies Using Rust ──────────────────────────────────────── */}
-        <section id="companies" className="e-section e-section--companies">
-          <div className="e-col e-col--wide">
-            <SectionHeader
-              num="06"
-              title="Companies Using Rust"
-              meta="exploratory"
-              note="Not all companies listed here are hiring. Useful for orientation — who builds what in the Rust ecosystem."
-              archiveHref={COMPANIES.length > LIMITS.companies ? "/ecosystem" : undefined}
-              archiveLabel={`View all ${COMPANIES.length}`}
-            />
-            <CompanyGrid companies={featuredCompanies} />
-          </div>
-        </section>
-
-        {/* ── 07 Job Portals ───────────────────────────────────────────────── */}
-        <section id="portals" className="e-section">
-          <div className="e-col">
-            <SectionHeader
-              num="07"
-              title="Job Portals"
-              meta="where else to look"
-              note="Rust-relevant job boards and aggregators. Complementary sources — not curated by this site."
-            />
-            <div className="e-pulse">
-              {PORTALS.map((portal) => (
-                <PortalRow key={portal.name} portal={portal} />
+            <div className="hp-org-grid">
+              {featuredOrganizations.map((org) => (
+                <Link key={org.slug} href={org.href} className="hp-org-card">
+                  <span className="hp-org-name">{org.name}</span>
+                  <div className="hp-org-meta">
+                    <span>{org.repoCount} repos</span>
+                    <span>★ {(org.totalStars / 1000).toFixed(0)}k</span>
+                  </div>
+                  {org.jobCount > 0 && (
+                    <span className="hp-org-hiring">
+                      {org.jobCount} open role{org.jobCount !== 1 ? "s" : ""}
+                    </span>
+                  )}
+                </Link>
               ))}
             </div>
           </div>
