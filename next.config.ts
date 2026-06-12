@@ -5,6 +5,15 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  async redirects() {
+    return [
+      { source: "/companies/:path*", destination: "/", permanent: true },
+      { source: "/dashboard/:path*", destination: "/", permanent: true },
+      { source: "/workflow",         destination: "/", permanent: true },
+      { source: "/sources",          destination: "/", permanent: true },
+      { source: "/demo",             destination: "/", permanent: true },
+    ]
+  },
   serverExternalPackages: ["@prisma/client", "@prisma/adapter-pg"],
   turbopack: {
     root: path.resolve(__dirname),

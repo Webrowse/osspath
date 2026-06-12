@@ -44,10 +44,6 @@ export function EditorialArchiveSkeleton({ title, wide = false }: Props) {
             <span>rust opportunities</span>
           </Link>
           <div className="e-nav__spacer" />
-          <Link className="e-nav__workspace" href="/companies">
-            <span>Job Tracker</span>
-            <span aria-hidden="true">→</span>
-          </Link>
         </div>
       </header>
 

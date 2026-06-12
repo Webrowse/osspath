@@ -64,11 +64,7 @@ export function EditorialMobileMenu({ links }: { links: NavLink[] }) {
           ))}
         </nav>
 
-        <div className="e-drawer__footer">
-          <Link className="e-drawer__workspace" href="/companies" onClick={() => setOpen(false)}>
-            Workspace →
-          </Link>
-        </div>
+        <div className="e-drawer__footer" />
       </aside>
     </>
   )

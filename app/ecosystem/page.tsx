@@ -98,17 +98,6 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
             <p className="e-archive-empty">No companies match that filter.</p>
           )}
 
-          <div style={{ marginTop: 28, paddingTop: 20, borderTop: "1px solid var(--e-line-soft)" }}>
-            <p style={{ fontSize: 14, color: "var(--e-fg-dim)", fontFamily: "var(--e-mono)", margin: 0 }}>
-              Track companies, save notes, and monitor hiring signals in the{" "}
-              <Link
-                href="/companies"
-                style={{ color: "var(--e-accent)", textDecoration: "none", borderBottom: "1px dashed currentColor" }}
-              >
-                Research Workspace →
-              </Link>
-            </p>
-          </div>
         </div>
       </section>
     </EditorialLayout>

@@ -23,15 +23,6 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
 
           <div className="e-nav__spacer" />
 
-          <Link
-            className="e-nav__workspace"
-            href="/companies"
-            title="Job tracker — save companies, track applications, take notes"
-          >
-            <span>Job Tracker</span>
-            <span aria-hidden="true">→</span>
-          </Link>
-
           <EditorialMobileMenu links={[
             { label: "← Home",     href: "/" },
             ...SITE_NAV.map((l) => ({ label: l.label, href: l.archive })),
@@ -49,14 +40,6 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
             <div>
               <div className="e-footer__brand">rust opportunities</div>
               <div className="e-footer__tagline">Curated weekly. Quiet by design.</div>
-            </div>
-            <div>
-              <Link className="e-footer__workspace" href="/companies">
-                Job Tracker →
-              </Link>
-              <div className="e-footer__tagline" style={{ marginTop: 6 }}>
-                saved jobs · notes · tracking · deep research
-              </div>
             </div>
           </div>
           <div className="e-footer__links">

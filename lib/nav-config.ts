@@ -6,7 +6,7 @@ export const SITE_NAV = [
   { label: "Grants",    anchor: "#grants",    archive: "/grants" },
   { label: "Pulse",     anchor: "#pulse",     archive: "/pulse" },
   { label: "Events",    anchor: "#events",    archive: "/events" },
-  { label: "Companies", anchor: "#companies", archive: "/ecosystem" },
+  { label: "Ecosystem", anchor: "#ecosystem", archive: "/ecosystem" },
   { label: "Portals",   anchor: "#portals",   archive: "/portals" },
 ] as const
 
