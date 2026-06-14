@@ -3,8 +3,8 @@ import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
 import { HeroGraph } from "@/components/editorial/hero-graph"
 import { SectionHeader } from "@/components/editorial/section-header"
 import { getLandingData } from "@/lib/landing-data"
-import { SITE_CONFIG } from "@/lib/site-config"
-import { SITE_NAV } from "@/lib/nav-config"
+import { ECO_LABEL } from "@/lib/eco-tags"
+import { SITE_NAV, FOOTER_NAV } from "@/lib/nav-config"
 
 export default function HomePage() {
   const {
@@ -15,6 +15,7 @@ export default function HomePage() {
     featuredOrganizations,
     featuredEcosystems,
     featuredCrates,
+    featuredJobs,
   } = getLandingData()
 
   return (
@@ -30,13 +31,13 @@ export default function HomePage() {
 
           <nav className="e-nav__links" aria-label="Primary">
             {SITE_NAV.map((l) => (
-              <a key={l.anchor} className="e-nav__link" href={l.archive}>{l.label}</a>
+              <a key={l.anchor} className="e-nav__link" href={l.anchor}>{l.label}</a>
             ))}
           </nav>
 
           <div className="e-nav__spacer" />
 
-          <EditorialMobileMenu links={SITE_NAV.map((l) => ({ label: l.label, href: l.archive }))} />
+          <EditorialMobileMenu links={SITE_NAV.map((l) => ({ label: l.label, href: l.anchor }))} />
         </div>
       </header>
 
@@ -50,7 +51,7 @@ export default function HomePage() {
             <div className="hp-hero-text">
               <div className="e-hero__eyebrow">
                 <span className="e-dot" />
-                <span>OSS Paths — the Rust ecosystem graph</span>
+                <span>Ecosystem graph</span>
               </div>
               <h1 className="e-hero__title">
                 Navigate the Rust ecosystem{" "}
@@ -108,17 +109,18 @@ export default function HomePage() {
               title="Ecosystems"
               meta={`${featuredEcosystems.length} domains`}
               note="Navigate the graph by domain. Each ecosystem links to its repositories, organizations, and open jobs."
-              archiveHref="/oss"
-              archiveLabel="Browse repositories"
             />
             <div className="hp-eco-grid">
               {featuredEcosystems.map((eco) => (
-                <Link key={eco.tag} href={eco.reposHref} className="hp-eco-card">
+                <Link key={eco.tag} href={`/ecosystems/${eco.tag}`} className="hp-eco-card">
                   <span className="hp-eco-name">{eco.label}</span>
                   <div className="hp-eco-counts">
                     <span><b>{eco.repoCount.toLocaleString("en-US")}</b> repos</span>
                     {eco.jobCount > 0 && (
                       <span><b>{eco.jobCount}</b> job{eco.jobCount !== 1 ? "s" : ""}</span>
+                    )}
+                    {eco.programCount > 0 && (
+                      <span><b>{eco.programCount}</b> program{eco.programCount !== 1 ? "s" : ""}</span>
                     )}
                   </div>
                 </Link>
@@ -136,7 +138,7 @@ export default function HomePage() {
               meta={`${graphStats.totalRepos.toLocaleString("en-US")} indexed`}
               note="Stars, activity tier, owning organization, and ecosystem — each repo is a node with edges out."
               archiveHref="/oss"
-              archiveLabel={`Explore all ${graphStats.totalRepos.toLocaleString("en-US")}`}
+              archiveLabel={`All ${graphStats.totalRepos.toLocaleString("en-US")} repositories`}
             />
             <div className="hp-repo-grid">
               {featuredRepositories.map((r) => (
@@ -155,6 +157,7 @@ export default function HomePage() {
                   <div className="hp-repo-foot">
                     {r.org && <span className="hp-repo-org">{r.org.name}</span>}
                     <span className="hp-repo-eco">{r.ecoLabel}</span>
+                    {r.isFunded && <span className="hp-repo-funded">funded</span>}
                   </div>
                 </Link>
               ))}
@@ -180,7 +183,10 @@ export default function HomePage() {
               </div>
               {featuredCrates.map((c) => (
                 <Link key={c.name} href={c.href} className="hp-crate-row">
-                  <span className="hp-crate-name">{c.name}</span>
+                  <div className="hp-crate-name-wrap">
+                    <span className="hp-crate-name">{c.name}</span>
+                    <span className="hp-crate-desc">{c.description.split(".")[0]}.</span>
+                  </div>
                   <div className="hp-crate-bar-wrap">
                     <div className="hp-crate-bar" style={{ width: `${Math.min(c.pctOfCorpus, 100)}%` }} />
                   </div>
@@ -214,6 +220,15 @@ export default function HomePage() {
                     <span className="hp-fund-funder">{p.funder.name}</span>
                   )}
                   <p className="hp-fund-desc">{p.description}</p>
+                  {p.ecosystems.length > 0 && (
+                    <div className="hp-fund-ecos">
+                      {p.ecosystems.slice(0, 3).map(eco => (
+                        <span key={eco} className={`e-oss__eco-badge e-oss__eco-badge--${eco}`}>
+                          {ECO_LABEL[eco]}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   <div className="hp-fund-foot">
                     <span className="hp-fund-repos">{p.fundedCount} funded repos</span>
                     {p.maxAward && <span className="hp-fund-award">{p.maxAward}</span>}
@@ -239,10 +254,20 @@ export default function HomePage() {
               {featuredOrganizations.map((org) => (
                 <Link key={org.slug} href={org.href} className="hp-org-card">
                   <span className="hp-org-name">{org.name}</span>
+                  <span className="hp-org-sector">{org.sector}</span>
                   <div className="hp-org-meta">
                     <span>{org.repoCount} repos</span>
                     <span>★ {(org.totalStars / 1000).toFixed(0)}k</span>
                   </div>
+                  {org.ecosystems.length > 0 && (
+                    <div className="hp-org-ecos">
+                      {org.ecosystems.slice(0, 2).map(eco => (
+                        <span key={eco} className={`e-oss__eco-badge e-oss__eco-badge--${eco}`}>
+                          {ECO_LABEL[eco]}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                   {org.jobCount > 0 && (
                     <span className="hp-org-hiring">
                       {org.jobCount} open role{org.jobCount !== 1 ? "s" : ""}
@@ -253,6 +278,40 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
+        {/* ── 06 Open Positions ────────────────────────────────────────────── */}
+        {featuredJobs.length > 0 && (
+          <section id="jobs" className="e-section">
+            <div className="e-col">
+              <SectionHeader
+                num="06"
+                title="Open Positions"
+                meta={`${graphStats.activeJobs} active`}
+                note="Each role connects to the organization's open source footprint and the ecosystems it operates in."
+                archiveHref="/jobs"
+                archiveLabel={`Browse all ${graphStats.activeJobs} jobs`}
+              />
+              <div className="hp-job-list">
+                {featuredJobs.map(job => (
+                  <Link key={job.slug} href={`/jobs/${job.slug}`} className="hp-job-row">
+                    <div className="hp-job-ecos">
+                      {(job.ecosystems ?? []).slice(0, 2).map(eco => (
+                        <span key={eco} className={`e-oss__eco-badge e-oss__eco-badge--${eco}`}>
+                          {ECO_LABEL[eco]}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="hp-job-info">
+                      <span className="hp-job-company">{job.company}</span>
+                      <span className="hp-job-role">{job.role}</span>
+                    </div>
+                    <span className="hp-job-arrow">→</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
       </main>
 
@@ -266,9 +325,9 @@ export default function HomePage() {
             </div>
           </div>
           <div className="e-footer__links">
-            <a href={SITE_CONFIG.submitUrl} rel="noopener noreferrer">Submit a link</a>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/login?callbackUrl=%2Fdashboard">Sign in</Link>
+            {FOOTER_NAV.map(l => (
+              <Link key={l.href} href={l.href}>{l.label}</Link>
+            ))}
           </div>
         </div>
       </footer>

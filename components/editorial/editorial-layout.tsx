@@ -1,8 +1,7 @@
 import Link from "next/link"
 import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
 import { EditorialNav } from "@/components/editorial/editorial-nav"
-import { SITE_NAV } from "@/lib/nav-config"
-import { SITE_CONFIG } from "@/lib/site-config"
+import { SITE_NAV, FOOTER_NAV } from "@/lib/nav-config"
 
 interface EditorialLayoutProps {
   children: React.ReactNode
@@ -43,9 +42,9 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
             </div>
           </div>
           <div className="e-footer__links">
-            <a href={SITE_CONFIG.submitUrl as string}>Submit a link</a>
-            <Link href="/privacy">Privacy</Link>
-            <Link href="/login">Sign in</Link>
+            {FOOTER_NAV.map(l => (
+              <Link key={l.href} href={l.href}>{l.label}</Link>
+            ))}
           </div>
         </div>
       </footer>

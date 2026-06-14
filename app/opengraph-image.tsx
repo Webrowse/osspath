@@ -49,7 +49,7 @@ export default function OgImage() {
           flexShrink: 0,
         }}
       >
-        j.
+        r.
       </div>
 
       {/* Site name */}
@@ -78,7 +78,7 @@ export default function OgImage() {
           flexDirection: "column",
         }}
       >
-        <span>Remote engineering</span>
+        <span>Rust ecosystem</span>
         <span
           style={{
             background: "linear-gradient(90deg, #d97030 0%, #4f82ec 100%)",
@@ -87,7 +87,7 @@ export default function OgImage() {
             display: "flex",
           }}
         >
-          job tracker
+          as a connected graph.
         </span>
       </div>
 
@@ -102,12 +102,12 @@ export default function OgImage() {
           display: "flex",
         }}
       >
-        Rust · backend · systems · infra · distributed systems
+        Jobs · Repos · Funding · Orgs · Ecosystems
       </div>
 
-      {/* Tech pills */}
+      {/* Entity pills */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-        {["Rust", "Go", "C++", "Systems", "Infrastructure", "Remote-first"].map((tag) => (
+        {["Jobs", "Repos", "Funding", "Orgs", "Ecosystems"].map((tag) => (
           <div
             key={tag}
             style={{

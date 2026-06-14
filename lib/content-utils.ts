@@ -51,19 +51,21 @@ export function formatCheckedAt(checkedAt?: string): string | null {
   if (!checkedAt) return null
   const days = daysSinceCheck(checkedAt)
   if (days === null || days < 0) return null
-  if (days === 0) return "Checked today"
-  if (days <= 6)  return `Checked ${days}d ago`
-  if (days <= 27) return `Checked ${Math.floor(days / 7)}w ago`
-  return `Verified ${new Date(checkedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
+  if (days === 0) return "Reviewed today"
+  if (days <= 6)  return `Reviewed ${days}d ago`
+  if (days <= 27) return `Reviewed ${Math.floor(days / 7)}w ago`
+  return `Last reviewed ${new Date(checkedAt).toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
 
-/** Simple case-insensitive substring match across an object's string values. */
+/** Case-insensitive substring match across string values and string arrays (aliases, topics, ecosystems). */
 export function matchesQuery(item: Record<string, unknown>, query: string): boolean {
   if (!query.trim()) return true
   const q = query.toLowerCase()
-  return Object.values(item).some((v) =>
-    typeof v === "string" && v.toLowerCase().includes(q)
-  )
+  return Object.values(item).some((v) => {
+    if (typeof v === "string") return v.toLowerCase().includes(q)
+    if (Array.isArray(v)) return v.some(s => typeof s === "string" && s.toLowerCase().includes(q))
+    return false
+  })
 }

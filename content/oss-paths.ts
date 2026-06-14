@@ -22,7 +22,8 @@ export type OSSPath = {
   /** @deprecated GitHub REST API does not return this field. Always 0. Revive via GraphQL or Issues API enrichment. */
   helpWantedIssuesCount?: number
   language?: string | null
-  owner?: string
+  kind?: "code" | "reference"
+  owner: string
   license?: string | null
   pushedAt?: string
   activityTier?: "active" | "maintenance" | "dormant"

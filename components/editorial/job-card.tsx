@@ -19,8 +19,8 @@ export function JobCard({ job }: { job: EditorialJob }) {
   const freshness = formatCheckedAt(job.checkedAt)
 
   const trustParts: string[] = []
-  if (job.rustMentioned)   trustParts.push("Rust explicit")
-  if (job.remoteConfirmed) trustParts.push("Remote confirmed")
+  if (job.rustMentioned)   trustParts.push("Rust mentioned")
+  if (job.remoteConfirmed) trustParts.push("Remote listed")
   if (freshness)           trustParts.push(freshness)
   const trustLine = trustParts.join(" · ")
 
@@ -28,16 +28,17 @@ export function JobCard({ job }: { job: EditorialJob }) {
     <article className="e-job">
       <div className="e-job__main">
         <div className="e-job__head">
+          {/* Stretched link — ::after covers the entire .e-job article */}
           <Link
             href={`/jobs/${job.slug}`}
-            style={{ textDecoration: "none", color: "inherit" }}
+            className="e-job__role-link"
           >
             <span className="e-job__role">{job.role}</span>
           </Link>
           {job.company_slug ? (
             <Link
               href={`/ecosystem/${job.company_slug}`}
-              style={{ textDecoration: "none", color: "inherit" }}
+              className="e-job__company-link"
             >
               <span className="e-job__company">— {job.company}</span>
             </Link>

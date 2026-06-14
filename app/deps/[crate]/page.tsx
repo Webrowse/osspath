@@ -12,6 +12,7 @@ import {
   DEP_PAGE_THRESHOLD,
   DEP_MAX_REPOS,
 } from "@/lib/deps-data"
+import { getCompaniesForDep } from "@/lib/company-data"
 import { TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
 
 // No fallback for params not in generateStaticParams — return 404 instead.
@@ -112,6 +113,7 @@ export default async function DepPage({ params }: PageProps) {
 
   const relatedTopics  = getDepTopicAffinity(allRepos)
   const depPageCounts  = getDepPageCounts()
+  const dependentOrgs  = getCompaniesForDep(crate)
 
   const repoLabel = allRepos.length === 1 ? "repository" : "repositories"
 
@@ -145,7 +147,7 @@ export default async function DepPage({ params }: PageProps) {
                 textDecoration: "none",
               }}
             >
-              OSS Paths
+              Repositories
             </Link>
           </nav>
 
@@ -196,7 +198,7 @@ export default async function DepPage({ params }: PageProps) {
             ))}
           </div>
 
-          {/* ── Browse in OSS Paths CTA ────────────────────────────────────── */}
+          {/* ── Browse in Repositories CTA ──────────────────────────────────── */}
           <div style={{ marginBottom: 40 }}>
             <Link
               href={`/oss?dep=${crate}`}
@@ -213,7 +215,7 @@ export default async function DepPage({ params }: PageProps) {
                 padding: "6px 14px",
               }}
             >
-              Browse {allRepos.length} {repoLabel} using {crate} in OSS Paths →
+              Browse {allRepos.length} {repoLabel} using {crate} in Repos →
             </Link>
           </div>
 
@@ -278,6 +280,32 @@ export default async function DepPage({ params }: PageProps) {
             </div>
           )}
 
+          {/* ── Organizations using this crate ──────────────────────────────── */}
+          {dependentOrgs.length > 0 && (
+            <div style={{ marginBottom: 40 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.08em",
+                  color: "var(--e-fg-dim)",
+                  marginBottom: 12,
+                }}
+              >
+                Used by these organizations
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {dependentOrgs.map(org => (
+                  <Link key={org.slug} href={`/ecosystem/${org.slug}`} style={{ textDecoration: "none" }}>
+                    <span className="e-tag e-tag--soft" style={{ cursor: "pointer", fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}>
+                      {org.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* ── Repository list ─────────────────────────────────────────────── */}
           <div>
             <div
@@ -315,7 +343,7 @@ export default async function DepPage({ params }: PageProps) {
               href="/oss"
               style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}
             >
-              ← Browse all OSS repositories
+              ← Browse all repos
             </Link>
           </div>
 

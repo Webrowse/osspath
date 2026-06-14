@@ -31,17 +31,17 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL("https://jobs.adarshrust.com"),
   title: {
-    default: "Rust Opportunities — Curated ecosystem paths",
+    default: "Rust Opportunities — Rust ecosystem graph",
     template: "%s | Rust Opportunities",
   },
   description:
-    "Curated Rust ecosystem opportunities — remote jobs, OSS paths, grants, and ecosystem signals. Kept short and read by a human first.",
+    "Curated Rust ecosystem opportunities — remote jobs, repos, funding, and ecosystem signals. Kept short and read by a human first.",
   keywords: ["rust jobs", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering"],
   authors: [{ name: "Adarsh" }],
   openGraph: {
-    title: "Rust Opportunities — Curated ecosystem paths",
+    title: "Rust Opportunities — Rust ecosystem graph",
     description:
-      "Remote jobs, OSS paths, grants, and quiet ecosystem signals — kept short and read by a human first.",
+      "Remote jobs, repos, funding, and quiet ecosystem signals — kept short and read by a human first.",
     url: "https://jobs.adarshrust.com",
     siteName: "Rust Opportunities",
     type: "website",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Rust Opportunities",
-    description: "Curated Rust ecosystem paths — jobs, OSS, grants, and community signals.",
+    description: "Curated Rust ecosystem paths — jobs, repos, funding, and community signals.",
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },

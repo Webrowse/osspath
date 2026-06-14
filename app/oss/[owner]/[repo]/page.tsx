@@ -8,6 +8,8 @@ import { getDepPageCounts } from "@/lib/deps-data"
 import { getSimilarRepos } from "@/lib/oss-similar"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import { getCompanyForOwner } from "@/lib/company-data"
+import { getProgramsForRepo } from "@/lib/grants-data"
+import { DepList } from "@/components/editorial/dep-list"
 import type { OSSPath } from "@/content/oss-paths"
 
 export const dynamicParams = false
@@ -19,9 +21,9 @@ interface PageProps {
 // ── Static params ──────────────────────────────────────────────────────────────
 
 export async function generateStaticParams(): Promise<{ owner: string; repo: string }[]> {
-  return getOSSRepos()
-    .filter((r): r is OSSPath & { owner: string; name: string } => !!(r.owner && r.name))
-    .map(r => ({ owner: r.owner, repo: r.name }))
+  // getOSSRepos() throws at build time if any record is missing owner/name/href.
+  // owner is required in OSSPath — no filter needed.
+  return getOSSRepos().map(r => ({ owner: r.owner, repo: r.name }))
 }
 
 // ── Metadata ───────────────────────────────────────────────────────────────────
@@ -78,6 +80,7 @@ export default async function OSSRepoPage({ params }: PageProps) {
   const ecoTags       = getEcoTags(r.dependencies, { owner: r.owner ?? undefined, topics: r.topics ?? undefined })
   const company       = r.owner ? getCompanyForOwner(r.owner) : undefined
   const slug          = `${owner}/${repoName}`
+  const fundingForRepo = getProgramsForRepo(slug)
 
   // Similar repos: look up precomputed similarity, then hydrate from corpus
   const slugIndex     = Object.fromEntries(allRepos.map(r => [`${r.owner}/${r.name}`, r]))
@@ -86,11 +89,10 @@ export default async function OSSRepoPage({ params }: PageProps) {
     .map(e => slugIndex[e.repo])
     .filter((r): r is OSSPath => r != null)
 
-  // Top dep links — qualified deps sorted by popularity
-  const topDeps = (r.dependencies ?? [])
+  // Qualified deps sorted by their own page's dependent count — all of them, slicing happens in DepList
+  const sortedDeps = (r.dependencies ?? [])
     .filter(d => d in depPageCounts)
     .sort((a, b) => (depPageCounts[b] ?? 0) - (depPageCounts[a] ?? 0))
-    .slice(0, 8)
 
   return (
     <EditorialLayout>
@@ -100,7 +102,7 @@ export default async function OSSRepoPage({ params }: PageProps) {
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" style={{ marginBottom: 24 }}>
             <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
-              ← OSS Paths
+              ← Repositories
             </Link>
           </nav>
 
@@ -153,7 +155,7 @@ export default async function OSSRepoPage({ params }: PageProps) {
                   {ecoTags.map(tag => (
                     <Link
                       key={tag}
-                      href={`/oss?eco=${tag}`}
+                      href={`/ecosystems/${tag}`}
                       className={`e-oss__eco-badge e-oss__eco-badge--${tag}`}
                       style={{ textDecoration: "none" }}
                     >
@@ -184,7 +186,7 @@ export default async function OSSRepoPage({ params }: PageProps) {
                 {ecoTags.map(tag => (
                   <Link
                     key={tag}
-                    href={`/oss?eco=${tag}`}
+                    href={`/ecosystems/${tag}`}
                     className={`e-oss__eco-badge e-oss__eco-badge--${tag} e-oss__eco-badge--lg`}
                     style={{ textDecoration: "none" }}
                   >
@@ -218,6 +220,49 @@ export default async function OSSRepoPage({ params }: PageProps) {
             </div>
           )}
 
+          {/* Funded by */}
+          {fundingForRepo.length > 0 && (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 10 }}>
+                Funded by
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {fundingForRepo.map(({ program: p, funder: f }) => (
+                  <div key={p.slug} style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <Link
+                      href={`/grants/${p.slug}`}
+                      style={{ fontSize: 14, fontFamily: "var(--e-mono)", fontWeight: 500, color: "var(--e-fg)", textDecoration: "none" }}
+                    >
+                      {p.name}
+                    </Link>
+                    {f && (
+                      <span style={{ fontSize: 12, color: "var(--e-fg-dim)" }}>
+                        {"via "}
+                        <Link href={`/funders/${f.slug}`} style={{ color: "var(--e-accent)", textDecoration: "none" }}>
+                          {f.name}
+                        </Link>
+                      </span>
+                    )}
+                    <span
+                      style={{
+                        fontSize: 11,
+                        padding: "2px 7px",
+                        borderRadius: 3,
+                        background: "var(--e-line-soft)",
+                        color: "var(--e-fg-dim)",
+                        fontFamily: "var(--e-mono)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
+                      {p.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Contribution signals */}
           {openIssues > 0 && (
             <div style={{ marginBottom: 32 }}>
@@ -248,25 +293,12 @@ export default async function OSSRepoPage({ params }: PageProps) {
           )}
 
           {/* Dependencies */}
-          {topDeps.length > 0 && (
+          {sortedDeps.length > 0 && (
             <div style={{ marginBottom: 40 }}>
               <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 12 }}>
-                Dependencies ({r.dependencies?.length ?? 0} total)
+                Dependencies ({sortedDeps.length} total)
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                {topDeps.map(dep => (
-                  <Link key={dep} href={`/deps/${dep}`} style={{ textDecoration: "none" }}>
-                    <span className="e-tag e-tag--soft" style={{ cursor: "pointer", fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}>
-                      {dep}
-                    </span>
-                  </Link>
-                ))}
-                {(r.dependencies?.length ?? 0) > topDeps.length && (
-                  <span className="e-tag e-tag--soft" style={{ opacity: 0.6 }}>
-                    +{(r.dependencies?.length ?? 0) - topDeps.length} more
-                  </span>
-                )}
-              </div>
+              <DepList deps={sortedDeps} />
             </div>
           )}
 
@@ -287,7 +319,7 @@ export default async function OSSRepoPage({ params }: PageProps) {
           {/* Footer */}
           <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--color-border)" }}>
             <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
-              ← Browse all OSS repositories
+              ← Browse all repos
             </Link>
           </div>
 

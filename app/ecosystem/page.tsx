@@ -74,7 +74,7 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
                     >
                       <span className="e-company__name">{c.name}</span>
                       <span className="e-company__sector">{c.sector}</span>
-                      <span className="e-company__hint" aria-hidden="true">{hasRepos ? "OSS →" : "Profile →"}</span>
+                      <span className="e-company__hint" aria-hidden="true">{hasRepos ? "Repos →" : "Profile →"}</span>
                     </Link>
                   )
                 }

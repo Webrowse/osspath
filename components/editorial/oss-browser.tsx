@@ -12,6 +12,7 @@ import type { OSSPath } from "@/content/oss-paths"
 type SortKey       = "stars-desc" | "stars-asc" | "forks-desc" | "updated" | "issues"
 type StarBucketKey = "any" | "20-59" | "60-99" | "100-499" | "500-1999" | "2000-9999" | "10000+"
 type DropdownId    = "license" | "topics" | "owner" | "deps"
+type KindFilter    = "all" | "code" | "reference"
 
 const PAGE_SIZE = 100
 
@@ -24,6 +25,7 @@ export interface NormalizedRepo extends OSSPath {
   topics:          string[]
   owner:           string
   language:        string
+  kind:            "code" | "reference"
   license:         string
   activityTier:    "active" | "maintenance" | "dormant"
   dependencies:    string[]
@@ -37,12 +39,13 @@ function normalize(r: OSSPath): NormalizedRepo {
     forks:           r.forks           ?? 0,
     openIssuesCount: r.openIssuesCount ?? 0,
     topics:          r.topics          ?? [],
-    owner:           r.owner           ?? "unknown",
+    owner:           r.owner,
     language:        r.language        ?? "unknown",
+    kind:            r.kind            ?? "code",
     license:         r.license         ?? "unknown",
     activityTier:    (r.activityTier as "active" | "maintenance" | "dormant") ?? "dormant",
     dependencies:    r.dependencies    ?? [],
-    ecoTags:         getEcoTags(r.dependencies, { owner: r.owner ?? undefined, topics: r.topics ?? undefined }),
+    ecoTags:         getEcoTags(r.dependencies, { owner: r.owner, topics: r.topics ?? undefined }),
   }
 }
 
@@ -83,8 +86,8 @@ function buildFilter(
   items: NormalizedRepo[],
   opts: {
     q: string
+    selectedKind:      KindFilter
     selectedActivity:  Set<string>
-    selectedLanguages: Set<string>
     selectedLicenses:  Set<string>
     selectedOwners:    Set<string>
     selectedTopics:    Set<string>
@@ -93,7 +96,7 @@ function buildFilter(
     star?: { lo: number; hi: number }
   }
 ): NormalizedRepo[] {
-  const { q, selectedActivity, selectedLanguages, selectedLicenses,
+  const { q, selectedKind, selectedActivity, selectedLicenses,
           selectedOwners, selectedTopics, selectedDeps, selectedEcos, star } = opts
   return items.filter(r => {
     if (q) {
@@ -104,8 +107,8 @@ function buildFilter(
       if (!hit) return false
     }
     if (star != null && (r.stars < star.lo || r.stars > star.hi)) return false
+    if (selectedKind !== "all" && r.kind !== selectedKind)         return false
     if (selectedActivity.size  > 0 && !selectedActivity.has(r.activityTier)) return false
-    if (selectedLanguages.size > 0 && !selectedLanguages.has(r.language))    return false
     if (selectedLicenses.size  > 0 && !selectedLicenses.has(r.license))      return false
     if (selectedOwners.size    > 0 && !selectedOwners.has(r.owner))          return false
     if (selectedTopics.size    > 0 &&
@@ -119,15 +122,13 @@ function buildFilter(
 }
 
 function buildFacets(items: NormalizedRepo[]) {
-  const activity:  Record<string, number> = {}
-  const languages: Record<string, number> = {}
-  const licenses:  Record<string, number> = {}
-  const owners:    Record<string, number> = {}
-  const topics:    Record<string, number> = {}
+  const activity: Record<string, number> = {}
+  const licenses: Record<string, number> = {}
+  const owners:   Record<string, number> = {}
+  const topics:   Record<string, number> = {}
 
   for (const r of items) {
     activity[r.activityTier] = (activity[r.activityTier] ?? 0) + 1
-    if (r.language) languages[r.language] = (languages[r.language] ?? 0) + 1
     if (r.license && r.license !== "unknown") {
       licenses[r.license] = (licenses[r.license] ?? 0) + 1
     }
@@ -144,11 +145,10 @@ function buildFacets(items: NormalizedRepo[]) {
     Object.entries(obj).sort((a, b) => b[1] - a[1])
 
   return {
-    activity:  sort(activity),
-    languages: sort(languages),
-    licenses:  sort(licenses),
-    owners:    sort(owners),
-    topics:    sort(topics),
+    activity: sort(activity),
+    licenses: sort(licenses),
+    owners:   sort(owners),
+    topics:   sort(topics),
   }
 }
 
@@ -186,8 +186,8 @@ export function OSSBrowser({
   // Filter state
   const [q,                 setQ]                 = useState("")
   const [starBucket,        setStarBucket]        = useState<StarBucketKey>("any")
+  const [selectedKind,      setSelectedKind]      = useState<KindFilter>("all")
   const [selectedActivity,  setSelectedActivity]  = useState<Set<string>>(new Set())
-  const [selectedLanguages, setSelectedLanguages] = useState<Set<string>>(new Set())
   const [selectedLicenses,  setSelectedLicenses]  = useState<Set<string>>(new Set())
   const [selectedOwners,    setSelectedOwners]    = useState<Set<string>>(new Set())
   const [selectedTopics,    setSelectedTopics]    = useState<Set<string>>(new Set())
@@ -235,7 +235,7 @@ export function OSSBrowser({
   }
 
   const filterOpts = {
-    q, selectedActivity, selectedLanguages, selectedLicenses,
+    q, selectedKind, selectedActivity, selectedLicenses,
     selectedOwners, selectedTopics, selectedDeps, selectedEcos,
   }
 
@@ -247,7 +247,7 @@ export function OSSBrowser({
   const filtered = useMemo(
     () => buildFilter(normalized, { ...filterOpts, star: activeBucket }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [normalized, q, starBucket, selectedActivity, selectedLanguages,
+    [normalized, q, starBucket, selectedKind, selectedActivity,
      selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
   )
 
@@ -255,7 +255,7 @@ export function OSSBrowser({
   const filteredNoStars = useMemo(
     () => buildFilter(normalized, { ...filterOpts }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [normalized, q, selectedActivity, selectedLanguages,
+    [normalized, q, selectedKind, selectedActivity,
      selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
   )
 
@@ -302,15 +302,6 @@ export function OSSBrowser({
     })),
     [filteredNoStars]
   )
-
-  // Language options from full corpus — prevents control disappearing on selection
-  const allLanguages = useMemo(() => {
-    const counts: Record<string, number> = {}
-    for (const r of normalized) {
-      if (r.language) counts[r.language] = (counts[r.language] ?? 0) + 1
-    }
-    return Object.entries(counts).sort((a, b) => b[1] - a[1])
-  }, [normalized])
 
   // Dep counts from full corpus — option stability for the deps dropdown
   const globalDepCounts = useMemo(() => {
@@ -386,14 +377,14 @@ export function OSSBrowser({
       chips.push({ key: `stars:${starBucket}`, label: `★ ${b.label}`,
         onRemove: () => setStarBucket("any") })
     }
+    if (selectedKind !== "all") {
+      chips.push({ key: `kind:${selectedKind}`, label: selectedKind === "code" ? "Code" : "Reference",
+        onRemove: () => setSelectedKind("all") })
+    }
     for (const a of selectedActivity) {
       const label = ACTIVITY_OPTIONS.find(o => o.value === a)?.label ?? a
       chips.push({ key: `activity:${a}`, label,
         onRemove: () => setSelectedActivity(prev => toggleSet(prev, a)) })
-    }
-    for (const lang of selectedLanguages) {
-      chips.push({ key: `lang:${lang}`, label: lang,
-        onRemove: () => setSelectedLanguages(new Set()) })
     }
     for (const lic of selectedLicenses) {
       chips.push({ key: `lic:${lic}`, label: lic,
@@ -418,14 +409,14 @@ export function OSSBrowser({
     }
     return chips
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, starBucket, selectedActivity, selectedLanguages, selectedLicenses,
+  }, [q, starBucket, selectedKind, selectedActivity, selectedLicenses,
       selectedOwners, selectedTopics, selectedDeps, selectedEcos])
 
   function clearAll() {
     setQ("")
     setStarBucket("any")
+    setSelectedKind("all")
     setSelectedActivity(new Set())
-    setSelectedLanguages(new Set())
     setSelectedLicenses(new Set())
     setSelectedOwners(new Set())
     setSelectedTopics(new Set())
@@ -678,24 +669,27 @@ export function OSSBrowser({
             })}
           </div>
 
-          {allLanguages.length > 1 && (
-            <div className="oss-rail-group">
-              <div className="oss-rail-label">Language</div>
-              <select
-                className="oss-filter-select"
-                value={selectedLanguages.size > 0 ? [...selectedLanguages][0] : ""}
-                onChange={e => {
-                  const v = e.target.value
-                  setSelectedLanguages(v ? new Set([v]) : new Set())
-                }}
-              >
-                <option value="">Any</option>
-                {allLanguages.map(([lang, count]) => (
-                  <option key={lang} value={lang}>{lang} ({count})</option>
-                ))}
-              </select>
-            </div>
-          )}
+          <div className="oss-rail-group">
+            <div className="oss-rail-label">Type</div>
+            {(["all", "code", "reference"] as KindFilter[]).map(k => {
+              const count = k === "all"
+                ? normalized.length
+                : normalized.filter(r => r.kind === k).length
+              const label = k === "all" ? "All" : k === "code" ? "Code" : "Reference"
+              return (
+                <label key={k} className="oss-filter-row">
+                  <input
+                    type="radio"
+                    className="oss-filter-radio"
+                    checked={selectedKind === k}
+                    onChange={() => setSelectedKind(k)}
+                  />
+                  <span style={{ flex: 1 }}>{label}</span>
+                  <span className="oss-filter-count">{count}</span>
+                </label>
+              )
+            })}
+          </div>
 
           <div className="oss-rail-group">
             <div className="oss-rail-label">Ecosystem</div>

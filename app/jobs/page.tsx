@@ -8,11 +8,11 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Remote Rust Jobs",
-  description: "Curated remote Rust engineering roles — explicit Rust only, manually verified before listing. No job board noise.",
+  description: "Curated remote Rust engineering roles. Manually reviewed before listing. No job board noise.",
   alternates: { canonical: "https://jobs.adarshrust.com/jobs" },
   openGraph: {
     title: "Remote Rust Jobs",
-    description: "Curated remote Rust engineering roles — explicit Rust only, manually verified before listing.",
+    description: "Curated remote Rust engineering roles. Manually reviewed before listing.",
     url: "https://jobs.adarshrust.com/jobs",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Remote Rust Jobs",
-    description: "Curated remote Rust engineering roles — explicit Rust only, manually verified.",
+    description: "Curated remote Rust engineering roles. Manually reviewed before listing.",
     images: ["/opengraph-image"],
   },
 }
@@ -43,7 +43,7 @@ export default async function JobsArchivePage({ searchParams }: PageProps) {
               <div className="e-section__num">Open positions</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Remote Rust Jobs</h1>
               <p className="e-archive-meta">
-                Rust-explicit roles only. Each entry links directly to the company careers page and is manually verified before listing.
+                Manually curated. Reviewed before publication.
               </p>
             </div>
             <Suspense>

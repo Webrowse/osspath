@@ -1,6 +1,7 @@
 [
   {
     "name": "sea-orm",
+    "owner": "SeaQL",
     "eco": "Database · Storage",
     "href": "https://github.com/SeaQL/sea-orm",
     "note": "🐚 A powerful relational ORM for Rust",
@@ -74,10 +75,12 @@
       "prettyplease",
       "indoc",
       "arrow"
-    ]
+    ],
+    "language": "Rust"
   },
   {
     "name": "zizmor",
+    "owner": "zizmorcore",
     "eco": "Security · Crypto",
     "href": "https://github.com/zizmorcore/zizmor",
     "note": "Static analysis for GitHub Actions",
@@ -158,7 +161,8 @@
       "tree-sitter-yaml",
       "tikv-jemallocator",
       "typomania"
-    ]
+    ],
+    "language": "Rust"
   },
   {
     "name": "deskbrid",
@@ -160685,7 +160689,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "opsem-team",
@@ -160714,7 +160719,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "regex",
@@ -161850,7 +161856,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "log",
@@ -162483,35 +162490,6 @@
     ]
   },
   {
-    "name": "llvm-project",
-    "eco": "Libraries · General",
-    "href": "https://github.com/rust-lang/llvm-project",
-    "note": "Rust-specific fork of LLVM.",
-    "topics": [],
-    "stars": 132,
-    "forks": 121,
-    "openIssuesCount": 1,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "rust-lang",
-    "license": null,
-    "pushedAt": "2026-05-20T05:06:24Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "1 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "leadership-council",
     "eco": "Libraries · General",
     "href": "https://github.com/rust-lang/leadership-council",
@@ -162538,7 +162516,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "calendar",
@@ -162653,7 +162632,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "flate2-rs",
@@ -163479,7 +163459,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "man",
@@ -164468,7 +164449,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "tokio-compat",
@@ -164673,7 +164655,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "http",
@@ -165946,93 +165929,6 @@
     ]
   },
   {
-    "name": "js-libp2p-examples",
-    "eco": "Libraries · General",
-    "href": "https://github.com/libp2p/js-libp2p-examples",
-    "note": "Examples for the JS implementation of libp2p",
-    "topics": [],
-    "stars": 105,
-    "forks": 61,
-    "openIssuesCount": 22,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": "NOASSERTION",
-    "pushedAt": "2026-05-25T11:37:56Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "22 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
-    "name": "libp2p",
-    "eco": "Networking",
-    "href": "https://github.com/libp2p/libp2p",
-    "note": "A modular and extensible networking stack which solves many challenges of peer-to-peer applications.",
-    "topics": [],
-    "stars": 3059,
-    "forks": 294,
-    "openIssuesCount": 40,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": "MIT",
-    "pushedAt": "2026-05-14T16:26:10Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "40 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
-    "name": "specs",
-    "eco": "Networking",
-    "href": "https://github.com/libp2p/specs",
-    "note": "Technical specifications for the libp2p networking stack",
-    "topics": [],
-    "stars": 1767,
-    "forks": 311,
-    "openIssuesCount": 187,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": null,
-    "pushedAt": "2026-04-15T17:38:36Z",
-    "activityTier": "maintenance",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "187 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "rust-yamux",
     "eco": "Libraries · General",
     "href": "https://github.com/libp2p/rust-yamux",
@@ -166171,93 +166067,6 @@
       "serde_json",
       "serde_cbor"
     ]
-  },
-  {
-    "name": "xtp",
-    "eco": "Libraries · General",
-    "href": "https://github.com/libp2p/xtp",
-    "note": "XTP - eXternal Transports Protocol",
-    "topics": [],
-    "stars": 35,
-    "forks": 1,
-    "openIssuesCount": 5,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": "MIT",
-    "pushedAt": "2025-05-01T08:40:18Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "5 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
-    "name": "research-pubsub",
-    "eco": "Libraries · General",
-    "href": "https://github.com/libp2p/research-pubsub",
-    "note": "Research on PubSub algorithms for libp2p",
-    "topics": [],
-    "stars": 74,
-    "forks": 5,
-    "openIssuesCount": 11,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": "MIT",
-    "pushedAt": "2025-05-01T08:40:16Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "11 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
-    "name": "notes",
-    "eco": "Libraries · General",
-    "href": "https://github.com/libp2p/notes",
-    "note": "libp2p Collaborative Notebook for Research",
-    "topics": [],
-    "stars": 38,
-    "forks": 2,
-    "openIssuesCount": 19,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "libp2p",
-    "license": "MIT",
-    "pushedAt": "2025-05-01T08:40:15Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "19 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "rnfc",
@@ -168574,7 +168383,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "ComponentizeJS",
@@ -169692,37 +169502,6 @@
       "cc",
       "tempfile"
     ]
-  },
-  {
-    "name": "py2wasm",
-    "eco": "WASM · Runtime",
-    "href": "https://github.com/wasmerio/py2wasm",
-    "note": "Nuitka is a Python compiler written in Python.  It's fully compatible with Python 2.6, 2.7, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, and 3.11. You feed it your Python app, it does a lot of clever things, and spits out an executable or extension module. ",
-    "topics": [
-      "wasm"
-    ],
-    "stars": 229,
-    "forks": 8,
-    "openIssuesCount": 18,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "wasmerio",
-    "license": "Apache-2.0",
-    "pushedAt": "2024-06-05T08:20:06Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "18 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "wasmer-pack",
@@ -171724,7 +171503,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "libappindicator-rs",
@@ -171983,7 +171763,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "bevy-assets",
@@ -172014,7 +171795,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "dlss_wgpu",
@@ -173076,35 +172858,6 @@
       "env_logger",
       "roxmltree"
     ]
-  },
-  {
-    "name": "2d.graphics",
-    "eco": "Libraries · General",
-    "href": "https://github.com/linebender/2d.graphics",
-    "note": "Repo for an ideational book on 2D graphics, plus tools to make images",
-    "topics": [],
-    "stars": 44,
-    "forks": 0,
-    "openIssuesCount": 1,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "linebender",
-    "license": null,
-    "pushedAt": "2025-04-22T04:13:20Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "1 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "spline",
@@ -175117,41 +174870,6 @@
     ]
   },
   {
-    "name": "product",
-    "eco": "Libraries · General",
-    "href": "https://github.com/meilisearch/product",
-    "note": "Public feedback and ideation discussions for Meilisearch product 🔮",
-    "topics": [
-      "backlog",
-      "feedback",
-      "ideation",
-      "meilisearch",
-      "product"
-    ],
-    "stars": 56,
-    "forks": 1,
-    "openIssuesCount": 29,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "meilisearch",
-    "license": null,
-    "pushedAt": "2023-10-23T17:47:08Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "29 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "rust-client",
     "eco": "CLI · Tooling",
     "href": "https://github.com/qdrant/rust-client",
@@ -176352,7 +176070,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "nu-ansi-term",
@@ -176448,7 +176167,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "nana",
@@ -176682,35 +176402,6 @@
       "rustix",
       "xattr"
     ]
-  },
-  {
-    "name": "claude-code-plugins",
-    "eco": "Libraries · General",
-    "href": "https://github.com/astral-sh/claude-code-plugins",
-    "note": "",
-    "topics": [],
-    "stars": 266,
-    "forks": 10,
-    "openIssuesCount": 11,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "astral-sh",
-    "license": "Apache-2.0",
-    "pushedAt": "2026-02-27T16:09:15Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "11 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "astral-tl",
@@ -176966,40 +176657,6 @@
       "mimalloc",
       "tikv-jemallocator"
     ]
-  },
-  {
-    "name": "rattler-build-action",
-    "eco": "Libraries · General",
-    "href": "https://github.com/prefix-dev/rattler-build-action",
-    "note": "GitHub Action to build conda packages :octocat: 📦",
-    "topics": [
-      "conda",
-      "github-actions",
-      "packaging",
-      "rattler-build"
-    ],
-    "stars": 21,
-    "forks": 4,
-    "openIssuesCount": 7,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "prefix-dev",
-    "license": "BSD-3-Clause",
-    "pushedAt": "2026-06-02T20:44:08Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "7 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "shell",
@@ -178177,37 +177834,6 @@
     ]
   },
   {
-    "name": "aws-security-analytics-bootstrap",
-    "eco": "Security · Crypto",
-    "href": "https://github.com/awslabs/aws-security-analytics-bootstrap",
-    "note": "AWS Security Analytics Bootstrap enables customers to perform security investigations on AWS service logs by providing an Amazon Athena analysis environment that's quick to deploy, ready to use, and easy to maintain.",
-    "topics": [
-      "security"
-    ],
-    "stars": 278,
-    "forks": 55,
-    "openIssuesCount": 3,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "awslabs",
-    "license": "Apache-2.0",
-    "pushedAt": "2026-06-07T23:22:42Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "3 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "llrt",
     "eco": "Async · Runtime",
     "href": "https://github.com/awslabs/llrt",
@@ -178420,35 +178046,6 @@
       "tempfile",
       "tokio"
     ]
-  },
-  {
-    "name": "api-schemas",
-    "eco": "Libraries · General",
-    "href": "https://github.com/cloudflare/api-schemas",
-    "note": "",
-    "topics": [],
-    "stars": 176,
-    "forks": 68,
-    "openIssuesCount": 3,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "cloudflare",
-    "license": "BSD-3-Clause",
-    "pushedAt": "2026-06-08T22:14:02Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "3 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "foundations",
@@ -179308,37 +178905,6 @@
     ]
   },
   {
-    "name": "winget-pkgs",
-    "eco": "Libraries · General",
-    "href": "https://github.com/microsoft/winget-pkgs",
-    "note": "The Microsoft community Windows Package Manager manifest repository",
-    "topics": [
-      "hacktoberfest"
-    ],
-    "stars": 10669,
-    "forks": 7323,
-    "openIssuesCount": 1785,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "microsoft",
-    "license": "MIT",
-    "pushedAt": "2026-06-08T22:18:06Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "1785 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "litebox",
     "eco": "Security · Crypto",
     "href": "https://github.com/microsoft/litebox",
@@ -179854,41 +179420,6 @@
     ]
   },
   {
-    "name": "agents-cli",
-    "eco": "CLI · Tooling",
-    "href": "https://github.com/google/agents-cli",
-    "note": "The CLI and skills that turn any coding assistant into an expert at creating, evaluating, and deploying AI agents on Google Cloud.",
-    "topics": [
-      "cli",
-      "adk",
-      "agent-development-kit",
-      "agents",
-      "coding-agent"
-    ],
-    "stars": 2733,
-    "forks": 324,
-    "openIssuesCount": 12,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "google",
-    "license": "Apache-2.0",
-    "pushedAt": "2026-06-08T20:54:33Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "12 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "uniffi-rs",
     "eco": "Libraries · General",
     "href": "https://github.com/mozilla/uniffi-rs",
@@ -180171,7 +179702,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "rust-rocksdb",
@@ -180572,7 +180104,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "rust-prometheus",
@@ -181045,7 +180578,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "community",
@@ -181074,7 +180608,8 @@
     "queue": true,
     "skipReason": "",
     "checkedAt": "2026-06-08",
-    "dependencies": []
+    "dependencies": [],
+    "kind": "reference"
   },
   {
     "name": "tidb-engine-ext",
@@ -181347,35 +180882,6 @@
     ]
   },
   {
-    "name": "presentations",
-    "eco": "Libraries · General",
-    "href": "https://github.com/pingcap/presentations",
-    "note": "",
-    "topics": [],
-    "stars": 363,
-    "forks": 72,
-    "openIssuesCount": 4,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "pingcap",
-    "license": null,
-    "pushedAt": "2022-09-27T08:35:46Z",
-    "activityTier": "dormant",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "4 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
-  },
-  {
     "name": "sedona-spatialbench",
     "eco": "Database · Storage",
     "href": "https://github.com/apache/sedona-spatialbench",
@@ -181439,39 +180945,6 @@
       "tempfile",
       "flate2"
     ]
-  },
-  {
-    "name": "maven-parent",
-    "eco": "Libraries · General",
-    "href": "https://github.com/apache/maven-parent",
-    "note": "Apache Maven Project Parent POMs",
-    "topics": [
-      "build-management",
-      "java",
-      "maven"
-    ],
-    "stars": 33,
-    "forks": 29,
-    "openIssuesCount": 9,
-    "goodFirstIssuesCount": 0,
-    "helpWantedIssuesCount": 0,
-    "language": null,
-    "owner": "apache",
-    "license": "Apache-2.0",
-    "pushedAt": "2026-06-08T18:35:08Z",
-    "activityTier": "active",
-    "maintainerFriendliness": 0.5,
-    "issueQuality": 0.5,
-    "beginnerSuitability": 0.5,
-    "maintainerLabel": "",
-    "issueLabel": "9 open issues",
-    "beginnerLabel": "",
-    "ecosystem": [],
-    "beginnerFriendly": false,
-    "queue": true,
-    "skipReason": "",
-    "checkedAt": "2026-06-08",
-    "dependencies": []
   },
   {
     "name": "cloud.devenv.sh",

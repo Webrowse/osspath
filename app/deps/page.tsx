@@ -40,7 +40,7 @@ export default function DepsIndexPage() {
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" style={{ marginBottom: 24 }}>
             <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
-              ← OSS Paths
+              ← Repositories
             </Link>
           </nav>
 

@@ -151,7 +151,7 @@ export default async function TopicPage({ params }: PageProps) {
                 gap: 4,
               }}
             >
-              ← OSS Paths
+              ← Repositories
             </Link>
           </nav>
 
@@ -272,7 +272,7 @@ export default async function TopicPage({ params }: PageProps) {
               href="/oss"
               style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}
             >
-              ← Browse all OSS repositories
+              ← Browse all repos
             </Link>
           </div>
 

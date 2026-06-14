@@ -77,7 +77,7 @@ export default async function ProgramDetailPage({ params }: PageProps) {
           {/* Breadcrumb */}
           <nav aria-label="Breadcrumb" style={{ marginBottom: 24, display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
             <Link href="/grants" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
-              ← Grants & Funding
+              ← Funding
             </Link>
             {funder && (
               <Link href={`/funders/${funder.slug}`} style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>

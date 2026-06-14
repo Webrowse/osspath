@@ -48,8 +48,8 @@ export const CONTENT_FILES: Record<ContentType, string> = {
 
 export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
   jobs:      "Jobs",
-  oss:       "OSS Paths",
-  grants:    "Grants",
+  oss:       "Repos",
+  grants:    "Funding",
   pulse:     "Pulse",
   events:    "Events",
   companies: "Companies",

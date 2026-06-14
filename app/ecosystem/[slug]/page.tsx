@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const company = getCompanyBySlug(slug)
   if (!company) return { title: "Not Found" }
 
-  const title = `${company.name} — Rust OSS Footprint`
+  const title = `${company.name} — Rust Repos`
   const description = company.description
     ?? `Open source Rust repositories maintained by ${company.name}.`
 
@@ -88,7 +88,7 @@ export default async function CompanyProfilePage({ params }: PageProps) {
               ← Companies
             </Link>
             <Link href="/oss" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
-              OSS Paths
+              Repositories
             </Link>
           </nav>
 
@@ -172,7 +172,7 @@ export default async function CompanyProfilePage({ params }: PageProps) {
                 {profile.ecosystems.map(tag => (
                   <Link
                     key={tag}
-                    href={`/oss?eco=${tag}`}
+                    href={`/ecosystems/${tag}`}
                     className={`e-oss__eco-badge e-oss__eco-badge--${tag} e-oss__eco-badge--lg`}
                     style={{ textDecoration: "none" }}
                   >

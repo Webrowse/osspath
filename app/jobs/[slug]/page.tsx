@@ -3,10 +3,12 @@ import Link from "next/link"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { GrantCard } from "@/components/editorial/grant-card"
+import { OSSCard } from "@/components/editorial/oss-card"
 import { JOBS } from "@/content/jobs"
 import { getJobBySlug } from "@/lib/jobs-data"
-import { getCompanyBySlug } from "@/lib/company-data"
+import { getCompanyBySlug, buildCompanyProfile } from "@/lib/company-data"
 import { getProgramsForEcosystem } from "@/lib/grants-data"
+import { getDepPageCounts } from "@/lib/deps-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
 import type { EcoTag } from "@/lib/eco-tags"
 import type { FundingProgram } from "@/content/programs"
@@ -64,6 +66,9 @@ export default async function JobDetailPage({ params }: PageProps) {
   if (!job) notFound()
 
   const company = getCompanyBySlug(job.company_slug)
+  const profile = company ? buildCompanyProfile(company) : null
+  const orgTopRepos = profile?.repos.slice(0, 4) ?? []
+  const depCounts = getDepPageCounts()
 
   // Collect funding programs from all job ecosystems, deduplicate, cap at 4
   const relatedPrograms = dedupPrograms(
@@ -122,7 +127,7 @@ export default async function JobDetailPage({ params }: PageProps) {
               <span key={t} className="e-tag">{t}</span>
             ))}
             {job.rustMentioned && (
-              <span className="e-tag e-tag--soft" style={{ fontFamily: "var(--e-mono)", fontSize: 12 }}>Rust explicit</span>
+              <span className="e-tag e-tag--soft" style={{ fontFamily: "var(--e-mono)", fontSize: 12 }}>Rust mentioned</span>
             )}
           </div>
 
@@ -136,7 +141,7 @@ export default async function JobDetailPage({ params }: PageProps) {
                 {job.ecosystems.map(tag => (
                   <Link
                     key={tag}
-                    href={`/oss?eco=${tag}`}
+                    href={`/ecosystems/${tag}`}
                     className={`e-oss__eco-badge e-oss__eco-badge--${tag} e-oss__eco-badge--lg`}
                     style={{ textDecoration: "none" }}
                   >
@@ -217,9 +222,36 @@ export default async function JobDetailPage({ params }: PageProps) {
               Apply at {job.company} →
             </a>
             <p style={{ fontSize: 12, color: "var(--e-fg-faint)", marginTop: 8 }}>
-              Opens the company careers page. Listing checked {job.checkedAt}.
+              Last reviewed {job.checkedAt}.
             </p>
           </div>
+
+          {/* Org repositories */}
+          {orgTopRepos.length > 0 && company && (
+            <div style={{ marginBottom: 40 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 6 }}>
+                {company.name} open source
+              </div>
+              <p style={{ fontSize: 13, color: "var(--e-fg-dim)", marginBottom: 16, lineHeight: 1.5 }}>
+                Repositories maintained by the team behind this role.
+              </p>
+              <div className="e-oss-grid">
+                {orgTopRepos.map(repo => (
+                  <OSSCard key={repo.href} repo={repo} depPageCounts={depCounts} />
+                ))}
+              </div>
+              {(profile?.repoCount ?? 0) > 4 && (
+                <div style={{ marginTop: 12 }}>
+                  <Link
+                    href={`/ecosystem/${company.slug}`}
+                    style={{ fontSize: 13, color: "var(--e-accent)", textDecoration: "none", fontFamily: "var(--e-mono)" }}
+                  >
+                    View all {profile?.repoCount} repositories →
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Related funding programs */}
           {relatedPrograms.length > 0 && (

@@ -25,7 +25,7 @@ export default function ScanPage() {
           />
           <ScannerPanel
             id="grants"
-            title="Grants & Bounties"
+            title="Funding"
             description="Searches HN for Rust Foundation grants, open source bounties, and ecosystem funding announcements. DeepSeek extracts kind, name, status, and URL."
             source="hn-grants"
           />
