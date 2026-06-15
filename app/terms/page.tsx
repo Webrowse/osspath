@@ -25,9 +25,6 @@ export default function TermsPage() {
             <p style={{ fontSize: 14, color: "var(--e-fg-dim)", lineHeight: 1.7 }}>
               Do not use this service to scrape, spam, or abuse any third-party systems.
             </p>
-            <p style={{ fontSize: 14, color: "var(--e-fg-dim)", lineHeight: 1.7 }}>
-              We reserve the right to terminate accounts that violate these terms.
-            </p>
           </div>
         </div>
       </section>

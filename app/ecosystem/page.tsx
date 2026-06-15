@@ -10,11 +10,11 @@ import { getOwnerCompanyIndex } from "@/lib/company-data"
 export const metadata: Metadata = {
   title: "Companies Using Rust in Production",
   description: "Ecosystem orientation — who builds what with Rust. Tokio, Cloudflare, Microsoft, Mozilla, and more. Not all companies listed are actively hiring.",
-  alternates: { canonical: "https://jobs.adarshrust.com/ecosystem" },
+  alternates: { canonical: "/ecosystem" },
   openGraph: {
     title: "Companies Using Rust in Production",
     description: "Who builds what with Rust — ecosystem orientation across infrastructure, databases, networking, and tooling.",
-    url: "https://jobs.adarshrust.com/ecosystem",
+    url: "/ecosystem",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
@@ -64,6 +64,9 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
               {items.map((c) => {
                 const hasProfile = !!c.slug
                 const hasRepos   = c.github_org ? ownerIndex.has(c.github_org.toLowerCase()) : false
+                const sectorLine = c.status === "acquired"
+                  ? `${c.sector} · Acquired`
+                  : c.sector
                 if (hasProfile) {
                   return (
                     <Link
@@ -73,7 +76,7 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
                       aria-label={c.name}
                     >
                       <span className="e-company__name">{c.name}</span>
-                      <span className="e-company__sector">{c.sector}</span>
+                      <span className="e-company__sector">{sectorLine}</span>
                       <span className="e-company__hint" aria-hidden="true">{hasRepos ? "Repos →" : "Profile →"}</span>
                     </Link>
                   )
@@ -88,7 +91,7 @@ export default async function EcosystemPage({ searchParams }: PageProps) {
                     aria-label={c.name}
                   >
                     <span className="e-company__name">{c.name}</span>
-                    <span className="e-company__sector">{c.sector}</span>
+                    <span className="e-company__sector">{sectorLine}</span>
                     <span className="e-company__hint" aria-hidden="true">Visit →</span>
                   </a>
                 )

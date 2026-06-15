@@ -7,7 +7,7 @@ import { JOBS }                            from "@/content/jobs"
 import { LIFECYCLE_EDGES }                 from "@/content/lifecycle-edges"
 import { getOSSRepos }                     from "@/lib/oss-data"
 import { getDepPageCounts }                from "@/lib/deps-data"
-import { getEcoTags, ECO_LABEL }           from "@/lib/eco-tags"
+import { getEcoTags, ECO_LABEL, ECO_DISPLAY_NAME, ECO_TAG_ORDER } from "@/lib/eco-tags"
 import { getOwnerCompanyIndex }            from "@/lib/company-data"
 import { getFunderBySlug }                 from "@/lib/grants-data"
 import type { EcoTag }                     from "@/lib/eco-tags"
@@ -75,6 +75,7 @@ export type LandingRepository = {
   stars:        number
   activityTier: string
   ecoLabel:     string        // corpus eco category
+  isFunded:     boolean
   org: {
     name: string
     slug: string
@@ -94,16 +95,18 @@ export type LandingOrganization = {
   repoCount:   number
   totalStars:  number
   github_org:  string | null
+  ecosystems:  EcoTag[]
 }
 
 export type LandingEcosystem = {
-  tag:        EcoTag
-  label:      string   // full display name (e.g. "AI & Machine Learning")
-  shortLabel: string   // abbreviated (from ECO_LABEL — "ai", "db", etc.)
-  jobCount:   number
-  repoCount:  number   // repos tagged with this eco via dep/topic analysis
-  jobsHref:   string   // /jobs?eco=tag
-  reposHref:  string   // /oss?eco=tag
+  tag:          EcoTag
+  label:        string   // full display name (e.g. "AI & Machine Learning")
+  shortLabel:   string   // abbreviated (from ECO_LABEL — "ai", "db", etc.)
+  jobCount:     number
+  repoCount:    number   // repos tagged with this eco via dep/topic analysis
+  programCount: number   // active/rolling funding programs for this eco
+  jobsHref:     string   // /jobs?eco=tag
+  reposHref:    string   // /oss?eco=tag
 }
 
 export type LandingCrate = {
@@ -122,28 +125,8 @@ export type LandingData = {
   featuredOrganizations:  LandingOrganization[]
   featuredEcosystems:     LandingEcosystem[]
   featuredCrates:         LandingCrate[]
+  featuredJobs:           EditorialJob[]
 }
-
-// ─── Private: ecosystem display names ─────────────────────────────────────────
-
-const ECO_DISPLAY_NAME: Record<EcoTag, string> = {
-  bevy:       "Bevy Game Engine",
-  tauri:      "Tauri Desktop",
-  blockchain: "Blockchain",
-  embedded:   "Embedded / no_std",
-  ai:         "AI & Machine Learning",
-  wasm:       "WebAssembly",
-  database:   "Database",
-  grpc:       "gRPC & Networking",
-  cli:        "CLI & TUI",
-  axum:       "Web & APIs",
-  tokio:      "Async / Tokio",
-}
-
-const ECO_TAG_ORDER: EcoTag[] = [
-  "bevy", "tauri", "blockchain", "embedded", "ai",
-  "wasm", "database", "grpc", "cli", "axum", "tokio",
-]
 
 // ─── Private: crate editorial descriptions ────────────────────────────────────
 // Determines which crates are featured. Count and ordering come from data;
@@ -259,6 +242,7 @@ function getRepoIndexes(): RepoIndexes {
   for (const r of getOSSRepos()) {
     const tags = getEcoTags(r.dependencies, {
       owner:  r.owner  ?? undefined,
+      name:   r.name   ?? undefined,
       topics: r.topics ?? undefined,
     })
 
@@ -469,6 +453,9 @@ export function getFeaturedFundingPrograms(): LandingFundingProgram[] {
 
 export function getFeaturedRepositories(): LandingRepository[] {
   const ownerIndex = getOwnerCompanyIndex()
+  const fundedSet  = new Set(
+    PROGRAMS.flatMap(p => p.funded_repos ?? []).map(s => s.toLowerCase())
+  )
 
   return getOSSRepos()
     .filter(r =>
@@ -482,7 +469,6 @@ export function getFeaturedRepositories(): LandingRepository[] {
     .map(r => {
       const owner   = r.owner!
       const company = ownerIndex.get(owner.toLowerCase())!
-      // href is the GitHub URL; derive /oss path from owner + name
       return {
         name:         r.name,
         owner,
@@ -493,6 +479,7 @@ export function getFeaturedRepositories(): LandingRepository[] {
         stars:        r.stars ?? 0,
         activityTier: r.activityTier ?? "active",
         ecoLabel:     r.eco,
+        isFunded:     fundedSet.has(`${owner}/${r.name}`.toLowerCase()),
         org: {
           name: company.name,
           slug: company.slug,
@@ -516,7 +503,8 @@ export function getFeaturedOrganizations(): LandingOrganization[] {
     .sort((a, b) => (orgStats[b.slug]?.stars ?? 0) - (orgStats[a.slug]?.stars ?? 0))
     .slice(0, 8)
     .map(c => {
-      const s = orgStats[c.slug] ?? { stars: 0, repoCount: 0 }
+      const s = orgStats[c.slug] ?? { stars: 0, repoCount: 0, ecoSet: new Set<EcoTag>() }
+      const ecosystems = ECO_TAG_ORDER.filter(t => s.ecoSet?.has(t)).slice(0, 3)
       return {
         name:         c.name,
         slug:         c.slug,
@@ -529,6 +517,7 @@ export function getFeaturedOrganizations(): LandingOrganization[] {
         repoCount:    s.repoCount,
         totalStars:   s.stars,
         github_org:   c.github_org ?? null,
+        ecosystems,
       }
     })
 }
@@ -544,14 +533,32 @@ export function getFeaturedEcosystems(): LandingEcosystem[] {
     return acc
   }, {})
 
+  // Count active/rolling programs per ecosystem
+  const activePrograms = PROGRAMS.filter(p => p.status === "rolling" || p.status === "open")
+  const programCounts: Partial<Record<EcoTag, number>> = {}
+  for (const p of activePrograms) {
+    const ecos = (p.ecosystems ?? []) as EcoTag[]
+    if (ecos.length === 0) {
+      // broad program — counts for all ecosystems
+      for (const tag of ECO_TAG_ORDER) {
+        programCounts[tag] = (programCounts[tag] ?? 0) + 1
+      }
+    } else {
+      for (const tag of ecos) {
+        programCounts[tag] = (programCounts[tag] ?? 0) + 1
+      }
+    }
+  }
+
   return ECO_TAG_ORDER.map(tag => ({
     tag,
-    label:      ECO_DISPLAY_NAME[tag],
-    shortLabel: ECO_LABEL[tag],
-    jobCount:   jobEcoCounts[tag] ?? 0,
-    repoCount:  ecoRepoCounts[tag],
-    jobsHref:   `/jobs?eco=${tag}`,
-    reposHref:  `/oss?eco=${tag}`,
+    label:        ECO_DISPLAY_NAME[tag],
+    shortLabel:   ECO_LABEL[tag],
+    jobCount:     jobEcoCounts[tag] ?? 0,
+    repoCount:    ecoRepoCounts[tag],
+    programCount: programCounts[tag] ?? 0,
+    jobsHref:     `/jobs?eco=${tag}`,
+    reposHref:    `/oss?eco=${tag}`,
   }))
 }
 
@@ -583,5 +590,6 @@ export function getLandingData(): LandingData {
     featuredOrganizations:   getFeaturedOrganizations(),
     featuredEcosystems:      getFeaturedEcosystems(),
     featuredCrates:          getFeaturedCrates(),
+    featuredJobs:            getActiveJobs().slice(0, 6),
   }
 }

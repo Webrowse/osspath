@@ -3,6 +3,7 @@ import rawEvents from "./events.json"
 export type EcosystemEvent = {
   day: string
   month: string
+  year?: string
   title: string
   meta: string
   href: string

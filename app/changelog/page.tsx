@@ -2,9 +2,9 @@ import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 
 export const metadata: Metadata = {
-  title: "Changelog — Rust Opportunities",
-  description: "What's shipped — features, fixes, and improvements to Rust Opportunities in reverse chronological order.",
-  alternates: { canonical: "https://jobs.adarshrust.com/changelog" },
+  title: "Changelog — Rust Atlas",
+  description: "What's shipped — features, fixes, and improvements to Rust Atlas in reverse chronological order.",
+  alternates: { canonical: "/changelog" },
 }
 
 type Entry = {

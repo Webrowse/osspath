@@ -11,6 +11,7 @@ import { getDepPageCounts } from "@/lib/deps-data"
 import { getProgramsForCompany, getFunderForCompany, getIncomingFundingForOrg } from "@/lib/grants-data"
 import { getActiveJobsByCompany } from "@/lib/jobs-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
+import { CorrectionLink } from "@/components/editorial/correction-link"
 
 export const dynamicParams = false
 
@@ -34,11 +35,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/ecosystem/${slug}` },
+    alternates: { canonical: `/ecosystem/${slug}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/ecosystem/${slug}`,
+      url: `/ecosystem/${slug}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -55,6 +56,12 @@ function fmt(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`
   if (n >= 1_000)     return `${(n / 1_000).toFixed(n >= 10_000 ? 0 : 1)}k`
   return n.toLocaleString()
+}
+
+// Parse YYYY-MM-DD without UTC conversion so the month is always correct.
+function fmtAcquisitionDate(iso: string): string {
+  const [year, month] = iso.split("-").map(Number)
+  return new Date(year, month - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" })
 }
 
 export default async function CompanyProfilePage({ params }: PageProps) {
@@ -75,7 +82,8 @@ export default async function CompanyProfilePage({ params }: PageProps) {
   const incomingFunding = getIncomingFundingForOrg(company.github_org)
     .filter(item => !sponsoredSlugs.has(item.program.slug))
 
-  const hasOSS = profile.repoCount > 0
+  const hasOSS      = profile.repoCount > 0
+  const parentCo    = company.parent_org ? getCompanyBySlug(company.parent_org) : null
 
   return (
     <EditorialLayout>
@@ -107,6 +115,45 @@ export default async function CompanyProfilePage({ params }: PageProps) {
               </p>
             )}
           </header>
+
+          {/* Acquisition notice */}
+          {company.status === "acquired" && company.parent_org && (
+            <div
+              style={{
+                marginBottom: 32,
+                padding: "10px 16px",
+                border: "1px solid var(--e-line-soft)",
+                borderRadius: 6,
+                background: "var(--e-bg-2)",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "baseline",
+                gap: "4px 20px",
+              }}
+            >
+              <span style={{ fontSize: 12, fontFamily: "var(--e-mono)", color: "var(--e-fg-dim)" }}>
+                Acquired by{" "}
+                {parentCo ? (
+                  <Link
+                    href={`/ecosystem/${company.parent_org}`}
+                    style={{ color: "var(--e-accent)", textDecoration: "none" }}
+                  >
+                    {parentCo.name}
+                  </Link>
+                ) : (
+                  company.parent_org
+                )}
+                {company.effective_date && (
+                  <> · {fmtAcquisitionDate(company.effective_date)}</>
+                )}
+              </span>
+              {company.github_org && (
+                <span style={{ fontSize: 11, fontFamily: "var(--e-mono)", color: "var(--e-fg-faint)" }}>
+                  Repositories continue under github.com/{company.github_org}
+                </span>
+              )}
+            </div>
+          )}
 
           {/* Stats strip */}
           {hasOSS && (
@@ -343,10 +390,11 @@ export default async function CompanyProfilePage({ params }: PageProps) {
           )}
 
           {/* Footer */}
-          <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--e-line-soft)" }}>
+          <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--e-line-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
             <Link href="/ecosystem" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
               ← Browse all companies
             </Link>
+            <CorrectionLink />
           </div>
 
         </div>

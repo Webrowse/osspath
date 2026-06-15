@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { FundingProgram } from "@/content/programs"
+import { formatCheckedAt } from "@/lib/content-utils"
 
 const KIND_LABEL: Record<string, string> = {
   grant:           "Grant",
@@ -20,6 +21,7 @@ function ArrowUR() {
 }
 
 export function GrantCard({ program }: { program: FundingProgram }) {
+  const freshness = formatCheckedAt(program.checkedAt)
   return (
     <Link
       className="e-grant"
@@ -28,6 +30,11 @@ export function GrantCard({ program }: { program: FundingProgram }) {
       <span className="e-grant__kind">{KIND_LABEL[program.kind] ?? program.kind}</span>
       <h3 className="e-grant__name">{program.name}</h3>
       <p className="e-grant__sub">{program.description}</p>
+      {freshness && (
+        <span style={{ display: "block", fontSize: 11, fontFamily: "var(--e-mono)", color: "var(--e-fg-faint)", marginBottom: 6 }}>
+          {freshness}
+        </span>
+      )}
       <div className="e-grant__foot">
         <span>{program.status}</span>
         {program.max_award && (

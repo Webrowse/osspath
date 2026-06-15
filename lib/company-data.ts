@@ -58,6 +58,7 @@ export function buildCompanyProfile(company: EcosystemCompany): CompanyProfile {
   for (const r of repos) {
     getEcoTags(r.dependencies, {
       owner:  r.owner  ?? undefined,
+      name:   r.name   ?? undefined,
       topics: r.topics ?? undefined,
     }).forEach(t => ecoSet.add(t))
   }
@@ -86,6 +87,20 @@ export function buildCompanyProfile(company: EcosystemCompany): CompanyProfile {
   }
 
   return { ...company, repos, repoCount, totalStars, topRepo, ecosystems, topDeps, activityBreakdown }
+}
+
+// Companies that have at least one repo depending on the given crate.
+export function getCompaniesForDep(crate: string): EcosystemCompany[] {
+  const ownerIndex = getOwnerCompanyIndex()
+  const matched    = new Set<string>()
+
+  for (const r of getOSSRepos()) {
+    if (!r.owner || !r.dependencies?.includes(crate)) continue
+    const company = ownerIndex.get(r.owner.toLowerCase())
+    if (company) matched.add(company.slug)
+  }
+
+  return COMPANIES.filter(c => matched.has(c.slug))
 }
 
 export { COMPANIES, ECO_LABEL }

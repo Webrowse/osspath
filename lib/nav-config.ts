@@ -12,7 +12,9 @@ export const FOOTER_NAV = [
   { label: "Community", href: "/pulse" },
   { label: "Events",    href: "/events" },
   { label: "Job Boards", href: "/portals" },
-  { label: "Contact",   href: "/contact" },
+  { label: "About",       href: "/about" },
+  { label: "Methodology", href: "/methodology" },
+  { label: "Contact",     href: "/contact" },
   { label: "Privacy",   href: "/privacy" },
 ] as const
 

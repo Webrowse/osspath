@@ -1,5 +1,7 @@
 import Link from "next/link"
 import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
+import { CommandPalette } from "@/components/command-palette"
+import { EditorialThemeToggle } from "@/components/editorial-theme-toggle"
 import { HeroGraph } from "@/components/editorial/hero-graph"
 import { SectionHeader } from "@/components/editorial/section-header"
 import { getLandingData } from "@/lib/landing-data"
@@ -24,9 +26,9 @@ export default function HomePage() {
       {/* ── Nav ──────────────────────────────────────────────────────────────── */}
       <header className="e-nav">
         <div className="e-col e-col--wide e-nav__inner">
-          <Link href="/" className="e-nav__brand" aria-label="Rust Opportunities — home">
+          <Link href="/" className="e-nav__brand" aria-label="Rust Atlas — home">
             <span className="e-nav__mark" />
-            <span>rust opportunities</span>
+            <span>rust atlas</span>
           </Link>
 
           <nav className="e-nav__links" aria-label="Primary">
@@ -36,6 +38,10 @@ export default function HomePage() {
           </nav>
 
           <div className="e-nav__spacer" />
+
+          <CommandPalette />
+
+          <EditorialThemeToggle />
 
           <EditorialMobileMenu links={SITE_NAV.map((l) => ({ label: l.label, href: l.anchor }))} />
         </div>
@@ -61,22 +67,6 @@ export default function HomePage() {
                 Find jobs through repositories. Find organizations through
                 dependencies. Find funding through projects. Start from any node.
               </p>
-
-              <div className="hp-graph-legend">
-                {([
-                  { label: "Fund",  color: "#c2562c" },
-                  { label: "Repo",  color: "#3d6b9e" },
-                  { label: "Eco",   color: "#6a7a3f" },
-                  { label: "Org",   color: "#7a5c8c" },
-                  { label: "Crate", color: "#8a6030" },
-                  { label: "Job",   color: "#2b6b4a" },
-                ] as const).map(({ label, color }) => (
-                  <span key={label} className="hp-legend-tok" style={{ "--nc": color } as React.CSSProperties}>
-                    <span className="hp-legend-dot" />
-                    {label}
-                  </span>
-                ))}
-              </div>
 
               <div className="hp-stats">
                 {([
@@ -320,7 +310,7 @@ export default function HomePage() {
         <div className="e-col e-col--wide">
           <div className="e-footer__row">
             <div>
-              <div className="e-footer__brand">rust opportunities</div>
+              <div className="e-footer__brand">rust atlas</div>
               <div className="e-footer__tagline">Curated weekly. Quiet by design.</div>
             </div>
           </div>

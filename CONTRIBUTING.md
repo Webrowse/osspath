@@ -1,4 +1,4 @@
-# Contributing to Rust Opportunities
+# Contributing to Rust Atlas
 
 This site is manually curated. It stays useful by staying small.
 

@@ -14,6 +14,7 @@ import {
 } from "@/lib/deps-data"
 import { getCompaniesForDep } from "@/lib/company-data"
 import { TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
+import { CRATE_DESCRIPTIONS } from "@/lib/crate-descriptions"
 
 // No fallback for params not in generateStaticParams — return 404 instead.
 export const dynamicParams = false
@@ -38,16 +39,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const displayName = crate.charAt(0).toUpperCase() + crate.slice(1)
   const title = `${displayName} Rust Projects and Repositories`
-  const description = `Discover ${entry.repoCount} open source Rust projects using ${crate}. Browse active repositories, stars, activity levels, maintainers, and common companion crates.`
+  const crateDesc = CRATE_DESCRIPTIONS[crate]
+  const description = crateDesc
+    ? `${crateDesc.tagline} Browse ${entry.repoCount} Rust repositories using ${crate}.`
+    : `Discover ${entry.repoCount} open source Rust projects using ${crate}. Browse active repositories, stars, activity levels, maintainers, and common companion crates.`
 
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/deps/${crate}` },
+    alternates: { canonical: `/deps/${crate}` },
     openGraph: {
       title,
       description: `${entry.repoCount} Rust repositories using ${crate} — active projects, top contributors, and companion crates.`,
-      url: `https://jobs.adarshrust.com/deps/${crate}`,
+      url: `/deps/${crate}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -152,19 +156,59 @@ export default async function DepPage({ params }: PageProps) {
           </nav>
 
           {/* ── Header ─────────────────────────────────────────────────────── */}
-          <header style={{ marginBottom: 32 }}>
-            <div className="e-section__num">Dependency</div>
+          <header style={{ marginBottom: CRATE_DESCRIPTIONS[crate] ? 24 : 32 }}>
+            <div className="e-section__num">Crate</div>
             <h1
               className="e-section__title"
               style={{ fontSize: "clamp(26px, 3.4vw, 36px)", fontFamily: "var(--font-ibm-plex-mono)" }}
             >
               {crate}
             </h1>
-            <p className="e-archive-meta" style={{ marginTop: 8 }}>
-              Browse Rust repositories that depend on{" "}
-              <span style={{ fontFamily: "var(--font-ibm-plex-mono)" }}>{crate}</span>.
-            </p>
+            {CRATE_DESCRIPTIONS[crate] ? (
+              <p style={{ marginTop: 10, fontSize: "clamp(15px, 1.6vw, 17px)", color: "var(--e-fg-mute)", lineHeight: 1.5, maxWidth: "64ch" }}>
+                {CRATE_DESCRIPTIONS[crate].tagline}
+              </p>
+            ) : (
+              <p className="e-archive-meta" style={{ marginTop: 8 }}>
+                Browse Rust repositories that depend on{" "}
+                <span style={{ fontFamily: "var(--font-ibm-plex-mono)" }}>{crate}</span>.
+              </p>
+            )}
           </header>
+
+          {/* ── Description ─────────────────────────────────────────────────── */}
+          {CRATE_DESCRIPTIONS[crate] && (() => {
+            const desc = CRATE_DESCRIPTIONS[crate]!
+            return (
+              <div
+                style={{
+                  marginBottom: 40,
+                  paddingBottom: 32,
+                  borderBottom: "1px solid var(--e-line-soft)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 24,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 10 }}>
+                    What it is
+                  </div>
+                  <p style={{ fontSize: 15, lineHeight: 1.65, color: "var(--e-fg-mute)", maxWidth: "68ch", margin: 0 }}>
+                    {desc.summary}
+                  </p>
+                </div>
+                <div>
+                  <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 10 }}>
+                    Why it is commonly used
+                  </div>
+                  <p style={{ fontSize: 15, lineHeight: 1.65, color: "var(--e-fg-mute)", maxWidth: "68ch", margin: 0 }}>
+                    {desc.usage}
+                  </p>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* ── Stats strip ────────────────────────────────────────────────── */}
           <div

@@ -12,6 +12,8 @@ import { getDepPageCounts } from "@/lib/deps-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
 import type { EcoTag } from "@/lib/eco-tags"
 import type { FundingProgram } from "@/content/programs"
+import { formatCheckedAt } from "@/lib/content-utils"
+import { CorrectionLink } from "@/components/editorial/correction-link"
 
 export const dynamicParams = false
 
@@ -34,11 +36,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/jobs/${slug}` },
+    alternates: { canonical: `/jobs/${slug}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/jobs/${slug}`,
+      url: `/jobs/${slug}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -222,7 +224,7 @@ export default async function JobDetailPage({ params }: PageProps) {
               Apply at {job.company} →
             </a>
             <p style={{ fontSize: 12, color: "var(--e-fg-faint)", marginTop: 8 }}>
-              Last reviewed {job.checkedAt}.
+              {formatCheckedAt(job.checkedAt) ?? `Last reviewed ${job.checkedAt}`}
             </p>
           </div>
 
@@ -276,10 +278,11 @@ export default async function JobDetailPage({ params }: PageProps) {
           )}
 
           {/* Footer */}
-          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)" }}>
+          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
             <Link href="/jobs" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
               ← All jobs
             </Link>
+            <CorrectionLink />
           </div>
 
         </div>

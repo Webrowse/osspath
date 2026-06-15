@@ -9,11 +9,11 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 export const metadata: Metadata = {
   title: "Rust Funding",
   description: "Funding opportunities for Rust ecosystem work — Rust Foundation grants, fellowships, NLnet programs, government investment, and more.",
-  alternates: { canonical: "https://jobs.adarshrust.com/grants" },
+  alternates: { canonical: "/grants" },
   openGraph: {
     title: "Rust Funding",
     description: "Rust Foundation grants, NLnet, Sovereign Tech Fund, OpenSSF, and more — curated funding for Rust ecosystem work.",
-    url: "https://jobs.adarshrust.com/grants",
+    url: "/grants",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },

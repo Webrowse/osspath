@@ -6,6 +6,8 @@ import { GrantCard } from "@/components/editorial/grant-card"
 import { FUNDERS } from "@/content/funders"
 import { getProgramsByFunder } from "@/lib/grants-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
+import { formatCheckedAt } from "@/lib/content-utils"
+import { CorrectionLink } from "@/components/editorial/correction-link"
 
 export const dynamicParams = false
 
@@ -28,11 +30,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/funders/${slug}` },
+    alternates: { canonical: `/funders/${slug}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/funders/${slug}`,
+      url: `/funders/${slug}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -119,6 +121,16 @@ export default async function FunderDetailPage({ params }: PageProps) {
                 </div>
               </div>
             )}
+            {formatCheckedAt(funder.checkedAt) && (
+              <div style={{ minWidth: 80 }}>
+                <div style={{ fontSize: 13, fontFamily: "var(--e-mono)", color: "var(--e-fg-dim)", lineHeight: 1.1 }}>
+                  {formatCheckedAt(funder.checkedAt)}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--e-fg-faint)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Listing
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Links */}
@@ -179,10 +191,11 @@ export default async function FunderDetailPage({ params }: PageProps) {
           )}
 
           {/* Footer */}
-          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)" }}>
+          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
             <Link href="/funders" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
               ← All funders
             </Link>
+            <CorrectionLink />
           </div>
 
         </div>

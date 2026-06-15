@@ -45,7 +45,7 @@ function normalize(r: OSSPath): NormalizedRepo {
     license:         r.license         ?? "unknown",
     activityTier:    (r.activityTier as "active" | "maintenance" | "dormant") ?? "dormant",
     dependencies:    r.dependencies    ?? [],
-    ecoTags:         getEcoTags(r.dependencies, { owner: r.owner, topics: r.topics ?? undefined }),
+    ecoTags:         getEcoTags(r.dependencies, { owner: r.owner, name: r.name ?? undefined, topics: r.topics ?? undefined }),
   }
 }
 

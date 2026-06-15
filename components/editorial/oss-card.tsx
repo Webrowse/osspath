@@ -46,7 +46,7 @@ export function OSSCard({
   const openIssues = repo.openIssuesCount ?? 0
   const tier       = repo.activityTier    ?? "dormant"
   const depLinks   = depPageCounts ? pickDepLinks(repo.dependencies, depPageCounts, 3) : []
-  const ecoTags    = getEcoTags(repo.dependencies, { owner: repo.owner ?? undefined, topics: repo.topics ?? undefined })
+  const ecoTags    = getEcoTags(repo.dependencies, { owner: repo.owner ?? undefined, name: repo.name ?? undefined, topics: repo.topics ?? undefined })
   const issueWarm  = tier === "active" && openIssues >= 5
 
   const detailHref = repo.owner && repo.name

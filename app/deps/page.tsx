@@ -8,11 +8,11 @@ import { getCompanionIndex } from "@/lib/oss-data"
 export const metadata: Metadata = {
   title: "Rust Dependencies — Browse Crate Pages",
   description: "Explore crate-specific pages for 500+ Rust dependencies. See which projects use each crate, companion crates by lift, and total star weight.",
-  alternates: { canonical: "https://jobs.adarshrust.com/deps" },
+  alternates: { canonical: "/deps" },
   openGraph: {
     title: "Rust Dependencies — Browse Crate Pages",
     description: "500+ Rust crate pages — repo counts, star weight, companion crates.",
-    url: "https://jobs.adarshrust.com/deps",
+    url: "/deps",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },

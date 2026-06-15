@@ -39,9 +39,9 @@ export function EditorialArchiveSkeleton({ title, wide = false }: Props) {
       {/* Nav shell — identical markup to EditorialLayout */}
       <header className="e-nav">
         <div className="e-col e-col--wide e-nav__inner">
-          <Link href="/" className="e-nav__brand" aria-label="Rust Opportunities — home">
+          <Link href="/" className="e-nav__brand" aria-label="Rust Atlas — home">
             <span className="e-nav__mark" />
-            <span>rust opportunities</span>
+            <span>rust atlas</span>
           </Link>
           <div className="e-nav__spacer" />
         </div>

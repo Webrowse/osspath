@@ -31,11 +31,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/ecosystems/${tag}` },
+    alternates: { canonical: `/ecosystems/${tag}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/ecosystems/${tag}`,
+      url: `/ecosystems/${tag}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },

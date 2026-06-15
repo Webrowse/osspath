@@ -8,11 +8,11 @@ import { getDepPageCounts, getQualifiedCrates } from "@/lib/deps-data"
 export const metadata: Metadata = {
   title: "Repos — Rust Ecosystem",
   description: "2,000+ curated Rust repositories filtered by stars, activity, license, and topic. Find realistic open-source contribution paths with maintainer context.",
-  alternates: { canonical: "https://jobs.adarshrust.com/oss" },
+  alternates: { canonical: "/oss" },
   openGraph: {
     title: "Repos — Rust Ecosystem",
     description: "2,000+ curated Rust repositories. Filter by stars, activity, license, and topic to find your next contribution.",
-    url: "https://jobs.adarshrust.com/oss",
+    url: "/oss",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },

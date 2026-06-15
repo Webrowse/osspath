@@ -17,7 +17,7 @@ export function SectionHeader({ num, title, meta, note, archiveHref, archiveLabe
           <span className="e-section__num">{num}</span>
           <h2 className="e-section__title">{title}</h2>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", columnGap: 16, rowGap: 4, flexWrap: "wrap", justifyContent: "flex-end" }}>
           {meta && <span className="e-section__meta">{meta}</span>}
           {archiveHref && (
             <Link href={archiveHref} className="e-section__archive-link" prefetch={true}>

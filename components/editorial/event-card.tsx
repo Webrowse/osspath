@@ -35,8 +35,8 @@ export function EventCard({ event }: { event: EcosystemEvent }) {
   return (
     <article className="e-event">
       <div className="e-event__date">
-        <span className="e-d">{event.day}</span>
-        <span className="e-m">{event.month}</span>
+        {event.day !== "—" && <span className="e-d">{event.day}</span>}
+        <span className="e-m">{event.month}{event.year ? ` ${event.year}` : ""}</span>
       </div>
       <div className="e-event__main">
         <h3 className="e-event__title">{event.title}</h3>

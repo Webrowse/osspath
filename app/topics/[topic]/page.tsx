@@ -44,11 +44,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/topics/${topic}` },
+    alternates: { canonical: `/topics/${topic}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/topics/${topic}`,
+      url: `/topics/${topic}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },

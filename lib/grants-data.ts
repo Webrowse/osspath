@@ -53,6 +53,18 @@ export function getFunderForCompany(companySlug: string): Funder | undefined {
   return FUNDERS.find(f => f.company_slug === companySlug)
 }
 
+// Programs that list the given "owner/repo" path in their funded_repos.
+export function getProgramsForRepo(slug: string): { program: FundingProgram; funder: Funder | undefined }[] {
+  const slugLower = slug.toLowerCase()
+  const result: { program: FundingProgram; funder: Funder | undefined }[] = []
+  for (const p of PROGRAMS) {
+    if ((p.funded_repos ?? []).some(r => r.toLowerCase() === slugLower)) {
+      result.push({ program: p, funder: getFunderBySlug(p.funder_slug) })
+    }
+  }
+  return result
+}
+
 // ── Incoming funding (reverse traversal) ──────────────────────────────────────
 // Programs that have funded repos owned by the given GitHub org.
 // This surfaces the Program → funded_repo → Org edge on org profile pages.

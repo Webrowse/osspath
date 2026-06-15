@@ -9,11 +9,11 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 export const metadata: Metadata = {
   title: "Remote Rust Jobs",
   description: "Curated remote Rust engineering roles. Manually reviewed before listing. No job board noise.",
-  alternates: { canonical: "https://jobs.adarshrust.com/jobs" },
+  alternates: { canonical: "/jobs" },
   openGraph: {
     title: "Remote Rust Jobs",
     description: "Curated remote Rust engineering roles. Manually reviewed before listing.",
-    url: "https://jobs.adarshrust.com/jobs",
+    url: "/jobs",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },

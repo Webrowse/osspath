@@ -5,6 +5,8 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { PROGRAMS } from "@/content/programs"
 import { getFunderBySlug } from "@/lib/grants-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
+import { formatCheckedAt } from "@/lib/content-utils"
+import { CorrectionLink } from "@/components/editorial/correction-link"
 
 export const dynamicParams = false
 
@@ -27,11 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    alternates: { canonical: `https://jobs.adarshrust.com/grants/${slug}` },
+    alternates: { canonical: `/grants/${slug}` },
     openGraph: {
       title,
       description,
-      url: `https://jobs.adarshrust.com/grants/${slug}`,
+      url: `/grants/${slug}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -149,6 +151,16 @@ export default async function ProgramDetailPage({ params }: PageProps) {
                 </div>
                 <div style={{ fontSize: 11, color: "var(--e-fg-dim)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
                   Next Deadline
+                </div>
+              </div>
+            )}
+            {formatCheckedAt(program.checkedAt) && (
+              <div style={{ minWidth: 80 }}>
+                <div style={{ fontSize: 13, fontFamily: "var(--e-mono)", color: "var(--e-fg-dim)", lineHeight: 1.1 }}>
+                  {formatCheckedAt(program.checkedAt)}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--e-fg-faint)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Listing
                 </div>
               </div>
             )}
@@ -280,15 +292,18 @@ export default async function ProgramDetailPage({ params }: PageProps) {
           </div>
 
           {/* Footer */}
-          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)", display: "flex", gap: 24 }}>
-            <Link href="/grants" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
-              ← All programs
-            </Link>
-            {funder && (
-              <Link href={`/funders/${funder.slug}`} style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
-                More from {funder.name} →
+          <div style={{ paddingTop: 24, borderTop: "1px solid var(--e-line-soft)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "8px 24px" }}>
+            <div style={{ display: "flex", gap: 24 }}>
+              <Link href="/grants" style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
+                ← All programs
               </Link>
-            )}
+              {funder && (
+                <Link href={`/funders/${funder.slug}`} style={{ fontSize: 13, color: "var(--e-fg-mute)", textDecoration: "none" }}>
+                  More from {funder.name} →
+                </Link>
+              )}
+            </div>
+            <CorrectionLink />
           </div>
 
         </div>

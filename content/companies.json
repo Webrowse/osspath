@@ -398,7 +398,7 @@
     "description": "Rust search and observability infrastructure: tantivy (fast full-text search library) and quickwit (cloud-native distributed search engine). Team joined Datadog in January 2025.",
     "status": "acquired",
     "parent_org": "datadog",
-    "effective_date": "2025-01"
+    "effective_date": "2025-01-01"
   },
   {
     "name": "Datadog",

@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
+import { CONTACT_EMAIL } from "@/lib/site-config"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy policy for Rust Opportunities — what data we collect, how it's used, and how to delete your account.",
+  description: "Privacy policy for Rust Atlas — what data we collect and how it is used.",
 }
 
 export default function PrivacyPage() {
@@ -27,28 +28,30 @@ export default function PrivacyPage() {
             maxWidth: "58ch",
           }}>
             <p>
-              Rust Opportunities is a personal project for curating the Rust ecosystem and,
-              optionally, tracking remote engineering job applications.
+              Rust Atlas is a public directory. No account or login is required to browse
+              the site. We do not collect names, email addresses, or any personally
+              identifiable information from visitors.
             </p>
             <p>
-              We collect only your email, name, and profile image from your OAuth provider
-              (GitHub or Google) for authentication purposes. This data is used only to
-              identify your account.
+              Your theme preference is stored in your browser&rsquo;s localStorage. This
+              data never leaves your device.
             </p>
             <p>
-              Your application data (companies, statuses, notes) is private and only
-              visible to you when signed in.
+              We use PostHog for error tracking and basic analytics. PostHog may store a
+              cookie or use localStorage to distinguish sessions. Events are not linked to
+              any personally identifiable information. Autocapture and pageview tracking
+              are disabled; only errors and explicit events are recorded.
             </p>
             <p>
-              We do not sell, share, or use your data for advertising.
+              We do not sell, share, or use visitor data for advertising.
             </p>
             <p>
-              You can delete your account and all associated data at any time by contacting{" "}
+              To report a concern or request data removal, contact{" "}
               <a
-                href="mailto:great.adarsh@gmail.com"
+                href={`mailto:${CONTACT_EMAIL}`}
                 style={{ color: "var(--e-accent)", textDecoration: "underline", textUnderlineOffset: 3 }}
               >
-                great.adarsh@gmail.com
+                {CONTACT_EMAIL}
               </a>
               .
             </p>

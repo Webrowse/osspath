@@ -10,6 +10,7 @@ import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import { getCompanyForOwner } from "@/lib/company-data"
 import { getProgramsForRepo } from "@/lib/grants-data"
 import { DepList } from "@/components/editorial/dep-list"
+import { CorrectionLink } from "@/components/editorial/correction-link"
 import type { OSSPath } from "@/content/oss-paths"
 
 export const dynamicParams = false
@@ -39,11 +40,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description: desc,
-    alternates: { canonical: `https://jobs.adarshrust.com/oss/${owner}/${repo}` },
+    alternates: { canonical: `/oss/${owner}/${repo}` },
     openGraph: {
       title,
       description: desc,
-      url: `https://jobs.adarshrust.com/oss/${owner}/${repo}`,
+      url: `/oss/${owner}/${repo}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
     },
@@ -64,6 +65,10 @@ function fmt(n: number): string {
   return n.toLocaleString()
 }
 
+function fmtPushedAt(iso: string): string {
+  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+}
+
 // ── Page ───────────────────────────────────────────────────────────────────────
 
 export default async function OSSRepoPage({ params }: PageProps) {
@@ -77,7 +82,10 @@ export default async function OSSRepoPage({ params }: PageProps) {
   const forks         = r.forks           ?? 0
   const openIssues    = r.openIssuesCount ?? 0
   const tier          = r.activityTier    ?? "dormant"
-  const ecoTags       = getEcoTags(r.dependencies, { owner: r.owner ?? undefined, topics: r.topics ?? undefined })
+  const licenseLabel  = !r.license                    ? "License unknown"
+                      : r.license === "NOASSERTION"   ? "Not identified"
+                      : r.license
+  const ecoTags       = getEcoTags(r.dependencies, { owner: r.owner ?? undefined, name: r.name ?? undefined, topics: r.topics ?? undefined })
   const company       = r.owner ? getCompanyForOwner(r.owner) : undefined
   const slug          = `${owner}/${repoName}`
   const fundingForRepo = getProgramsForRepo(slug)
@@ -149,6 +157,14 @@ export default async function OSSRepoPage({ params }: PageProps) {
                   </div>
                 </div>
               ))}
+              <div style={{ minWidth: 60 }}>
+                <div style={{ fontSize: 13, fontFamily: "var(--e-mono)", fontWeight: 500, color: "var(--color-foreground)", lineHeight: 1.2 }}>
+                  {licenseLabel}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--color-muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  License
+                </div>
+              </div>
               <div>
                 <div style={{ display: "flex", gap: 6, flexWrap: "wrap", paddingTop: 2 }}>
                   <span className={`e-oss__activity e-oss__activity--${tier}`}>{tier}</span>
@@ -164,6 +180,13 @@ export default async function OSSRepoPage({ params }: PageProps) {
                   ))}
                 </div>
               </div>
+              {r.pushedAt && (
+                <div style={{ width: "100%", marginTop: 4 }}>
+                  <span style={{ fontSize: 11, fontFamily: "var(--e-mono)", color: "var(--color-muted)" }}>
+                    Last GitHub commit: {fmtPushedAt(r.pushedAt)}
+                  </span>
+                </div>
+              )}
             </div>
             <a
               href={r.href}
@@ -317,10 +340,11 @@ export default async function OSSRepoPage({ params }: PageProps) {
           )}
 
           {/* Footer */}
-          <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--color-border)" }}>
+          <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
             <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
               ← Browse all repos
             </Link>
+            <CorrectionLink />
           </div>
 
         </div>

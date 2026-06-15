@@ -1,16 +1,15 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
+import { CONTACT_EMAIL } from "@/lib/site-config"
 
 export const metadata: Metadata = {
   title: "Contact",
   description: "Report stale data, broken links, or suggest a repository, job, funding program, or organization.",
-  alternates: { canonical: "https://jobs.adarshrust.com/contact" },
+  alternates: { canonical: "/contact" },
 }
-
-const CONTACT_EMAIL = "adarshtechjob@gmail.com"
 const GITHUB_PROFILE = "https://github.com/Webrowse"
-const GITHUB_REPO = "https://github.com/Webrowse/jobs-adarshrust"
+const GITHUB_REPO = "https://github.com/Webrowse/adarshrust-jobs"
 
 export default function ContactPage() {
   return (
@@ -86,7 +85,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               style={{ fontSize: 14, color: "var(--e-accent)", textDecoration: "none", fontFamily: "var(--e-mono)" }}
             >
-              github.com/Webrowse/jobs-adarshrust →
+              github.com/Webrowse/adarshrust-jobs →
             </a>
           </div>
 

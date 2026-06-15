@@ -8,11 +8,11 @@ import { ECO_LABEL } from "@/lib/eco-tags"
 export const metadata: Metadata = {
   title: "Rust Funding Organizations",
   description: "Foundations, government programs, and organizations that fund Rust ecosystem work — grants, fellowships, audits, and more.",
-  alternates: { canonical: "https://jobs.adarshrust.com/funders" },
+  alternates: { canonical: "/funders" },
   openGraph: {
     title: "Rust Funding Organizations",
     description: "Foundations, government programs, and organizations that fund Rust ecosystem work.",
-    url: "https://jobs.adarshrust.com/funders",
+    url: "/funders",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
