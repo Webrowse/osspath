@@ -42,45 +42,38 @@
     "checkedAt": "2026-05-28"
   },
   {
-    "kind": "Community",
-    "title": "awesome-rust-mentors",
-    "description": "A curated list of Rust mentors tagged by topics of interest to help learners find guidance.",
-    "href": "https://rustbeginners.github.io/awesome-rust-mentors/",
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "kind": "Blog",
-    "title": "rustycrate.ru",
-    "description": "Русскоязычный сайт о языке программирования Rust.",
-    "href": "https://rustycrate.ru/",
-    "checkedAt": "2026-06-08"
+    "kind": "Podcast",
+    "title": "Rust in Production",
+    "description": "Interviews with teams running Rust in production. Covers real-world tradeoffs, migration stories, and performance wins. Published by corrode.dev.",
+    "href": "https://corrode.dev/podcast/",
+    "checkedAt": "2026-05-28"
   },
   {
     "kind": "Community",
-    "title": "eu-uso-rust",
-    "description": "Repositório de empresas e projetos 'made in Brazil' usando Rust.",
-    "href": "https://github.com/rust-br/eu-uso-rust",
-    "checkedAt": "2026-06-08"
+    "title": "Embedded Rust — Matrix",
+    "description": "Active chat room for embedded Rust development. Good for questions about HALs, bare-metal targets, and peripheral drivers.",
+    "href": "https://matrix.to/#/#rust-embedded:matrix.org",
+    "checkedAt": "2026-05-28"
   },
   {
     "kind": "Community",
-    "title": "RustIndia",
-    "description": "The official Rust India community repository on GitHub for collaboration and resources.",
+    "title": "Rust India",
+    "description": "Regional Rust community connecting developers across India through meetups, discussions, and learning resources.",
     "href": "https://github.com/MozillaIndia/RustIndia",
     "checkedAt": "2026-06-08"
   },
   {
     "kind": "Community",
-    "title": "Rust Brasil General",
-    "description": "Repositório com informações gerais sobre grupos de Rust no Brasil.",
+    "title": "Rust Brasil",
+    "description": "Brazilian Rust community connecting local meetup groups across Belo Horizonte, Floripa, Rio, and São Paulo.",
     "href": "https://github.com/rust-br/general",
     "checkedAt": "2026-06-08"
   },
   {
-    "kind": "Blog",
-    "title": "RustFest Speakers Guide",
-    "description": "A comprehensive guide for speakers at Rust conferences, covering talk preparation, submission, and delivery.",
-    "href": "https://rustfesteu.github.io/speakers-guide/index.html",
-    "checkedAt": "2026-06-08"
+    "kind": "Learning",
+    "title": "Rust Exercises",
+    "description": "Structured Rust curriculum with explanations and hands-on exercises. Covers core language features from basics to async.",
+    "href": "https://rust-exercises.com",
+    "checkedAt": "2026-05-28"
   }
 ]

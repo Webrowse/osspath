@@ -1,6 +1,6 @@
 import rawPulse from "./pulse.json"
 
-export type PulseKind = "Newsletter" | "Forum" | "Blog" | "Community" | "Podcast"
+export type PulseKind = "Newsletter" | "Forum" | "Blog" | "Community" | "Podcast" | "Learning"
 
 export type PulseItem = {
   kind: PulseKind
