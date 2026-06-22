@@ -1227,11 +1227,167 @@ const GH_HEADERS = {
   ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
 }
 
+const RUST_BYTES_FEED = "https://weeklyrust.substack.com/feed"
+
 async function ghFetch(url: string): Promise<unknown> {
   const res = await fetch(url, { headers: GH_HEADERS, signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } })
   if (res.status === 403) throw new Error("GitHub rate-limited (403). Set GITHUB_TOKEN in .env.local.")
   if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`)
   return res.json()
+}
+
+// ── Rust Bytes newsletter scanner ─────────────────────────────────────────────
+
+/** Extract unique github.com/{owner}/{repo} URLs from raw HTML, normalised to base URL. */
+function extractGitHubRepoUrls(html: string): string[] {
+  const seen = new Set<string>()
+  const re = /https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/g
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html)) !== null) {
+    const [, owner, repo] = m
+    // skip .github org config repos, and common non-code paths
+    if (repo === ".github" || owner === "topics" || owner === "trending") continue
+    seen.add(`https://github.com/${owner}/${repo}`)
+  }
+  return [...seen]
+}
+
+/** Fetch and parse the Rust Bytes RSS feed. Returns last `limit` issue item links. */
+async function fetchRustBytesIssues(limit = 10): Promise<Array<{ link: string; html: string; guid: string }>> {
+  try {
+    const res = await fetch(RUST_BYTES_FEED, {
+      signal: AbortSignal.timeout(20_000),
+      headers: { "User-Agent": "osspath.com/scanner" },
+      next: { revalidate: 0 },
+    })
+    if (!res.ok) throw new Error(`Feed HTTP ${res.status}`)
+    const xml = await res.text()
+
+    const items: Array<{ link: string; html: string; guid: string }> = []
+    // Extract <item> blocks
+    const itemRe = /<item>([\s\S]*?)<\/item>/g
+    let im: RegExpExecArray | null
+    while ((im = itemRe.exec(xml)) !== null && items.length < limit) {
+      const block = im[1]
+      const link  = (block.match(/<link>(.*?)<\/link>/) ?? [])[1] ?? ""
+      const guid  = (block.match(/<guid[^>]*>(.*?)<\/guid>/) ?? [])[1] ?? link
+      // content:encoded is wrapped in CDATA
+      const cdataM = block.match(/<content:encoded>\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*<\/content:encoded>/)
+      const html   = cdataM ? cdataM[1] : block
+      if (link) items.push({ link, html, guid })
+    }
+    return items
+  } catch {
+    return []
+  }
+}
+
+export async function scanRustBytes(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "rust-bytes",
+    startedAt: new Date().toISOString(),
+    found: 0,
+    added: 0,
+    skipped: 0,
+    errors: [],
+    stages: {},
+    notes: [],
+  }
+
+  // ── 1. Fetch feed ──────────────────────────────────────────────────────────
+  const issues = await fetchRustBytesIssues(10)
+  log.stages!.issues = issues.length
+  if (issues.length === 0) {
+    log.errors.push("Could not fetch Rust Bytes feed — check network or URL")
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+  log.notes!.push(`Parsed ${issues.length} issues from feed`)
+
+  // ── 2. Build dedup sets ────────────────────────────────────────────────────
+  const existingHrefs = new Set<string>()
+  const existingIds   = new Set<string>()
+  try {
+    for (const item of readPending("oss")) {
+      existingIds.add(item.id)
+      if (item.sourceUrl) existingHrefs.add(item.sourceUrl)
+    }
+    for (const item of readContent("oss")) {
+      const h = String(item.href ?? "")
+      if (h) existingHrefs.add(h)
+    }
+  } catch { /* non-fatal */ }
+
+  // ── 3. Extract unique GitHub repo URLs across all issues ──────────────────
+  const repoUrls = new Set<string>()
+  for (const issue of issues) {
+    for (const url of extractGitHubRepoUrls(issue.html)) {
+      repoUrls.add(url)
+    }
+  }
+  log.stages!.repoUrlsExtracted = repoUrls.size
+  log.found = repoUrls.size
+
+  // ── 4. Fetch GitHub API and filter to Rust repos ──────────────────────────
+  const toQueue: PendingItem[] = []
+  let dupCount = 0
+  let nonRustCount = 0
+  let fetchErrors = 0
+
+  for (const repoUrl of repoUrls) {
+    // Skip already-known repos
+    if (existingHrefs.has(repoUrl)) { dupCount++; continue }
+
+    const match = repoUrl.match(/github\.com\/([^/]+)\/([^/]+)$/)
+    if (!match) continue
+    const [, owner, repo] = match
+
+    let ghData: any
+    try {
+      ghData = await ghFetch(`https://api.github.com/repos/${owner}/${repo}`)
+      await sleep(400) // stay well under unauthenticated rate limit (60 req/hr)
+    } catch {
+      fetchErrors++
+      continue
+    }
+
+    // Only queue Rust repos
+    if (ghData.language !== "Rust") { nonRustCount++; continue }
+    if (ghData.archived || ghData.disabled) { nonRustCount++; continue }
+    if (ghData.size === 0) { nonRustCount++; continue }
+
+    const id = `gh-${ghData.id}`
+    if (existingIds.has(id)) { dupCount++; continue }
+
+    const mapped = mapRepoResponse(ghData)
+    const tier   = ossActivityTier(mapped.pushed_at)
+    const stars  = mapped.stargazers_count
+
+    toQueue.push({
+      id,
+      type:       "oss",
+      status:     "pending",
+      source:     "rust-bytes",
+      sourceUrl:  repoUrl,
+      foundAt:    new Date().toISOString(),
+      confidence: 0.85,
+      whyMatched: `rust-bytes · ${tier} · ★${stars}`,
+      rawText:    `${ghData.full_name}: ${ghData.description ?? ""}`,
+      extracted:  buildOSSExtracted(mapped),
+    })
+  }
+
+  // ── 5. Queue ───────────────────────────────────────────────────────────────
+  log.added   = addPendingItems("oss", toQueue)
+  log.skipped = dupCount + nonRustCount + fetchErrors
+  log.stages!.queued     = toQueue.length
+  log.stages!.duplicates = dupCount
+  log.stages!.nonRust    = nonRustCount
+  if (fetchErrors > 0) log.errors.push(`${fetchErrors} GitHub API fetch errors`)
+  log.notes!.push(`${repoUrls.size} GitHub URLs found → ${toQueue.length} Rust repos → ${log.added} new`)
+  log.finishedAt = new Date().toISOString()
+  return log
 }
 
 function mapRepoResponse(r: any): RepoInput {

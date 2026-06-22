@@ -38,10 +38,38 @@ export function writePending(type: ContentType, items: PendingItem[]) {
   writeJSON(`data/pending/${CONTENT_FILES[type]}.json`, items)
 }
 
+/** Build a set of hrefs already in published content — used for dedup. */
+function publishedHrefs(type: ContentType): Set<string> {
+  const content = readJSON<Record<string, unknown>>(`content/${CONTENT_FILES[type]}.json`)
+  const hrefs = new Set<string>()
+  for (const item of content) {
+    const h = String(item.href ?? "")
+    if (h) hrefs.add(h)
+  }
+  return hrefs
+}
+
+/** Returns pending items that are NOT already published, for queue display. */
+export function readPendingUnpublished(type: ContentType): PendingItem[] {
+  const all = readPending(type)
+  const published = publishedHrefs(type)
+  return all.filter((item) => {
+    const srcUrl = item.sourceUrl ?? ""
+    const extHref = String((item.extracted as Record<string, unknown>)?.href ?? "")
+    return !published.has(srcUrl) && !published.has(extHref)
+  })
+}
+
 export function addPendingItems(type: ContentType, newItems: PendingItem[]) {
   const existing = readPending(type)
   const existingIds = new Set(existing.map((i) => i.id))
-  const unique = newItems.filter((i) => !existingIds.has(i.id))
+  const published = publishedHrefs(type)
+  const unique = newItems.filter((i) => {
+    if (existingIds.has(i.id)) return false
+    const srcUrl = i.sourceUrl ?? ""
+    const extHref = String((i.extracted as Record<string, unknown>)?.href ?? "")
+    return !published.has(srcUrl) && !published.has(extHref)
+  })
   writePending(type, [...existing, ...unique])
   return unique.length
 }
@@ -83,7 +111,7 @@ const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "c
 
 export function getPendingCounts(): Record<ContentType, number> {
   return Object.fromEntries(
-    ALL_TYPES.map((t) => [t, readPending(t).length])
+    ALL_TYPES.map((t) => [t, readPendingUnpublished(t).length])
   ) as Record<ContentType, number>
 }
 

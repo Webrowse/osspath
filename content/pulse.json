@@ -1,6 +1,13 @@
 [
   {
     "kind": "Newsletter",
+    "title": "Rust Bytes",
+    "description": "Bi-weekly digest covering ecosystem announcements, new crates, company adoption, and one highlighted open-source project. 2,000+ subscribers.",
+    "href": "https://weeklyrust.substack.com/",
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "kind": "Newsletter",
     "title": "This Week in Rust",
     "description": "Community-edited weekly digest. Covers crates, blog posts, RFC updates, and job listings. Published every Tuesday without fail.",
     "href": "https://this-week-in-rust.org",
@@ -75,5 +82,26 @@
     "description": "Structured Rust curriculum with explanations and hands-on exercises. Covers core language features from basics to async.",
     "href": "https://rust-exercises.com",
     "checkedAt": "2026-05-28"
+  },
+  {
+    "kind": "Learning",
+    "title": "Essays by dtolnay",
+    "description": "Four deep-dive essays by the author of serde, syn, anyhow, and thiserror. Covers async/await pitfalls, reference mental models, soundness bugs in safe code, and scaling triage for open source teams.",
+    "href": "https://docs.rs/dtolnay/latest/dtolnay/",
+    "checkedAt": "2026-06-22"
+  },
+  {
+    "kind": "Community",
+    "title": "awesome-rust-mentors",
+    "description": "A list of Rust language mentors tagged by topics of interest.",
+    "href": "https://rustbeginners.github.io/awesome-rust-mentors/",
+    "checkedAt": "2026-06-22"
+  },
+  {
+    "kind": "Community",
+    "title": "eu-uso-rust",
+    "description": "Repositório de empresas e projetos brasileiros que usam Rust.",
+    "href": "https://github.com/rust-br/eu-uso-rust",
+    "checkedAt": "2026-06-22"
   }
 ]

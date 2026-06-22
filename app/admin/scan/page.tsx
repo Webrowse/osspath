@@ -1,5 +1,6 @@
 import { ScannerPanel } from "@/components/admin/scanner-panel"
 import { ManualAddForm } from "@/components/admin/manual-add-form"
+import { MaintenancePanel } from "@/components/admin/maintenance-panel"
 
 export default function ScanPage() {
   return (
@@ -22,6 +23,12 @@ export default function ScanPage() {
             title="GitHub OSS"
             description="Good-first-issues, help-wanted, star-range queries, and 12 org scans (tokio-rs, embassy-rs, bevyengine, etc.). All repos classified by DeepSeek."
             source="github-oss"
+          />
+          <ScannerPanel
+            id="rust-bytes"
+            title="Rust Bytes Newsletter"
+            description="Parses the last 10 issues of the Rust Bytes bi-weekly newsletter (weeklyrust.substack.com). Extracts GitHub repo URLs, verifies each via GitHub API, and queues Rust repos with high confidence (0.85 — human-curated signal)."
+            source="rust-bytes"
           />
           <ScannerPanel
             id="grants"
@@ -53,6 +60,7 @@ export default function ScanPage() {
             description="Finds GitHub organizations with multiple high-star Rust repos. Groups repos by owning org, fetches org details, and uses DeepSeek to classify sector and extract company website."
             source="github-orgs"
           />
+          <MaintenancePanel />
         </div>
 
         <div style={{ marginTop: 24 }}>

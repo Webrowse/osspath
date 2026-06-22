@@ -523,6 +523,8 @@ function promoteAllPending() {
     promoted.push({ ...ext, checkedAt: ext.checkedAt ?? TODAY })
   }
   console.log(`Promoted ${promoted.length} items from pending to content (${pending.length - promoted.length} dupes dropped)`)
+  // Clear pending now that everything is in content
+  if (!DRY_RUN) writeJSON(PENDING_FILE, [])
   return promoted
 }
 

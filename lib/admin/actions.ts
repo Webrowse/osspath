@@ -256,6 +256,38 @@ export async function updatePublished(
   revalidatePath("/")
 }
 
+// ── Index maintenance ─────────────────────────────────────────────────────────
+
+export async function rebuildSearchIndex(): Promise<string> {
+  await requireAdmin()
+  const { execFile } = await import("child_process")
+  const { promisify } = await import("util")
+  const { join } = await import("path")
+  const exec = promisify(execFile)
+  const script = join(process.cwd(), "scripts", "build-search-index.mjs")
+  const { stdout, stderr } = await exec(process.execPath, [script], {
+    cwd: process.cwd(),
+    timeout: 60_000,
+    env: process.env as NodeJS.ProcessEnv,
+  })
+  return (stdout + stderr).trim()
+}
+
+export async function enrichNewRepos(): Promise<string> {
+  await requireAdmin()
+  const { execFile } = await import("child_process")
+  const { promisify } = await import("util")
+  const { join } = await import("path")
+  const exec = promisify(execFile)
+  const script = join(process.cwd(), "scripts", "enrich-oss-deps.mjs")
+  const { stdout, stderr } = await exec(process.execPath, [script], {
+    cwd: process.cwd(),
+    timeout: 600_000,  // up to 10 min for a large batch
+    env: process.env as NodeJS.ProcessEnv,
+  })
+  return (stdout + stderr).trim()
+}
+
 // ── Update pending item (pre-approve edit) ────────────────────────────────────
 
 export async function updatePendingItem(

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { readPending } from "@/lib/admin/storage"
+import { readPendingUnpublished } from "@/lib/admin/storage"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import type { ContentType } from "@/lib/admin/types"
 import { QueueCard } from "@/components/admin/queue-card"
@@ -14,10 +14,10 @@ interface PageProps {
 export default async function QueuePage({ searchParams }: PageProps) {
   const { type = "jobs" } = await searchParams
   const activeType = (TABS.includes(type as ContentType) ? type : "jobs") as ContentType
-  const items = readPending(activeType)
+  const items = readPendingUnpublished(activeType)
 
   const tabCounts = Object.fromEntries(
-    TABS.map((t) => [t, readPending(t).length])
+    TABS.map((t) => [t, readPendingUnpublished(t).length])
   )
 
   return (

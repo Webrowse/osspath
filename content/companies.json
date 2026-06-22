@@ -270,7 +270,8 @@
     "sector": "Developer Tools",
     "href": "https://starship.rs",
     "github_org": "starship",
-    "description": "Minimal, fast, and customizable shell prompt written in Rust. Runs on any shell and any operating system; used by hundreds of thousands of developers."
+    "description": "Minimal, fast, and customizable shell prompt written in Rust. Runs on any shell and any operating system; used by hundreds of thousands of developers.",
+    "checkedAt": "2026-06-23"
   },
   {
     "name": "Meilisearch",
@@ -408,7 +409,10 @@
     "href": "https://datadoghq.com",
     "github_org": "datadog",
     "description": "Cloud monitoring, security, and analytics platform. Acquired Quickwit (Rust distributed search) in January 2025 to accelerate their distributed logging infrastructure.",
-    "ecosystems": ["database", "grpc"]
+    "ecosystems": [
+      "database",
+      "grpc"
+    ]
   },
   {
     "name": "Anthropic",
@@ -418,7 +422,9 @@
     "href": "https://anthropic.com",
     "github_org": "anthropic-ai",
     "description": "AI safety company and maker of Claude. Acquired Bun (Oven-sh JavaScript runtime) in December 2025. The Bun runtime is undergoing a Zig-to-Rust rewrite as of 2026.",
-    "ecosystems": ["ai"]
+    "ecosystems": [
+      "ai"
+    ]
   },
   {
     "name": "Hyperium",
@@ -428,7 +434,10 @@
     "href": "https://hyper.rs",
     "github_org": "hyperium",
     "description": "hyper, h2, http, and h3 — the HTTP primitive layer underlying axum, reqwest, and most of the Rust HTTP ecosystem. Referenced by four corpus funding programs.",
-    "ecosystems": ["axum", "grpc"]
+    "ecosystems": [
+      "axum",
+      "grpc"
+    ]
   },
   {
     "name": "Embassy",
@@ -438,7 +447,9 @@
     "href": "https://embassy.dev",
     "github_org": "embassy-rs",
     "description": "Async embedded Rust framework enabling async/await on microcontrollers. The dominant async embedded project in the corpus. NGI Zero funded.",
-    "ecosystems": ["embedded"]
+    "ecosystems": [
+      "embedded"
+    ]
   },
   {
     "name": "Actix",
@@ -448,7 +459,10 @@
     "href": "https://actix.rs",
     "github_org": "actix",
     "description": "actix-web — the most downloaded Rust web framework, consistently topping TechEmpower performance benchmarks. Community-maintained with no corporate parent.",
-    "ecosystems": ["axum", "grpc"]
+    "ecosystems": [
+      "axum",
+      "grpc"
+    ]
   },
   {
     "name": "gfx-rs",
@@ -458,7 +472,10 @@
     "href": "https://wgpu.rs",
     "github_org": "gfx-rs",
     "description": "wgpu — cross-platform GPU API implementing WebGPU in Rust. The rendering backend used by Bevy, Dioxus, Iced, and Zed.",
-    "ecosystems": ["wasm", "bevy"]
+    "ecosystems": [
+      "wasm",
+      "bevy"
+    ]
   },
   {
     "name": "probe-rs",
@@ -468,7 +485,9 @@
     "href": "https://probe.rs",
     "github_org": "probe-rs",
     "description": "Embedded debugging and flashing toolkit for Rust. NGI Zero funded; referenced in nlnet-ngi-zero funding records for embedded Rust toolchain support.",
-    "ecosystems": ["embedded"]
+    "ecosystems": [
+      "embedded"
+    ]
   },
   {
     "name": "Helix",
@@ -478,7 +497,9 @@
     "href": "https://helix-editor.com",
     "github_org": "helix-editor",
     "description": "Post-modern modal text editor written entirely in Rust. Tree-sitter and LSP native from the ground up. Community-maintained with 44k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Zellij",
@@ -488,7 +509,9 @@
     "href": "https://zellij.dev",
     "github_org": "zellij-org",
     "description": "Terminal workspace and multiplexer written in Rust with a WASM plugin system enabling arbitrary language plugins. Community-maintained with 33k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "PyO3",
@@ -498,7 +521,9 @@
     "href": "https://pyo3.rs",
     "github_org": "pyo3",
     "description": "pyo3 and maturin — the standard Python↔Rust interoperability toolkit. Used by Polars, HuggingFace tokenizers, orjson, and hundreds of Rust libraries exposing Python bindings.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Yew",
@@ -508,7 +533,9 @@
     "href": "https://yew.rs",
     "github_org": "yewstack",
     "description": "React-inspired frontend framework for building web applications in Rust compiled to WebAssembly. One of the oldest and most mature Rust WASM UI frameworks.",
-    "ecosystems": ["wasm"]
+    "ecosystems": [
+      "wasm"
+    ]
   },
   {
     "name": "Iced",
@@ -518,7 +545,10 @@
     "href": "https://iced.rs",
     "github_org": "iced-rs",
     "description": "Elm-inspired cross-platform GUI library for Rust. Runs natively on desktop and in the browser via WASM. 30k+ stars.",
-    "ecosystems": ["cli", "wasm"]
+    "ecosystems": [
+      "cli",
+      "wasm"
+    ]
   },
   {
     "name": "Ratatui",
@@ -528,7 +558,9 @@
     "href": "https://ratatui.rs",
     "github_org": "ratatui",
     "description": "Terminal UI library forked from tui-rs. The de facto toolkit for building TUI applications in Rust. 22k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "uutils",
@@ -538,7 +570,9 @@
     "href": "https://uutils.github.io",
     "github_org": "uutils",
     "description": "Cross-platform GNU coreutils rewrite in Rust. Drop-in replacement for ls, cp, cat, and 100+ other core utilities on macOS, Linux, and Windows. 24k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Leptos",
@@ -548,7 +582,10 @@
     "href": "https://leptos.dev",
     "github_org": "leptos-rs",
     "description": "Reactive fullstack Rust web framework with SSR and WASM hydration. Uses axum as the server backend. 20k+ stars.",
-    "ecosystems": ["wasm", "axum"]
+    "ecosystems": [
+      "wasm",
+      "axum"
+    ]
   },
   {
     "name": "Pocket",
@@ -557,7 +594,10 @@
     "sector": "Desktop Applications / Hardware",
     "href": "https://www.ycombinator.com/companies/pocket",
     "description": "YC W26 company building personal hardware devices with Tauri desktop applications. Shipped 30,000+ units. Rust backend powers Tauri plugins, system commands, and hardware integration.",
-    "ecosystems": ["tauri", "cli"]
+    "ecosystems": [
+      "tauri",
+      "cli"
+    ]
   },
   {
     "name": "Wasmer",
@@ -567,7 +607,9 @@
     "href": "https://wasmer.io",
     "github_org": "wasmerio",
     "description": "Builds the leading standalone WebAssembly runtime in Rust. wasmer (20k+ stars) supports LLVM, Cranelift, and Singlepass backends and runs Wasm in servers, edge, and embedded contexts.",
-    "ecosystems": ["wasm"]
+    "ecosystems": [
+      "wasm"
+    ]
   },
   {
     "name": "Typst",
@@ -577,7 +619,9 @@
     "href": "https://typst.app",
     "github_org": "typst",
     "description": "Modern typesetting system written entirely in Rust, positioned as a LaTeX alternative. typst (54k+ stars) compiles to PDF with a live-preview workflow. Berlin-based.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Tracel AI",
@@ -587,7 +631,9 @@
     "href": "https://tracel.ai",
     "github_org": "tracel-ai",
     "description": "Builds Burn, the Rust-native deep learning framework (15k+ stars), and cubecl, a unified compute language for GPU programming in Rust. Focused on training and inference performance.",
-    "ecosystems": ["ai"]
+    "ecosystems": [
+      "ai"
+    ]
   },
   {
     "name": "smol async",
@@ -597,7 +643,9 @@
     "href": "https://github.com/smol-rs",
     "github_org": "smol-rs",
     "description": "23 async primitive crates forming an alternative async runtime ecosystem outside Tokio: async-channel, polling, async-io, async-task, async-std, and more.",
-    "ecosystems": ["tokio"]
+    "ecosystems": [
+      "tokio"
+    ]
   },
   {
     "name": "Rust CLI WG",
@@ -607,7 +655,9 @@
     "href": "https://rust-cli.github.io",
     "github_org": "rust-cli",
     "description": "Rust CLI working group. Maintains config-rs, human-panic, env_logger, confy, and 8 more CLI utility crates used across the Rust ecosystem.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "libp2p",
@@ -617,7 +667,9 @@
     "href": "https://libp2p.io",
     "github_org": "libp2p",
     "description": "Modular P2P networking stack in Rust. Used by IPFS, Ethereum clients, Polkadot, and other decentralized protocol implementations.",
-    "ecosystems": ["grpc"]
+    "ecosystems": [
+      "grpc"
+    ]
   },
   {
     "name": "Serde",
@@ -627,7 +679,9 @@
     "href": "https://serde.rs",
     "github_org": "serde-rs",
     "description": "serde and serde_json — the universal serialization framework used by virtually every Rust project in the corpus. serde_json is the most downloaded Rust crate on crates.io.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Diesel",
@@ -637,7 +691,9 @@
     "href": "https://diesel.rs",
     "github_org": "diesel-rs",
     "description": "Diesel ORM — safe, extensible query builder and ORM for Rust. The primary Rust ORM used in production database applications. 14k+ stars.",
-    "ecosystems": ["database"]
+    "ecosystems": [
+      "database"
+    ]
   },
   {
     "name": "Rayon",
@@ -647,7 +703,9 @@
     "href": "https://github.com/rayon-rs/rayon",
     "github_org": "rayon-rs",
     "description": "Data-parallelism library for Rust. The standard parallel iterator library used by Polars, ripgrep, and most performance-critical Rust tools. 13k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "Clap",
@@ -657,7 +715,9 @@
     "href": "https://docs.rs/clap",
     "github_org": "clap-rs",
     "description": "Command-line argument parser for Rust. The most widely used Rust CLI argument parsing library by download count. 16k+ stars.",
-    "ecosystems": ["cli"]
+    "ecosystems": [
+      "cli"
+    ]
   },
   {
     "name": "wasm-bindgen",
@@ -667,7 +727,9 @@
     "href": "https://rustwasm.github.io/wasm-bindgen",
     "github_org": "rustwasm",
     "description": "JS↔Rust WASM interop glue layer. Required by virtually every Rust-to-WASM project targeting the browser. Maintained by the rustwasm working group.",
-    "ecosystems": ["wasm"]
+    "ecosystems": [
+      "wasm"
+    ]
   },
   {
     "name": "RustCrypto",
@@ -704,7 +766,9 @@
     "href": "https://github.com/esp-rs",
     "github_org": "esp-rs",
     "description": "Community organization maintaining Rust support for Espressif chips (ESP32, ESP32-S3, ESP32-C3). Covers bare-metal and ESP-IDF-based HAL crates, toolchain support, and no_std training materials. NLnet NGI Zero funded.",
-    "ecosystems": ["embedded"]
+    "ecosystems": [
+      "embedded"
+    ]
   },
   {
     "name": "Paradigm",
@@ -714,7 +778,9 @@
     "href": "https://www.paradigm.xyz",
     "github_org": "paradigmxyz",
     "description": "Crypto research and investment firm behind Reth, the modular Ethereum execution client written in Rust. Also the origin of Foundry (foundry-rs) and Alloy (alloy-rs), making Paradigm the largest single contributor to Rust Ethereum tooling.",
-    "ecosystems": ["blockchain"]
+    "ecosystems": [
+      "blockchain"
+    ]
   },
   {
     "name": "Matrix.org",
@@ -724,5 +790,29 @@
     "href": "https://matrix.org",
     "github_org": "matrix-org",
     "description": "Open standard and reference implementations for decentralized, real-time communication. matrix-rust-sdk is the Rust client library underpinning Element X and other Matrix clients. Funded by NLnet NGI Commons and the Sovereign Tech Fund."
+  },
+  {
+    "name": "Ultraworkers",
+    "sector": "Gaming",
+    "href": "https://discord.gg/6ztZB9jvWq",
+    "checkedAt": "2026-06-22"
+  },
+  {
+    "name": "The Rust Programming Language",
+    "sector": "Programming Language",
+    "href": "https://www.rust-lang.org",
+    "checkedAt": "2026-06-22"
+  },
+  {
+    "name": "rtk-ai",
+    "sector": "Developer Tools",
+    "href": "https://www.rtk-ai.app",
+    "checkedAt": "2026-06-22"
+  },
+  {
+    "name": "Open Interpreter",
+    "sector": "AI",
+    "href": "https://www.openinterpreter.com",
+    "checkedAt": "2026-06-22"
   }
 ]

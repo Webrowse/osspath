@@ -55,8 +55,10 @@ function checkDate(ctx: string, field: string, value?: string) {
     err(ctx, `Invalid date for ${field}: ${value}`)
     return
   }
-  if (field === "checkedAt" && d > new Date()) {
-    err(ctx, `checkedAt is in the future: ${value}`)
+  if (field === "checkedAt") {
+    const now = new Date()
+    const localToday = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+    if (value > localToday) err(ctx, `checkedAt is in the future: ${value}`)
   }
 }
 
@@ -108,8 +110,9 @@ for (const repo of OSS_PATHS) {
   checkUrl(ctx, repo.href)
   checkDate(ctx, "checkedAt", repo.checkedAt)
   checkStale(ctx, "oss", repo.checkedAt)
-  if (ossKeys.has(repo.name)) err(ctx, "Duplicate entry")
-  ossKeys.add(repo.name)
+  const ossKey = repo.href || repo.name
+  if (ossKeys.has(ossKey)) err(ctx, "Duplicate entry")
+  ossKeys.add(ossKey)
 }
 if (errors === 0 && warnings === 0) console.log("  All OSS paths OK")
 
@@ -131,14 +134,17 @@ if (errors === 0 && warnings === 0) console.log("  All grants OK")
 // ── Validate pulse ────────────────────────────────────────────────────────────
 
 console.log("\nPulse:")
-const pulseKeys = new Set<string>()
+const pulseTitles = new Set<string>()
+const pulseHrefs = new Set<string>()
 for (const item of PULSE) {
   const ctx = item.title
   checkUrl(ctx, item.href)
   checkDate(ctx, "checkedAt", item.checkedAt)
   checkStale(ctx, "pulse", item.checkedAt)
-  if (pulseKeys.has(item.title)) err(ctx, "Duplicate entry")
-  pulseKeys.add(item.title)
+  if (pulseTitles.has(item.title)) err(ctx, "Duplicate title")
+  if (pulseHrefs.has(item.href)) err(ctx, "Duplicate href — same URL as another entry")
+  pulseTitles.add(item.title)
+  pulseHrefs.add(item.href)
 }
 if (errors === 0 && warnings === 0) console.log("  All pulse items OK")
 
