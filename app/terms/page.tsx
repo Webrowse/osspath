@@ -3,7 +3,7 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 
 export const metadata: Metadata = {
   title: "Terms of Service",
-  description: "Terms of service for jobs.adarshrust.com.",
+  description: "Terms of service for osspath.com.",
 }
 
 export default function TermsPage() {
@@ -17,7 +17,7 @@ export default function TermsPage() {
           </h1>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 640 }}>
             <p style={{ fontSize: 14, color: "var(--e-fg-dim)", lineHeight: 1.7 }}>
-              By using jobs.adarshrust.com, you agree to use it for personal and research purposes only.
+              By using osspath.com, you agree to use it for personal and research purposes only.
             </p>
             <p style={{ fontSize: 14, color: "var(--e-fg-dim)", lineHeight: 1.7 }}>
               This is a free tool provided as-is, without warranty of any kind.

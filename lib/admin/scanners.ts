@@ -760,7 +760,7 @@ export async function scanGrants(): Promise<ScanLog> {
     try {
       const res = await fetch(pageUrl, {
         signal: AbortSignal.timeout(15_000),
-        headers: { "User-Agent": "jobs.adarshrust.com/scanner" },
+        headers: { "User-Agent": "osspath.com/scanner" },
         next: { revalidate: 0 },
       })
       const html = await res.text()
@@ -1223,7 +1223,7 @@ const RUST_ORGS = [
 
 const GH_HEADERS = {
   Accept: "application/vnd.github.v3+json",
-  "User-Agent": "jobs.adarshrust.com/scanner",
+  "User-Agent": "osspath.com/scanner",
   ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
 }
 

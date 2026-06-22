@@ -5,21 +5,21 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 export const metadata: Metadata = {
   title: "Methodology",
   description:
-    "How Rust Atlas is built, curated, reviewed, and maintained. Inclusion criteria, data sources, ecosystem classification, and correction process.",
+    "How OSSPath is built, curated, reviewed, and maintained. Inclusion criteria, data sources, ecosystem classification, and correction process.",
   alternates: { canonical: "/methodology" },
   openGraph: {
-    title: "Methodology — Rust Atlas",
+    title: "Methodology — OSSPath",
     description:
-      "How Rust Atlas is built, curated, reviewed, and maintained. Inclusion criteria, data sources, ecosystem classification, and correction process.",
+      "How OSSPath is built, curated, reviewed, and maintained. Inclusion criteria, data sources, ecosystem classification, and correction process.",
     url: "/methodology",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Methodology — Rust Atlas",
+    title: "Methodology — OSSPath",
     description:
-      "How Rust Atlas is built, curated, reviewed, and maintained.",
+      "How OSSPath is built, curated, reviewed, and maintained.",
     images: ["/opengraph-image"],
   },
 }
@@ -113,10 +113,10 @@ export default function MethodologyPage() {
           <div style={{ marginBottom: 40 }}>
             <div className="e-section__num">Methodology</div>
             <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>
-              How Rust Atlas is built
+              How OSSPath is built
             </h1>
             <p style={{ ...prose, marginTop: 16 }}>
-              Everything in Rust Atlas was added by a human. This page explains what that
+              Everything in OSSPath was added by a human. This page explains what that
               means in practice — what gets included, how it gets classified, how often it
               is re-verified, and how to report a mistake.
             </p>
@@ -249,7 +249,7 @@ export default function MethodologyPage() {
           <div style={sectionDiv}>
             <div style={label}>Entity types</div>
             <p style={{ ...prose, marginBottom: 20 }}>
-              Rust Atlas currently tracks seven entity types. Each has its own archive page,
+              OSSPath currently tracks seven entity types. Each has its own archive page,
               inclusion criteria, and review cadence.
             </p>
 

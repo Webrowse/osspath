@@ -62,7 +62,7 @@ export default function OgImage() {
           display: "flex",
         }}
       >
-        jobs.adarshrust.com
+        osspath.com
       </div>
 
       {/* Headline */}

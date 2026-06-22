@@ -48,7 +48,7 @@ export function EditorialMobileMenu({ links }: { links: NavLink[] }) {
           <div className="e-drawer__head">
             <span className="e-nav__brand">
               <span className="e-nav__mark" />
-              <span>rust atlas</span>
+              <span>osspath</span>
             </span>
             <button className="e-drawer__close" aria-label="Close menu" onClick={() => setOpen(false)}>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">

@@ -38,7 +38,7 @@ const TOKEN   = process.env.GITHUB_TOKEN
 
 const HEADERS = {
   Accept: "application/vnd.github.v3+json",
-  "User-Agent": "jobs.adarshrust.com/backfill",
+  "User-Agent": "osspath.com/backfill",
   ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
 }
 

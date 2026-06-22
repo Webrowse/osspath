@@ -158,7 +158,7 @@ const PAGES = [
   { title: "Community",     sub: "Pulse — forums and blogs",href: "/pulse" },
   { title: "Events",        sub: "Conferences and meetups", href: "/events" },
   { title: "Job Boards",    sub: "Where to find Rust jobs", href: "/portals" },
-  { title: "About",         sub: "About Rust Atlas",        href: "/about" },
+  { title: "About",         sub: "About OSSPath",           href: "/about" },
   { title: "Methodology",   sub: "How entries are curated", href: "/methodology" },
   { title: "Contact",       sub: "Report a correction",     href: "/contact" },
 ]

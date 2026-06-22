@@ -1,4 +1,4 @@
-# Contributing to Rust Atlas
+# Contributing to OSSPath
 
 This site is manually curated. It stays useful by staying small.
 

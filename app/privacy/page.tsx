@@ -4,7 +4,7 @@ import { CONTACT_EMAIL } from "@/lib/site-config"
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
-  description: "Privacy policy for Rust Atlas — what data we collect and how it is used.",
+  description: "Privacy policy for OSSPath — what data we collect and how it is used.",
 }
 
 export default function PrivacyPage() {
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
             maxWidth: "58ch",
           }}>
             <p>
-              Rust Atlas is a public directory. No account or login is required to browse
+              OSSPath is a public directory. No account or login is required to browse
               the site. We do not collect names, email addresses, or any personally
               identifiable information from visitors.
             </p>

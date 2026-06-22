@@ -5,21 +5,21 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 export const metadata: Metadata = {
   title: "About",
   description:
-    "What Rust Atlas is, what's here, and how it's curated. A map of the Rust ecosystem — jobs, repos, funding, organizations, and community signals.",
+    "What OSSPath is, what's here, and how it's curated. A map of the Rust ecosystem — jobs, repos, funding, organizations, and community signals.",
   alternates: { canonical: "/about" },
   openGraph: {
-    title: "About — Rust Atlas",
+    title: "About — OSSPath",
     description:
-      "What Rust Atlas is, what's here, and how it's curated. A map of the Rust ecosystem — jobs, repos, funding, organizations, and community signals.",
+      "What OSSPath is, what's here, and how it's curated. A map of the Rust ecosystem — jobs, repos, funding, organizations, and community signals.",
     url: "/about",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "About — Rust Atlas",
+    title: "About — OSSPath",
     description:
-      "What Rust Atlas is, what's here, and how it's curated.",
+      "What OSSPath is, what's here, and how it's curated.",
     images: ["/opengraph-image"],
   },
 }
@@ -66,7 +66,7 @@ export default function AboutPage() {
           <div style={{ marginBottom: 40 }}>
             <div className="e-section__num">About</div>
             <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>
-              What is Rust Atlas
+              What is OSSPath
             </h1>
             <p style={{ ...prose, marginTop: 16 }}>
               A map of the Rust ecosystem. Not a comprehensive index — a curated one. Jobs,
@@ -130,7 +130,7 @@ export default function AboutPage() {
 
           {/* What it is not */}
           <div style={section}>
-            <div style={label}>What Rust Atlas is not</div>
+            <div style={label}>What OSSPath is not</div>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 "Not a job board aggregator. There is no automated scraping. Jobs are listed one at a time.",

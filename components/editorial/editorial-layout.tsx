@@ -14,9 +14,9 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
     <div className="editorial-root">
       <header className="e-nav">
         <div className="e-col e-col--wide e-nav__inner">
-          <Link href="/" className="e-nav__brand" aria-label="Rust Atlas — home">
+          <Link href="/" className="e-nav__brand" aria-label="OSSPath — home">
             <span className="e-nav__mark" />
-            <span>rust atlas</span>
+            <span>osspath</span>
           </Link>
 
           {/* Desktop nav links — client component for active-state highlighting */}
@@ -43,7 +43,7 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
         <div className="e-col e-col--wide">
           <div className="e-footer__row">
             <div>
-              <div className="e-footer__brand">rust atlas</div>
+              <div className="e-footer__brand">osspath</div>
               <div className="e-footer__tagline">Curated weekly. Quiet by design.</div>
             </div>
           </div>

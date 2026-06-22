@@ -56,7 +56,7 @@ if (!TOKEN) {
 
 const GH_HEADERS = {
   Accept: "application/vnd.github.v3+json",
-  "User-Agent": "jobs.adarshrust.com/oss-deps",
+  "User-Agent": "osspath.com/oss-deps",
   Authorization: `Bearer ${TOKEN}`,
 }
 

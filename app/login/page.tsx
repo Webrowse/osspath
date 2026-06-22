@@ -6,7 +6,7 @@ import type { Metadata } from "next"
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to jobs.adarshrust.com to track your job applications.",
+  description: "Sign in to osspath.com to track your job applications.",
   robots: { index: false, follow: false },
 }
 
@@ -74,7 +74,7 @@ export default async function LoginPage({ searchParams }: PageProps) {
               color: "var(--fg-2)",
             }}
           >
-            jobs.adarshrust
+            osspath
           </span>
         </Link>
         <Link

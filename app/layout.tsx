@@ -29,28 +29,28 @@ const ibmPlexMono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://jobs.adarshrust.com"),
+  metadataBase: new URL("https://osspath.com"),
   title: {
-    default: "Rust Atlas — Rust ecosystem graph",
-    template: "%s | Rust Atlas",
+    default: "OSSPath — Navigate the Rust Ecosystem",
+    template: "%s | OSSPath",
   },
   description:
-    "Curated Rust ecosystem opportunities — remote jobs, repos, funding, and ecosystem signals. Kept short and read by a human first.",
+    "Explore repositories, jobs, organizations, funding programs, and ecosystem relationships across the Rust ecosystem.",
   keywords: ["rust jobs", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering"],
   authors: [{ name: "Adarsh" }],
   openGraph: {
-    title: "Rust Atlas — Rust ecosystem graph",
+    title: "OSSPath — Navigate the Rust Ecosystem",
     description:
-      "Remote jobs, repos, funding, and quiet ecosystem signals — kept short and read by a human first.",
+      "Explore repositories, jobs, organizations, funding programs, and ecosystem relationships across the Rust ecosystem.",
     url: "/",
-    siteName: "Rust Atlas",
+    siteName: "OSSPath",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Rust Atlas",
-    description: "Curated Rust ecosystem paths — jobs, repos, funding, and community signals.",
+    title: "OSSPath",
+    description: "Navigate the Rust ecosystem as a connected graph — jobs, repos, funding, and community signals.",
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },

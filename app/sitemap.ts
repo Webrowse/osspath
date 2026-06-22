@@ -8,7 +8,7 @@ import { FUNDERS } from "@/content/funders"
 import { COMPANIES } from "@/content/companies"
 import { ECO_TAG_ORDER } from "@/lib/eco-tags"
 
-const BASE = "https://jobs.adarshrust.com"
+const BASE = "https://osspath.com"
 
 function staticUrls(): MetadataRoute.Sitemap {
   return [

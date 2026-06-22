@@ -27,7 +27,7 @@ try {
 const TOKEN = process.env.GITHUB_TOKEN
 const GH_HEADERS = {
   Accept: "application/vnd.github.v3+json",
-  "User-Agent": "jobs.adarshrust.com/scanner",
+  "User-Agent": "osspath.com/scanner",
   ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
 }
 

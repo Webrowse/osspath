@@ -98,7 +98,7 @@ function ProductNav({ onEnterApp }) {
             boxShadow:"0 1px 0 oklch(1 0 0 / 0.18) inset"
           }}>j.</div>
           <span style={{color:"var(--fg-0)", fontWeight: 600, fontSize: 13.5, letterSpacing:"-0.01em"}}>
-            jobs.adarshrust
+            osspath
           </span>
         </a>
 
@@ -626,7 +626,7 @@ window.Landing = function Landing({ onEnterApp, onPickCompany }) {  const sample
           display:"flex", alignItems:"center", justifyContent:"space-between",
           fontSize: 12, color:"var(--fg-3)", fontFamily:"var(--font-mono)"
         }}>
-          <span>jobs.adarshrust · built by remote engineers, for remote engineers</span>
+          <span>osspath · built by remote engineers, for remote engineers</span>
           <span>v0.4.2 · 2026.05</span>
         </div>
       </footer>
@@ -737,7 +737,7 @@ function HeroPreview({ onEnter }) {
         <span style={{width:10, height:10, borderRadius:999, background:"oklch(0.72 0.14 155 / 0.7)"}}/>
         <div style={{flex:1, display:"flex", justifyContent:"center"}}>
           <span style={{fontFamily:"var(--font-mono)", fontSize: 11, color:"var(--fg-3)"}}>
-            jobs.adarshrust.com/companies
+            osspath.com/companies
           </span>
         </div>
       </div>
