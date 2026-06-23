@@ -1480,6 +1480,26 @@
 a.e-oss__eco-badge { cursor: pointer; transition: opacity 0.12s; }
 a.e-oss__eco-badge:hover { opacity: 0.75; }
 
+/* Provenance label badges (permanent editorial tags, not ecosystem tags) */
+.e-oss__label-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-family: var(--e-mono);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: lowercase;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.e-oss__label-badge--newsletter-pick {
+  color: #7a5c20;
+  border-color: #c4983a;
+  background: rgba(122, 92, 32, 0.07);
+}
+
 /* Warm open-issues stat (active project with ≥5 issues) */
 .e-oss__stat--issues { color: var(--e-accent); }
 
@@ -2967,3 +2987,5 @@ html[data-e-theme="dark"] .editorial-root .e-oss__eco-badge--blockchain
   { color: #c9a000; border-color: rgba(122, 92, 0, 0.45); background: rgba(122, 92, 0, 0.12); }
 html[data-e-theme="dark"] .editorial-root .e-oss__eco-badge--cli
   { color: #5fb86a; border-color: rgba(46, 122, 58, 0.45); background: rgba(46, 122, 58, 0.12); }
+html[data-e-theme="dark"] .editorial-root .e-oss__label-badge--newsletter-pick
+  { color: #c4983a; border-color: rgba(122, 92, 32, 0.45); background: rgba(122, 92, 32, 0.12); }

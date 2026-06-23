@@ -32,6 +32,7 @@ export type OSSPath = {
   ecosystem?: string[]
   dependencies?: string[]
   depsCheckedAt?: string
+  labels?: string[]
 }
 
 export const OSS_PATHS = rawOSS as OSSPath[]

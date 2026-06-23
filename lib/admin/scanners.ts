@@ -1374,7 +1374,7 @@ export async function scanRustBytes(): Promise<ScanLog> {
       confidence: 0.85,
       whyMatched: `rust-bytes · ${tier} · ★${stars}`,
       rawText:    `${ghData.full_name}: ${ghData.description ?? ""}`,
-      extracted:  buildOSSExtracted(mapped),
+      extracted:  { ...buildOSSExtracted(mapped), labels: ["newsletter-pick"] },
     })
   }
 

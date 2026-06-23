@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "node scripts/enrich-oss-deps.mjs && node scripts/build-search-index.mjs",
+    "prebuild": "node scripts/build-search-index.mjs",
     "build": "next build",
     "dev": "next dev",
     "start": "next start",

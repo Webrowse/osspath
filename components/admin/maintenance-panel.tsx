@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { enrichNewRepos, rebuildSearchIndex } from "@/lib/admin/actions"
+import { enrichNewRepos, getEnrichStatus, rebuildSearchIndex } from "@/lib/admin/actions"
 
 interface ActionState {
   running: boolean
@@ -24,6 +24,7 @@ function useAction(fn: () => Promise<string>) {
 
 export function MaintenancePanel() {
   const enrich  = useAction(enrichNewRepos)
+  const status  = useAction(getEnrichStatus)
   const rebuild = useAction(rebuildSearchIndex)
 
   return (
@@ -41,7 +42,14 @@ export function MaintenancePanel() {
           onClick={enrich.run}
           disabled={enrich.running || rebuild.running}
         >
-          {enrich.running ? "Enriching…" : "Enrich new repos"}
+          {enrich.running ? "Starting…" : "Enrich new repos"}
+        </button>
+        <button
+          className="adm-btn adm-btn--primary"
+          onClick={status.run}
+          disabled={status.running}
+        >
+          {status.running ? "Checking…" : "Check enrich status"}
         </button>
         <button
           className="adm-btn adm-btn--primary"
@@ -66,6 +74,14 @@ export function MaintenancePanel() {
       {rebuild.error && (
         <div className="adm-log" style={{ borderColor: "oklch(0.66 0.18 22 / 0.5)", whiteSpace: "pre-wrap" }}>
           {rebuild.error}
+        </div>
+      )}
+      {status.output && (
+        <div className="adm-log" style={{ whiteSpace: "pre-wrap" }}>{status.output}</div>
+      )}
+      {status.error && (
+        <div className="adm-log" style={{ borderColor: "oklch(0.66 0.18 22 / 0.5)", whiteSpace: "pre-wrap" }}>
+          {status.error}
         </div>
       )}
     </div>

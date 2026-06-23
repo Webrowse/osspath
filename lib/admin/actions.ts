@@ -258,34 +258,69 @@ export async function updatePublished(
 
 // ── Index maintenance ─────────────────────────────────────────────────────────
 
-export async function rebuildSearchIndex(): Promise<string> {
-  await requireAdmin()
+async function runScript(script: string, timeoutMs: number): Promise<string> {
   const { execFile } = await import("child_process")
   const { promisify } = await import("util")
   const { join } = await import("path")
   const exec = promisify(execFile)
-  const script = join(process.cwd(), "scripts", "build-search-index.mjs")
-  const { stdout, stderr } = await exec(process.execPath, [script], {
-    cwd: process.cwd(),
-    timeout: 60_000,
-    env: process.env as NodeJS.ProcessEnv,
-  })
-  return (stdout + stderr).trim()
+  try {
+    const { stdout, stderr } = await exec(process.execPath, [join(process.cwd(), script)], {
+      cwd: process.cwd(),
+      timeout: timeoutMs,
+      maxBuffer: 10 * 1024 * 1024, // 10 MB — enrich output is verbose
+      env: process.env as NodeJS.ProcessEnv,
+    })
+    return (stdout + stderr).trim()
+  } catch (err: any) {
+    // execFile throws on non-zero exit; stdout/stderr are on the error object
+    const out = ((err.stdout ?? "") + (err.stderr ?? "")).trim()
+    throw new Error(out || String(err.message ?? err))
+  }
 }
+
+export async function rebuildSearchIndex(): Promise<string> {
+  await requireAdmin()
+  return runScript("scripts/build-search-index.mjs", 60_000)
+}
+
+const ENRICH_LOG = "data/enrich.log"
 
 export async function enrichNewRepos(): Promise<string> {
   await requireAdmin()
-  const { execFile } = await import("child_process")
-  const { promisify } = await import("util")
-  const { join } = await import("path")
-  const exec = promisify(execFile)
-  const script = join(process.cwd(), "scripts", "enrich-oss-deps.mjs")
-  const { stdout, stderr } = await exec(process.execPath, [script], {
-    cwd: process.cwd(),
-    timeout: 600_000,  // up to 10 min for a large batch
-    env: process.env as NodeJS.ProcessEnv,
+  const { spawn }    = await import("child_process")
+  const { join }     = await import("path")
+  const { openSync } = await import("fs")
+  const root   = process.cwd()
+  const script = join(root, "scripts", "enrich-oss-deps.mjs")
+  const logPath = join(root, ENRICH_LOG)
+  const logFd  = openSync(logPath, "w")
+  const child  = spawn(process.execPath, [script], {
+    cwd:      root,
+    detached: true,
+    stdio:    ["ignore", logFd, logFd],
+    env:      process.env as NodeJS.ProcessEnv,
   })
-  return (stdout + stderr).trim()
+  child.unref()
+  const pid = child.pid ?? "?"
+  return [
+    `Enrichment started in background (PID ${pid}).`,
+    `Output → ${ENRICH_LOG}`,
+    ``,
+    `Hit "Check enrich status" to see progress.`,
+    `When you see the final summary line, hit "Rebuild search index".`,
+  ].join("\n")
+}
+
+export async function getEnrichStatus(): Promise<string> {
+  await requireAdmin()
+  const { readFileSync, existsSync } = await import("fs")
+  const { join } = await import("path")
+  const logPath = join(process.cwd(), ENRICH_LOG)
+  if (!existsSync(logPath)) return "No enrichment log found — run 'Enrich new repos' first."
+  const lines = readFileSync(logPath, "utf8").trimEnd().split("\n")
+  const tail  = lines.slice(-20).join("\n")
+  const total = lines.length
+  return `Last 20 lines of ${ENRICH_LOG} (${total} lines total):\n\n${tail}`
 }
 
 // ── Update pending item (pre-approve edit) ────────────────────────────────────

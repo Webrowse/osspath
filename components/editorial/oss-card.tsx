@@ -48,6 +48,7 @@ export function OSSCard({
   const depLinks   = depPageCounts ? pickDepLinks(repo.dependencies, depPageCounts, 3) : []
   const ecoTags    = getEcoTags(repo.dependencies, { owner: repo.owner ?? undefined, name: repo.name ?? undefined, topics: repo.topics ?? undefined })
   const issueWarm  = tier === "active" && openIssues >= 5
+  const isNewsletterPick = repo.labels?.includes("newsletter-pick")
 
   const detailHref = repo.owner && repo.name
     ? `/oss/${repo.owner}/${repo.name}`
@@ -93,8 +94,13 @@ export function OSSCard({
         <span className={`e-oss__activity e-oss__activity--${tier}`}>{tier}</span>
       </div>
 
-      {ecoTags.length > 0 && (
+      {(ecoTags.length > 0 || isNewsletterPick) && (
         <div className="e-oss__eco">
+          {isNewsletterPick && (
+            <span className="e-oss__label-badge e-oss__label-badge--newsletter-pick">
+              newsletter pick
+            </span>
+          )}
           {ecoTags.map(tag => (
             <Link
               key={tag}
