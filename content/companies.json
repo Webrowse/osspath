@@ -795,24 +795,28 @@
     "name": "Ultraworkers",
     "sector": "Gaming",
     "href": "https://discord.gg/6ztZB9jvWq",
-    "checkedAt": "2026-06-22"
+    "checkedAt": "2026-06-22",
+    "slug": "ultraworkers"
   },
   {
     "name": "The Rust Programming Language",
     "sector": "Programming Language",
     "href": "https://www.rust-lang.org",
-    "checkedAt": "2026-06-22"
+    "checkedAt": "2026-06-22",
+    "slug": "rust-lang"
   },
   {
     "name": "rtk-ai",
     "sector": "Developer Tools",
     "href": "https://www.rtk-ai.app",
-    "checkedAt": "2026-06-22"
+    "checkedAt": "2026-06-22",
+    "slug": "rtk-ai"
   },
   {
     "name": "Open Interpreter",
     "sector": "AI",
     "href": "https://www.openinterpreter.com",
-    "checkedAt": "2026-06-22"
+    "checkedAt": "2026-06-22",
+    "slug": "open-interpreter"
   }
 ]

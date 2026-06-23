@@ -20,7 +20,7 @@ interface PageProps {
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return COMPANIES.map(c => ({ slug: c.slug }))
+  return COMPANIES.filter(c => typeof c.slug === "string" && c.slug).map(c => ({ slug: c.slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

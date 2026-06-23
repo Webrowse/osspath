@@ -39,6 +39,14 @@ export async function approveItem(
     published.expiresAt = expiry.toISOString().split("T")[0]
   }
 
+  // Companies require slug for /ecosystem/[slug] routes
+  if (type === "companies" && !published.slug && published.name) {
+    published.slug = String(published.name)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+  }
+
   appendContent(type, published)
   writePending(type, pending.filter((p) => p.id !== id))
   archiveItem(type, { ...item, status: "approved" })
