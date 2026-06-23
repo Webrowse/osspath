@@ -1928,7 +1928,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   gap: 5px;
   font-family: var(--e-mono);
   font-size: 11.5px;
-  color: var(--nc, var(--e-fg-dim));
+  color: var(--e-fg-mute);
   padding: 4px 9px;
   border: 1px solid var(--e-line-soft);
   border-radius: 999px;
@@ -2054,7 +2054,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   gap: 5px;
   font-family: var(--e-mono);
   font-size: 9.5px;
-  color: var(--nc, var(--e-fg-faint));
+  color: var(--e-fg-mute);
   text-transform: uppercase;
   letter-spacing: 0.08em;
 }
@@ -2078,7 +2078,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
 .hp-jnode-sub {
   font-family: var(--e-mono);
   font-size: 10.5px;
-  color: var(--e-fg-dim);
+  color: var(--e-fg-mute);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2722,7 +2722,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
 }
 .cmd-btn__hint {
   font-size:   10px;
-  color:       var(--e-fg-faint);
+  color:       var(--e-fg-mute);
   background:  var(--e-surface);
   border:      1px solid var(--e-line-soft);
   border-radius: 4px;
@@ -2884,8 +2884,8 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
     --e-line-soft:   #2c2620;
     --e-fg:          #e8d8b8;
     --e-fg-mute:     #a89078;
-    --e-fg-dim:      #7a6855;
-    --e-fg-faint:    #503e2e;
+    --e-fg-dim:      #907a66;
+    --e-fg-faint:    #8a7862;
     --e-accent:      #d06838;
     --e-accent-d:    #b05228;
     --e-accent-soft: #2e1a10;
@@ -2917,8 +2917,8 @@ html[data-e-theme="dark"] .editorial-root {
   --e-line-soft:   #2c2620;
   --e-fg:          #e8d8b8;
   --e-fg-mute:     #a89078;
-  --e-fg-dim:      #7a6855;
-  --e-fg-faint:    #503e2e;
+  --e-fg-dim:      #907a66;
+  --e-fg-faint:    #8a7862;
   --e-accent:      #d06838;
   --e-accent-d:    #b05228;
   --e-accent-soft: #2e1a10;
