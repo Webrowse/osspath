@@ -24,8 +24,8 @@ export const metadata: Metadata = {
   },
 }
 
-const GITHUB_REPO      = "https://github.com/Webrowse/adarshrust-jobs"
-const CONTRIBUTING_URL = "https://github.com/Webrowse/adarshrust-jobs/blob/main/CONTRIBUTING.md"
+const GITHUB_REPO      = "https://github.com/Webrowse/osspath"
+const CONTRIBUTING_URL = "https://github.com/Webrowse/osspath/blob/main/CONTRIBUTING.md"
 
 // ── Shared style constants ────────────────────────────────────────────────────
 
@@ -445,7 +445,7 @@ export default function MethodologyPage() {
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
                 <a href={GITHUB_REPO} target="_blank" rel="noopener noreferrer" style={extLink}>
-                  github.com/Webrowse/adarshrust-jobs →
+                  github.com/Webrowse/osspath →
                 </a>
                 <a href={CONTRIBUTING_URL} target="_blank" rel="noopener noreferrer" style={extLink}>
                   CONTRIBUTING.md →

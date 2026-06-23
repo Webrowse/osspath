@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 }
 const GITHUB_PROFILE = "https://github.com/Webrowse"
-const GITHUB_REPO = "https://github.com/Webrowse/adarshrust-jobs"
+const GITHUB_REPO = "https://github.com/Webrowse/osspath"
 
 export default function ContactPage() {
   return (
@@ -85,7 +85,7 @@ export default function ContactPage() {
               rel="noopener noreferrer"
               style={{ fontSize: 14, color: "var(--e-accent)", textDecoration: "none", fontFamily: "var(--e-mono)" }}
             >
-              github.com/Webrowse/adarshrust-jobs →
+              github.com/Webrowse/osspath →
             </a>
           </div>
 

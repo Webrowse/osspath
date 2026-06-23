@@ -44,7 +44,7 @@ export function EditorialMobileMenu({ links }: { links: NavLink[] }) {
       />
 
       <div className="e-drawer-wrap">
-        <aside className={`e-drawer${open ? " open" : ""}`} aria-hidden={!open} aria-label="Menu">
+        <aside className={`e-drawer${open ? " open" : ""}`} aria-hidden={!open} inert={!open || undefined} aria-label="Menu">
           <div className="e-drawer__head">
             <span className="e-nav__brand">
               <span className="e-nav__mark" />

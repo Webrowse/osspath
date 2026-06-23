@@ -37,12 +37,6 @@ export default function PrivacyPage() {
               data never leaves your device.
             </p>
             <p>
-              We use PostHog for error tracking and basic analytics. PostHog may store a
-              cookie or use localStorage to distinguish sessions. Events are not linked to
-              any personally identifiable information. Autocapture and pageview tracking
-              are disabled; only errors and explicit events are recorded.
-            </p>
-            <p>
               We do not sell, share, or use visitor data for advertising.
             </p>
             <p>

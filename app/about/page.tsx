@@ -25,8 +25,8 @@ export const metadata: Metadata = {
 }
 
 const GITHUB_PROFILE    = "https://github.com/Webrowse"
-const GITHUB_REPO       = "https://github.com/Webrowse/adarshrust-jobs"
-const CONTRIBUTING_URL  = "https://github.com/Webrowse/adarshrust-jobs/blob/main/CONTRIBUTING.md"
+const GITHUB_REPO       = "https://github.com/Webrowse/osspath"
+const CONTRIBUTING_URL  = "https://github.com/Webrowse/osspath/blob/main/CONTRIBUTING.md"
 
 const label: React.CSSProperties = {
   fontSize: 11,
@@ -217,7 +217,7 @@ export default function AboutPage() {
                   github.com/Webrowse →
                 </a>
                 <a href={GITHUB_REPO} target="_blank" rel="noopener noreferrer" style={extLink}>
-                  github.com/Webrowse/adarshrust-jobs →
+                  github.com/Webrowse/osspath →
                 </a>
               </div>
             </div>

@@ -2034,7 +2034,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   text-decoration: none;
   opacity: 0;
   transform: translateY(5px);
-  transition: opacity 0.3s ease, transform 0.3s ease, background 120ms, border-color 120ms;
+  transition: opacity 0.3s ease, transform 0.3s ease, background 120ms;
   pointer-events: none;
 }
 .hp-jnode.is-vis {
