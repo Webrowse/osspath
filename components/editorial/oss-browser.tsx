@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useMemo, useRef, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useRouter, usePathname } from "next/navigation"
 import { OSSCard } from "./oss-card"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
@@ -205,6 +206,8 @@ export function OSSBrowser({
   const [sort,              setSort]              = useState<SortKey>("stars-desc")
   const [openDropdown,      setOpenDropdown]      = useState<DropdownId | null>(null)
   const [visibleCount,      setVisibleCount]      = useState(PAGE_SIZE)
+  const [filterSheetOpen,   setFilterSheetOpen]   = useState(false)
+  const [mounted,           setMounted]           = useState(false)
 
   // Sync selectedDeps + selectedEcos → URL
   useEffect(() => {
@@ -273,6 +276,23 @@ export function OSSBrowser({
 
   // Reset visible count when sorted set changes (filter or sort applied)
   useEffect(() => { setVisibleCount(PAGE_SIZE) }, [sorted])
+
+  // Portal mount guard
+  useEffect(() => { setMounted(true) }, [])
+
+  // Scroll lock while filter sheet is open
+  useEffect(() => {
+    document.body.style.overflow = filterSheetOpen ? "hidden" : ""
+    return () => { document.body.style.overflow = "" }
+  }, [filterSheetOpen])
+
+  // Escape key closes filter sheet
+  useEffect(() => {
+    if (!filterSheetOpen) return
+    function onKey(e: KeyboardEvent) { if (e.key === "Escape") setFilterSheetOpen(false) }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [filterSheetOpen])
 
   // Eco counts from full corpus (stable regardless of eco filter)
   const allEcoCounts = useMemo(() => {
@@ -426,6 +446,107 @@ export function OSSBrowser({
     setOwnerSearch("")
     setDepSearch("")
     setOpenDropdown(null)
+  }
+
+  // Count of rail-specific active filters (used for the mobile trigger badge)
+  const railFilterCount =
+    (starBucket !== "any" ? 1 : 0) +
+    (selectedKind !== "all" ? 1 : 0) +
+    selectedActivity.size +
+    selectedEcos.size
+
+  function renderRailGroups() {
+    return (
+      <>
+        <div className="oss-rail-group">
+          <div className="oss-rail-label">Sort</div>
+          <select
+            className="oss-filter-select"
+            value={sort}
+            onChange={e => setSort(e.target.value as SortKey)}
+          >
+            {SORT_OPTIONS.map(o => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="oss-rail-group">
+          <div className="oss-rail-label">Stars</div>
+          <select
+            className="oss-filter-select"
+            value={starBucket}
+            onChange={e => setStarBucket(e.target.value as StarBucketKey)}
+          >
+            {bucketCounts.map(b => (
+              <option key={b.key} value={b.key}>
+                {b.label} ({b.count})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="oss-rail-group">
+          <div className="oss-rail-label">Activity</div>
+          {ACTIVITY_OPTIONS.map(o => {
+            const count = facets.activity.find(([k]) => k === o.value)?.[1] ?? 0
+            return (
+              <label key={o.value} className="oss-filter-row">
+                <input
+                  type="checkbox"
+                  className="oss-filter-radio"
+                  checked={selectedActivity.has(o.value)}
+                  onChange={() => setSelectedActivity(prev => toggleSet(prev, o.value))}
+                />
+                <span style={{ flex: 1 }}>{o.label}</span>
+                <span className="oss-filter-count">{count}</span>
+              </label>
+            )
+          })}
+        </div>
+
+        <div className="oss-rail-group">
+          <div className="oss-rail-label">Type</div>
+          {(["all", "code", "reference"] as KindFilter[]).map(k => {
+            const count = k === "all"
+              ? normalized.length
+              : normalized.filter(r => r.kind === k).length
+            const label = k === "all" ? "All" : k === "code" ? "Code" : "Reference"
+            return (
+              <label key={k} className="oss-filter-row">
+                <input
+                  type="radio"
+                  className="oss-filter-radio"
+                  checked={selectedKind === k}
+                  onChange={() => setSelectedKind(k)}
+                />
+                <span style={{ flex: 1 }}>{label}</span>
+                <span className="oss-filter-count">{count}</span>
+              </label>
+            )
+          })}
+        </div>
+
+        <div className="oss-rail-group">
+          <div className="oss-rail-label">Ecosystem</div>
+          {ECO_OPTIONS.map(o => {
+            const count = allEcoCounts[o.value] ?? 0
+            return (
+              <label key={o.value} className="oss-filter-row">
+                <input
+                  type="checkbox"
+                  className="oss-filter-radio"
+                  checked={selectedEcos.has(o.value)}
+                  onChange={() => setSelectedEcos(prev => toggleSet(prev, o.value))}
+                />
+                <span style={{ flex: 1 }}>{o.label}</span>
+                <span className="oss-filter-count">{count}</span>
+              </label>
+            )
+          })}
+        </div>
+      </>
+    )
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -616,100 +737,68 @@ export function OSSBrowser({
         </div>
       )}
 
+      {/* Mobile filter trigger — hidden on desktop via CSS */}
+      <div className="oss-filter-trigger-row">
+        <button
+          type="button"
+          className="oss-filter-trigger"
+          onClick={() => setFilterSheetOpen(true)}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+          </svg>
+          Filters{railFilterCount > 0 ? ` (${railFilterCount})` : ""}
+        </button>
+      </div>
+
+      {/* Mobile filter bottom sheet */}
+      {mounted && createPortal(
+        <div
+          className={`oss-filter-sheet-back${filterSheetOpen ? " open" : ""}`}
+          onClick={() => setFilterSheetOpen(false)}
+          aria-hidden={!filterSheetOpen}
+        >
+          <div
+            className="oss-filter-sheet"
+            onClick={e => e.stopPropagation()}
+            role="dialog"
+            aria-label="Filter options"
+          >
+            <div className="oss-filter-sheet__head">
+              <span className="oss-filter-sheet__title">Filters</span>
+              <button
+                type="button"
+                className="oss-filter-sheet__close"
+                aria-label="Close filters"
+                onClick={() => setFilterSheetOpen(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <div className="oss-filter-sheet__body">
+              {renderRailGroups()}
+            </div>
+            <div className="oss-filter-sheet__foot">
+              <button type="button" className="oss-chip-clear" onClick={() => { clearAll(); setFilterSheetOpen(false) }}>
+                Clear all
+              </button>
+              <button type="button" className="oss-filter-sheet__done" onClick={() => setFilterSheetOpen(false)}>
+                Done
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Main layout — left rail + grid */}
       <div className="oss-layout">
 
         {/* Sticky left rail */}
         <aside className="oss-rail">
-
-          <div className="oss-rail-group">
-            <div className="oss-rail-label">Sort</div>
-            <select
-              className="oss-filter-select"
-              value={sort}
-              onChange={e => setSort(e.target.value as SortKey)}
-            >
-              {SORT_OPTIONS.map(o => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-
-          <div className="oss-rail-group">
-            <div className="oss-rail-label">Stars</div>
-            <select
-              className="oss-filter-select"
-              value={starBucket}
-              onChange={e => setStarBucket(e.target.value as StarBucketKey)}
-            >
-              {bucketCounts.map(b => (
-                <option key={b.key} value={b.key}>
-                  {b.label} ({b.count})
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="oss-rail-group">
-            <div className="oss-rail-label">Activity</div>
-            {ACTIVITY_OPTIONS.map(o => {
-              const count = facets.activity.find(([k]) => k === o.value)?.[1] ?? 0
-              return (
-                <label key={o.value} className="oss-filter-row">
-                  <input
-                    type="checkbox"
-                    className="oss-filter-radio"
-                    checked={selectedActivity.has(o.value)}
-                    onChange={() => setSelectedActivity(prev => toggleSet(prev, o.value))}
-                  />
-                  <span style={{ flex: 1 }}>{o.label}</span>
-                  <span className="oss-filter-count">{count}</span>
-                </label>
-              )
-            })}
-          </div>
-
-          <div className="oss-rail-group">
-            <div className="oss-rail-label">Type</div>
-            {(["all", "code", "reference"] as KindFilter[]).map(k => {
-              const count = k === "all"
-                ? normalized.length
-                : normalized.filter(r => r.kind === k).length
-              const label = k === "all" ? "All" : k === "code" ? "Code" : "Reference"
-              return (
-                <label key={k} className="oss-filter-row">
-                  <input
-                    type="radio"
-                    className="oss-filter-radio"
-                    checked={selectedKind === k}
-                    onChange={() => setSelectedKind(k)}
-                  />
-                  <span style={{ flex: 1 }}>{label}</span>
-                  <span className="oss-filter-count">{count}</span>
-                </label>
-              )
-            })}
-          </div>
-
-          <div className="oss-rail-group">
-            <div className="oss-rail-label">Ecosystem</div>
-            {ECO_OPTIONS.map(o => {
-              const count = allEcoCounts[o.value] ?? 0
-              return (
-                <label key={o.value} className="oss-filter-row">
-                  <input
-                    type="checkbox"
-                    className="oss-filter-radio"
-                    checked={selectedEcos.has(o.value)}
-                    onChange={() => setSelectedEcos(prev => toggleSet(prev, o.value))}
-                  />
-                  <span style={{ flex: 1 }}>{o.label}</span>
-                  <span className="oss-filter-count">{count}</span>
-                </label>
-              )
-            })}
-          </div>
-
+          {renderRailGroups()}
         </aside>
 
         {/* Repository grid */}

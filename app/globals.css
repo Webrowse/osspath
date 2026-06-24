@@ -1855,6 +1855,119 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   .oss-fb-dropdowns { flex-wrap: wrap; }
 }
 
+/* Mobile filter trigger */
+.oss-filter-trigger-row {
+  display: none;
+  margin-bottom: 12px;
+}
+@media (max-width: 860px) {
+  .oss-filter-trigger-row { display: flex; }
+}
+.oss-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 1px solid var(--e-line-soft);
+  border-radius: 20px;
+  background: var(--e-bg-2);
+  color: var(--e-fg-mute);
+  font-family: var(--e-ui);
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+.oss-filter-trigger:hover {
+  border-color: var(--e-accent);
+  color: var(--e-fg);
+}
+
+/* Mobile filter bottom sheet */
+.oss-filter-sheet-back {
+  position: fixed;
+  inset: 0;
+  background: oklch(0 0 0 / 0);
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  pointer-events: none;
+  transition: background 200ms ease;
+}
+.oss-filter-sheet-back.open {
+  background: oklch(0 0 0 / 0.55);
+  pointer-events: auto;
+}
+.oss-filter-sheet {
+  width: 100%;
+  max-height: 88dvh;
+  background: var(--e-bg-2);
+  border-radius: 16px 16px 0 0;
+  border: 1px solid var(--e-line-soft);
+  border-bottom: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.oss-filter-sheet-back.open .oss-filter-sheet {
+  transform: translateY(0);
+}
+.oss-filter-sheet__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px 14px;
+  border-bottom: 1px solid var(--e-line-soft);
+  flex-shrink: 0;
+}
+.oss-filter-sheet__title {
+  font-family: var(--e-ui);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--e-fg);
+}
+.oss-filter-sheet__close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: var(--e-bg-2);
+  border-radius: 50%;
+  color: var(--e-fg-mute);
+  cursor: pointer;
+}
+.oss-filter-sheet__close:hover { color: var(--e-fg); }
+.oss-filter-sheet__body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 20px 8px;
+}
+.oss-filter-sheet__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--e-line-soft);
+  flex-shrink: 0;
+}
+.oss-filter-sheet__done {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 8px;
+  background: var(--e-accent);
+  color: #fff;
+  font-family: var(--e-ui);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.oss-filter-sheet__done:hover { opacity: 0.88; }
+
 /* ── Mobile improvements ───────────────────────────────────── */
 
 /* Meter: at very narrow widths drop the value label, keep bar for scannability */
