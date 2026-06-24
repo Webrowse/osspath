@@ -1951,6 +1951,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   display: flex;
   align-items: center;
   gap: 7px;
+  min-width: 0;
   font-size: 12.5px;
   color: var(--e-fg-mute);
   cursor: pointer;
@@ -1958,8 +1959,10 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   user-select: none;
 }
 .oss-filter-row:hover { color: var(--e-fg); }
+.oss-filter-row > span:not(.oss-filter-count) { flex: 1 1 0%; min-width: 0; }
 .oss-filter-radio { accent-color: var(--e-accent); cursor: pointer; flex-shrink: 0; }
 .oss-filter-count {
+  flex-shrink: 0;
   font-size: 10px;
   color: var(--e-fg-faint);
   font-family: var(--e-mono);
@@ -1985,7 +1988,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
 @media (max-width: 860px) {
   .oss-filter-trigger-row { display: flex; }
 }
-.oss-filter-trigger {
+.editorial-root .oss-filter-trigger {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1999,7 +2002,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   cursor: pointer;
   transition: border-color 120ms, color 120ms;
 }
-.oss-filter-trigger:hover {
+.editorial-root .oss-filter-trigger:hover {
   border-color: var(--e-accent);
   color: var(--e-fg);
 }
@@ -2064,7 +2067,8 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
 }
 .oss-filter-sheet__close:hover { color: var(--e-fg); }
 .oss-filter-sheet__body {
-  flex: 1;
+  flex: 1 1 0%;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 4px 20px 8px;
@@ -2074,6 +2078,7 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
   border-top: 1px solid var(--e-line-soft);
   flex-shrink: 0;
 }
