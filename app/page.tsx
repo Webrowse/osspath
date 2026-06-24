@@ -4,9 +4,10 @@ import { CommandPalette } from "@/components/command-palette"
 import { EditorialThemeToggle } from "@/components/editorial-theme-toggle"
 import { HeroGraph } from "@/components/editorial/hero-graph"
 import { SectionHeader } from "@/components/editorial/section-header"
+import { ExploreDropdown } from "@/components/editorial/explore-dropdown"
 import { getLandingData } from "@/lib/landing-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
-import { SITE_NAV, FOOTER_NAV } from "@/lib/nav-config"
+import { SITE_NAV, FOOTER_NAV, EXPLORE_NAV } from "@/lib/nav-config"
 
 export default function HomePage() {
   const {
@@ -35,6 +36,7 @@ export default function HomePage() {
             {SITE_NAV.map((l) => (
               <a key={l.anchor} className="e-nav__link" href={l.anchor}>{l.label}</a>
             ))}
+            <ExploreDropdown />
           </nav>
 
           <div className="e-nav__spacer" />
@@ -43,7 +45,11 @@ export default function HomePage() {
 
           <EditorialThemeToggle />
 
-          <EditorialMobileMenu links={SITE_NAV.map((l) => ({ label: l.label, href: l.anchor }))} />
+          <EditorialMobileMenu links={[
+            ...SITE_NAV.map((l) => ({ label: l.label, href: l.anchor })),
+            { label: "Explore", href: "", isSection: true },
+            ...EXPLORE_NAV.map((l) => ({ label: l.label, href: l.href })),
+          ]} />
         </div>
       </header>
 

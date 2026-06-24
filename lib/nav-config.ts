@@ -8,6 +8,15 @@ export const SITE_NAV = [
   { label: "Orgs",       anchor: "#organizations", archive: "/ecosystem" },
 ] as const
 
+/** Explore dropdown — curated ecosystem resources, not graph entities. */
+export const EXPLORE_NAV = [
+  { label: "Authors",    href: "/authors",  description: "Writers and maintainers worth following" },
+  { label: "Learning",   href: "/learning", description: "Curated resources to understand Rust" },
+  { label: "Community",  href: "/pulse",    description: "Newsletters, forums, and podcasts" },
+  { label: "Events",     href: "/events",   description: "Conferences and workshops" },
+  { label: "Job Boards", href: "/portals",  description: "Rust job boards and aggregators" },
+] as const
+
 export const FOOTER_NAV = [
   { label: "Community", href: "/pulse" },
   { label: "Events",    href: "/events" },
@@ -19,3 +28,4 @@ export const FOOTER_NAV = [
 ] as const
 
 export type NavEntry = (typeof SITE_NAV)[number]
+export type ExploreEntry = (typeof EXPLORE_NAV)[number]
