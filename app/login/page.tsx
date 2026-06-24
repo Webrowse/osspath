@@ -18,7 +18,7 @@ function safeCallback(raw: string | string[] | undefined): string {
   const v = Array.isArray(raw) ? raw[0] : raw
   // Only allow relative paths — never redirect to external URLs
   if (v && v.startsWith("/") && !v.startsWith("//") && !v.startsWith("/\\")) return v
-  return "/dashboard"
+  return "/"
 }
 
 export default async function LoginPage({ searchParams }: PageProps) {

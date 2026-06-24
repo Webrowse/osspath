@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { SITE_NAV } from "@/lib/nav-config"
+import { ExploreDropdown } from "@/components/editorial/explore-dropdown"
 
 export function EditorialNav() {
   const pathname = usePathname()
@@ -17,6 +18,7 @@ export function EditorialNav() {
           {l.label}
         </Link>
       ))}
+      <ExploreDropdown />
     </nav>
   )
 }

@@ -3,7 +3,7 @@ import { EditorialMobileMenu } from "@/components/editorial-mobile-menu"
 import { EditorialNav } from "@/components/editorial/editorial-nav"
 import { CommandPalette } from "@/components/command-palette"
 import { EditorialThemeToggle } from "@/components/editorial-theme-toggle"
-import { SITE_NAV, FOOTER_NAV } from "@/lib/nav-config"
+import { SITE_NAV, FOOTER_NAV, EXPLORE_NAV } from "@/lib/nav-config"
 
 interface EditorialLayoutProps {
   children: React.ReactNode
@@ -31,6 +31,8 @@ export function EditorialLayout({ children }: EditorialLayoutProps) {
           <EditorialMobileMenu links={[
             { label: "← Home",     href: "/" },
             ...SITE_NAV.map((l) => ({ label: l.label, href: l.archive })),
+            { label: "Explore",    href: "",   isSection: true },
+            ...EXPLORE_NAV.map((l) => ({ label: l.label, href: l.href })),
           ]} />
         </div>
       </header>
