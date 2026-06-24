@@ -716,6 +716,18 @@ export function OSSBrowser({
 
         </div>
 
+        {/* Mobile filter trigger — lives inside the sticky bar, hidden on desktop */}
+        <button
+          type="button"
+          className="oss-filter-trigger"
+          onClick={() => setFilterSheetOpen(true)}
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
+          </svg>
+          Filters{railFilterCount > 0 ? ` (${railFilterCount})` : ""}
+        </button>
+
         <span className="oss-fb-count">
           {filtered.length !== repos.length
             ? `${filtered.length} / ${repos.length}`
@@ -736,20 +748,6 @@ export function OSSBrowser({
           </button>
         </div>
       )}
-
-      {/* Mobile filter trigger — hidden on desktop via CSS */}
-      <div className="oss-filter-trigger-row">
-        <button
-          type="button"
-          className="oss-filter-trigger"
-          onClick={() => setFilterSheetOpen(true)}
-        >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-            <path d="M1 3h12M3 7h8M5 11h4" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" />
-          </svg>
-          Filters{railFilterCount > 0 ? ` (${railFilterCount})` : ""}
-        </button>
-      </div>
 
       {/* Mobile filter bottom sheet */}
       {mounted && createPortal(

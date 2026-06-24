@@ -1980,16 +1980,9 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   .oss-fb-dropdowns { flex-wrap: wrap; }
 }
 
-/* Mobile filter trigger */
-.oss-filter-trigger-row {
-  display: none;
-  margin-bottom: 12px;
-}
-@media (max-width: 860px) {
-  .oss-filter-trigger-row { display: flex; }
-}
+/* Mobile filter trigger — sits inside .oss-fb sticky bar, hidden on desktop */
 .editorial-root .oss-filter-trigger {
-  display: inline-flex;
+  display: none;
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
@@ -1999,8 +1992,13 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   color: var(--e-fg-mute);
   font-family: var(--e-ui);
   font-size: 13px;
+  white-space: nowrap;
+  flex-shrink: 0;
   cursor: pointer;
   transition: border-color 120ms, color 120ms;
+}
+@media (max-width: 860px) {
+  .editorial-root .oss-filter-trigger { display: inline-flex; }
 }
 .editorial-root .oss-filter-trigger:hover {
   border-color: var(--e-accent);
