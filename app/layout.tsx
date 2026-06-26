@@ -54,6 +54,14 @@ export const metadata: Metadata = {
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },
+  icons: {
+    icon: [
+      { url: "/icon-dark.svg",  type: "image/svg+xml", media: "(prefers-color-scheme: dark)" },
+      { url: "/icon-light.svg", type: "image/svg+xml", media: "(prefers-color-scheme: light)" },
+      { url: "/favicon.ico",    sizes: "any" },
+    ],
+    apple: { url: "/apple-icon.png", sizes: "180x180" },
+  },
 }
 
 // Reads preferences before React hydrates — prevents flash of wrong theme

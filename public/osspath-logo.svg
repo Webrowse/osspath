@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OSSPath — Primary Logo
+  Concept: Hex-Node Path — three hexagons on a diagonal path with orange destination.
+  Mark on the left, wordmark "osspath" on the right.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 96" role="img" aria-label="OSSPath">
+  <title>OSSPath</title>
+
+  <!-- MARK: three hexagons on a diagonal path -->
+  <!-- Pointy-top hex with circumradius ~14. Hex points (r=14):
+       (cx, cy-14), (cx+12.12, cy-7), (cx+12.12, cy+7), (cx, cy+14), (cx-12.12, cy+7), (cx-12.12, cy-7)
+       Spaced diagonally: Hex 1 at (28, 28), Hex 2 at (52, 52), Hex 3 at (76, 76)
+  -->
+
+  <!-- Hex 1: origin (charcoal) -->
+  <polygon fill="#1A1A1A"
+           points="28,14 40.12,21 40.12,35 28,42 15.88,35 15.88,21"/>
+
+  <!-- Hex 2: connection (charcoal) -->
+  <polygon fill="#1A1A1A"
+           points="52,38 64.12,45 64.12,59 52,66 39.88,59 39.88,45"/>
+
+  <!-- Hex 3: destination (rust orange) -->
+  <polygon fill="#CE422B"
+           points="76,62 88.12,69 88.12,83 76,90 63.88,83 63.88,69"/>
+
+  <!-- WORDMARK -->
+  <text x="108" y="68"
+        font-family="'Inter', 'Helvetica Neue', Arial, sans-serif"
+        font-weight="600"
+        font-size="40"
+        letter-spacing="-1"
+        fill="#1A1A1A">osspath</text>
+</svg>

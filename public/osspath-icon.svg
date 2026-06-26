@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OSSPath — Simplified Icon (mark only)
+  v5: tightened layout, all hexes safely inside 64x64 with edge-to-edge fill.
+  Diagonal path: origin top-left → connection center → destination bottom-right.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="OSSPath icon">
+  <title>OSSPath icon</title>
+
+  <!-- Hex circumradius = 11. Pointy-top hex points:
+       (cx, cy-r), (cx+9.53, cy-5.5), (cx+9.53, cy+5.5), (cx, cy+r), (cx-9.53, cy+5.5), (cx-9.53, cy-5.5)
+       Step diagonally by ~17px so hexes edge-touch.
+  -->
+
+  <!-- Hex 1: origin (charcoal), center (15, 15) -->
+  <polygon fill="#1A1A1A"
+           points="15,4 24.53,9.5 24.53,20.5 15,26 5.47,20.5 5.47,9.5"/>
+
+  <!-- Hex 2: connection (charcoal), center (32, 32) -->
+  <polygon fill="#1A1A1A"
+           points="32,21 41.53,26.5 41.53,37.5 32,43 22.47,37.5 22.47,26.5"/>
+
+  <!-- Hex 3: destination (rust orange), center (49, 49) -->
+  <polygon fill="#CE422B"
+           points="49,38 58.53,43.5 58.53,54.5 49,60 39.47,54.5 39.47,43.5"/>
+</svg>

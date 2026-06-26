@@ -40,7 +40,11 @@ export function EditorialArchiveSkeleton({ title, wide = false }: Props) {
       <header className="e-nav">
         <div className="e-col e-col--wide e-nav__inner">
           <Link href="/" className="e-nav__brand" aria-label="OSSPath — home">
-            <span className="e-nav__mark" />
+            <svg width="22" height="22" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+              <polygon fill="currentColor" points="15,4 24.53,9.5 24.53,20.5 15,26 5.47,20.5 5.47,9.5"/>
+              <polygon fill="currentColor" points="32,21 41.53,26.5 41.53,37.5 32,43 22.47,37.5 22.47,26.5"/>
+              <polygon fill="#CE422B" points="49,38 58.53,43.5 58.53,54.5 49,60 39.47,54.5 39.47,43.5"/>
+            </svg>
             <span>osspath</span>
           </Link>
           <div className="e-nav__spacer" />
