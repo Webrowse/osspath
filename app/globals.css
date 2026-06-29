@@ -2951,12 +2951,12 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   border-color: var(--e-line-2);
 }
 .cmd-btn__hint {
-  font-size:   10px;
-  color:       var(--e-fg-mute);
-  background:  var(--e-surface);
-  border:      1px solid var(--e-line-soft);
+  font-size:   12px;
+  color:       var(--e-fg-dim);
+  background:  var(--e-surface-2);
+  border:      1px solid var(--e-line);
   border-radius: 4px;
-  padding:     1px 5px;
+  padding:     1px 6px;
   font-family: var(--e-mono);
   line-height: 1.6;
 }
