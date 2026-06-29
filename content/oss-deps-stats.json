@@ -1,408 +1,408 @@
 {
-  "generatedAt": "2026-06-23T02:23:55.359Z",
-  "totalRepos": 3083,
-  "reposWithDeps": 3020,
-  "uniqueDeps": 27403,
+  "generatedAt": "2026-06-29T10:52:40.983Z",
+  "totalRepos": 3663,
+  "reposWithDeps": 3585,
+  "uniqueDeps": 30744,
   "top100": [
     {
       "crate": "serde",
-      "count": 2288
+      "count": 2746
     },
     {
       "crate": "serde_json",
-      "count": 2059
+      "count": 2479
     },
     {
       "crate": "clap",
-      "count": 1704
+      "count": 2022
     },
     {
       "crate": "tokio",
-      "count": 1673
+      "count": 2009
     },
     {
       "crate": "thiserror",
-      "count": 1492
+      "count": 1816
     },
     {
       "crate": "anyhow",
-      "count": 1456
+      "count": 1734
     },
     {
       "crate": "tempfile",
-      "count": 1377
+      "count": 1620
     },
     {
       "crate": "rand",
-      "count": 1307
+      "count": 1542
     },
     {
       "crate": "chrono",
-      "count": 1264
-    },
-    {
-      "crate": "regex",
-      "count": 1212
+      "count": 1493
     },
     {
       "crate": "tracing",
-      "count": 1210
+      "count": 1452
+    },
+    {
+      "crate": "regex",
+      "count": 1426
     },
     {
       "crate": "tracing-subscriber",
-      "count": 1126
+      "count": 1347
     },
     {
       "crate": "reqwest",
-      "count": 1090
+      "count": 1293
     },
     {
       "crate": "futures",
-      "count": 1078
+      "count": 1264
     },
     {
       "crate": "log",
-      "count": 1022
+      "count": 1192
     },
     {
       "crate": "base64",
-      "count": 979
+      "count": 1183
     },
     {
       "crate": "toml",
-      "count": 938
-    },
-    {
-      "crate": "uuid",
-      "count": 937
+      "count": 1123
     },
     {
       "crate": "sha2",
-      "count": 925
+      "count": 1118
+    },
+    {
+      "crate": "uuid",
+      "count": 1107
     },
     {
       "crate": "url",
-      "count": 867
+      "count": 1012
     },
     {
       "crate": "libc",
-      "count": 849
+      "count": 1007
     },
     {
       "crate": "async-trait",
-      "count": 818
+      "count": 971
     },
     {
       "crate": "bytes",
-      "count": 778
+      "count": 915
     },
     {
       "crate": "criterion",
-      "count": 762
-    },
-    {
-      "crate": "syn",
-      "count": 682
-    },
-    {
-      "crate": "quote",
-      "count": 677
+      "count": 901
     },
     {
       "crate": "hex",
-      "count": 657
+      "count": 788
     },
     {
-      "crate": "proc-macro2",
-      "count": 642
+      "crate": "syn",
+      "count": 784
     },
     {
-      "crate": "itertools",
-      "count": 626
+      "crate": "quote",
+      "count": 777
     },
     {
       "crate": "axum",
-      "count": 615
+      "count": 733
     },
     {
-      "crate": "tokio-util",
-      "count": 599
+      "crate": "proc-macro2",
+      "count": 730
+    },
+    {
+      "crate": "itertools",
+      "count": 715
     },
     {
       "crate": "dirs",
-      "count": 596
-    },
-    {
-      "crate": "env_logger",
-      "count": 595
-    },
-    {
-      "crate": "flate2",
-      "count": 592
+      "count": 715
     },
     {
       "crate": "futures-util",
-      "count": 591
+      "count": 706
+    },
+    {
+      "crate": "flate2",
+      "count": 697
+    },
+    {
+      "crate": "tokio-util",
+      "count": 693
+    },
+    {
+      "crate": "env_logger",
+      "count": 687
     },
     {
       "crate": "rayon",
-      "count": 574
+      "count": 679
     },
     {
       "crate": "once_cell",
-      "count": 561
+      "count": 652
     },
     {
       "crate": "parking_lot",
-      "count": 515
+      "count": 599
     },
     {
       "crate": "indexmap",
-      "count": 505
+      "count": 581
     },
     {
       "crate": "walkdir",
-      "count": 501
+      "count": 580
     },
     {
       "crate": "http",
-      "count": 475
+      "count": 557
     },
     {
       "crate": "tower",
-      "count": 459
+      "count": 541
     },
     {
       "crate": "tokio-stream",
-      "count": 451
-    },
-    {
-      "crate": "strum",
-      "count": 447
-    },
-    {
-      "crate": "lazy_static",
-      "count": 440
-    },
-    {
-      "crate": "tower-http",
-      "count": 436
+      "count": 539
     },
     {
       "crate": "rustls",
-      "count": 434
+      "count": 523
+    },
+    {
+      "crate": "lazy_static",
+      "count": 511
+    },
+    {
+      "crate": "tower-http",
+      "count": 511
+    },
+    {
+      "crate": "strum",
+      "count": 510
     },
     {
       "crate": "serde_yaml",
-      "count": 424
+      "count": 497
     },
     {
       "crate": "semver",
-      "count": 389
+      "count": 452
     },
     {
       "crate": "time",
-      "count": 385
-    },
-    {
-      "crate": "bitflags",
-      "count": 381
+      "count": 451
     },
     {
       "crate": "getrandom",
-      "count": 375
+      "count": 451
     },
     {
       "crate": "proptest",
-      "count": 374
-    },
-    {
-      "crate": "smallvec",
-      "count": 372
+      "count": 445
     },
     {
       "crate": "image",
-      "count": 370
+      "count": 441
     },
     {
-      "crate": "wasm-bindgen",
-      "count": 368
+      "crate": "bitflags",
+      "count": 440
     },
     {
       "crate": "crossterm",
-      "count": 367
+      "count": 436
     },
     {
       "crate": "dashmap",
-      "count": 366
+      "count": 431
     },
     {
-      "crate": "nix",
-      "count": 360
+      "crate": "smallvec",
+      "count": 427
     },
     {
-      "crate": "tar",
-      "count": 357
-    },
-    {
-      "crate": "hyper",
-      "count": 351
-    },
-    {
-      "crate": "pretty_assertions",
-      "count": 349
+      "crate": "wasm-bindgen",
+      "count": 425
     },
     {
       "crate": "glob",
-      "count": 347
+      "count": 413
     },
     {
-      "crate": "indicatif",
-      "count": 336
+      "crate": "tar",
+      "count": 411
+    },
+    {
+      "crate": "hyper",
+      "count": 410
+    },
+    {
+      "crate": "nix",
+      "count": 406
+    },
+    {
+      "crate": "pretty_assertions",
+      "count": 400
     },
     {
       "crate": "zip",
-      "count": 336
+      "count": 398
     },
     {
       "crate": "clap_complete",
-      "count": 333
+      "count": 389
+    },
+    {
+      "crate": "indicatif",
+      "count": 388
     },
     {
       "crate": "bincode",
-      "count": 331
-    },
-    {
-      "crate": "insta",
-      "count": 326
-    },
-    {
-      "crate": "num-traits",
-      "count": 316
+      "count": 387
     },
     {
       "crate": "rusqlite",
-      "count": 314
+      "count": 384
+    },
+    {
+      "crate": "insta",
+      "count": 382
+    },
+    {
+      "crate": "num-traits",
+      "count": 378
     },
     {
       "crate": "schemars",
-      "count": 310
+      "count": 372
     },
     {
       "crate": "http-body-util",
-      "count": 306
+      "count": 364
     },
     {
       "crate": "prost",
-      "count": 298
+      "count": 363
     },
     {
       "crate": "notify",
-      "count": 293
+      "count": 354
     },
     {
       "crate": "ratatui",
-      "count": 288
-    },
-    {
-      "crate": "colored",
-      "count": 277
+      "count": 342
     },
     {
       "crate": "sysinfo",
-      "count": 275
+      "count": 325
     },
     {
-      "crate": "which",
-      "count": 273
+      "crate": "colored",
+      "count": 324
     },
     {
       "crate": "serial_test",
-      "count": 273
-    },
-    {
-      "crate": "percent-encoding",
-      "count": 272
-    },
-    {
-      "crate": "assert_cmd",
-      "count": 269
-    },
-    {
-      "crate": "hyper-util",
-      "count": 266
-    },
-    {
-      "crate": "paste",
-      "count": 263
+      "count": 323
     },
     {
       "crate": "urlencoding",
-      "count": 262
+      "count": 318
     },
     {
-      "crate": "rustc-hash",
-      "count": 261
+      "crate": "hyper-util",
+      "count": 313
+    },
+    {
+      "crate": "which",
+      "count": 312
+    },
+    {
+      "crate": "percent-encoding",
+      "count": 309
     },
     {
       "crate": "hmac",
-      "count": 257
+      "count": 307
     },
     {
-      "crate": "zstd",
-      "count": 255
-    },
-    {
-      "crate": "serde_with",
-      "count": 254
+      "crate": "paste",
+      "count": 306
     },
     {
       "crate": "tokio-tungstenite",
-      "count": 249
+      "count": 302
+    },
+    {
+      "crate": "assert_cmd",
+      "count": 300
+    },
+    {
+      "crate": "zstd",
+      "count": 295
+    },
+    {
+      "crate": "rustc-hash",
+      "count": 291
+    },
+    {
+      "crate": "serde_with",
+      "count": 290
     },
     {
       "crate": "cfg-if",
-      "count": 249
+      "count": 288
     },
     {
       "crate": "async-stream",
-      "count": 248
-    },
-    {
-      "crate": "js-sys",
-      "count": 248
-    },
-    {
-      "crate": "opentelemetry",
-      "count": 243
+      "count": 281
     },
     {
       "crate": "windows-sys",
-      "count": 237
+      "count": 281
     },
     {
-      "crate": "byteorder",
-      "count": 233
+      "crate": "js-sys",
+      "count": 280
+    },
+    {
+      "crate": "opentelemetry",
+      "count": 276
     },
     {
       "crate": "unicode-width",
-      "count": 231
-    },
-    {
-      "crate": "web-sys",
-      "count": 231
-    },
-    {
-      "crate": "opentelemetry_sdk",
-      "count": 225
+      "count": 271
     },
     {
       "crate": "tracing-appender",
-      "count": 224
+      "count": 269
+    },
+    {
+      "crate": "ureq",
+      "count": 267
     },
     {
       "crate": "rstest",
-      "count": 224
+      "count": 265
+    },
+    {
+      "crate": "tonic",
+      "count": 262
+    },
+    {
+      "crate": "web-sys",
+      "count": 260
     }
   ]
 }

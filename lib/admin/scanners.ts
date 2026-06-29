@@ -355,6 +355,15 @@ function ossJunkFilter(r: RepoInput & { archived?: boolean; disabled?: boolean }
   // Empty repos (no code at all)
   if (r.size === 0) return { junk: true, reason: "empty repository" }
 
+  // Non-English repos — CJK/non-Latin scripts in name or description.
+  // u flag is required: without it, emoji surrogate pairs (U+D83C etc.) falsely match BMP ranges.
+  // Parenthesized name translations like "Hayabusa (隼)" are stripped before testing.
+  const NON_ENGLISH = /[぀-ヿ㐀-䶿一-鿿가-퟿豈-﫿Ѐ-ӿ؀-ۿ֐-׿ऀ-ॿ฀-๿]/u
+  const stripParens = (s: string) => s.replace(/\s*\([^)]*\)/g, "")
+  if (NON_ENGLISH.test(stripParens(r.name)) || NON_ENGLISH.test(stripParens(r.description ?? ""))) {
+    return { junk: true, reason: "non-English script" }
+  }
+
   return { junk: false, reason: "" }
 }
 
