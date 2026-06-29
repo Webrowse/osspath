@@ -1,177 +1,35 @@
 [
   {
-    "day": "—",
+    "day": "8–11",
     "month": "Sep",
     "year": "2026",
     "title": "RustConf 2026",
-    "meta": "Annual · In-person + Remote",
+    "meta": "Annual · In-person + Online · Montreal, Canada",
     "href": "https://rustconf.com",
     "recurring": true,
-    "checkedAt": "2026-06-23",
-    "expiresAt": "2026-10-31"
+    "checkedAt": "2026-06-29",
+    "expiresAt": "2026-09-12"
   },
   {
-    "day": "—",
+    "day": "14–16",
+    "month": "Sep",
+    "year": "2026",
+    "title": "Oxidize 2026",
+    "meta": "Annual · In-person · Berlin, Germany",
+    "href": "https://oxidizeconf.com/",
+    "recurring": true,
+    "checkedAt": "2026-06-29",
+    "expiresAt": "2026-09-17"
+  },
+  {
+    "day": "14–17",
     "month": "Oct",
     "year": "2026",
     "title": "EuroRust 2026",
-    "meta": "Annual · Europe",
+    "meta": "Annual · In-person + Online · Barcelona, Spain",
     "href": "https://eurorust.eu",
     "recurring": true,
-    "checkedAt": "2026-06-23",
-    "expiresAt": "2026-11-30"
-  },
-  {
-    "title": "Oxidize – Embedded Rust Conference",
-    "day": "—",
-    "month": "—",
-    "meta": "Annual · Embedded Rust",
-    "href": "https://oxidizeconf.com/",
-    "recurring": true,
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "title": "Oxidize 1K",
-    "day": "—",
-    "month": "—",
-    "meta": "Remote · Embedded Rust",
-    "href": "https://oxidizeconf.com/oxidize-1k/",
-    "recurring": true,
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "title": "Rust Nation UK",
-    "day": "—",
-    "month": "Feb",
-    "meta": "Annual · London",
-    "href": "https://www.rustnationuk.com",
-    "recurring": true,
-    "checkedAt": "2026-06-08"
-  },
-  {
-    "title": "Memory Safety Is Merely Table Stakes (RustConf 2025 Talk)",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "YouTube",
-    "href": "https://www.youtube.com/watch?v=cOP219vkax8",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Cancelling Async Rust",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "YouTube",
-    "href": "https://www.youtube.com/watch?v=zrv5Cy1R7r4",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Redox OS Self-hosted Presentation for RustConf 2025 [video]",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "video",
-    "href": "https://www.youtube.com/watch?v=UQAS6i9Z9wc",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Rain: \"Cancelling Async Rust\" – RustConf 2025",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Online",
-    "href": "https://www.youtube.com/watch?v=zrv5Cy1R7r4",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "10 Years of Redox OS and Rust – RustConf 2025",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Online",
-    "href": "https://www.youtube.com/watch?v=xlccq9EbXGA",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "EuroRust 2023 Reflections: What's a Conference For?",
-    "day": "14",
-    "month": "Oct",
-    "meta": "Blog post",
-    "href": "https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "All EuroRust 2023 talks ordered by the view count",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Online",
-    "href": "https://techtalksweekly.substack.com/p/all-eurorust-2023-talks-ordered-by",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "EuroRust 2023",
-    "day": "—",
-    "month": "Oct",
-    "meta": "Recordings",
-    "href": "https://www.youtube.com/playlist?list=PLH6-VpZ3SvUUKFSEPEWiHQi4JqebBj9Tq",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Helsing at Eurorust and the Oxidation of Defense",
-    "day": "—",
-    "month": "Oct",
-    "meta": "Conference",
-    "href": "https://cafkafk.dev/p/eurorust-2024-helsing/",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "A bitter commentary on EuroRust conf",
-    "day": "14",
-    "month": "Oct",
-    "meta": "—",
-    "href": "https://lucumr.pocoo.org/2023/10/14/eurorust-whats-a-conference/",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Oxidize 1K: A Remote Rust Conference",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Remote, Free",
-    "href": "https://oxidizeconf.com/oxidize-1k/",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Oxidize – Remote-Only Embedded Rust Conference",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Remote",
-    "href": "https://oxidizeconf.com/",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Oxidize 1K – Remote lightning conference for Embedded Rust",
-    "day": "20",
-    "month": "Mar",
-    "meta": "Remote",
-    "href": "https://www.youtube.com/watch?v=zPuELAzJyno",
-    "recurring": false,
-    "checkedAt": "2026-06-22"
-  },
-  {
-    "title": "Rust Nation",
-    "day": "—",
-    "month": "Monthly",
-    "meta": "Conference",
-    "href": "https://www.rustnationuk.com",
-    "recurring": true,
-    "checkedAt": "2026-06-22"
+    "checkedAt": "2026-06-29",
+    "expiresAt": "2026-10-18"
   }
 ]

@@ -14,6 +14,8 @@ function isValidDay(day: string): boolean {
   // Accept abbreviated months used as day labels (RustConf uses "Sep", "Oct")
   const monthAbbrevs = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
   if (monthAbbrevs.includes(day)) return true
+  // Accept day ranges like "8–11" or "14–17"
+  if (/^\d{1,2}[–-]\d{1,2}$/.test(day)) return true
   // Accept 1-31 as day numbers only if they look like editorial intent
   // Reject bare numeric strings that came from bad data entry
   const n = Number(day)
