@@ -1035,7 +1035,7 @@ html {
 .e-oss-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 10px;
+  gap: 14px;
 }
 @media (min-width: 600px) {
   .e-oss-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1044,17 +1044,17 @@ html {
   .e-oss-grid { grid-template-columns: repeat(3, 1fr); }
 }
 .e-oss {
-  background: var(--e-bg-2);
+  background: var(--e-surface);
   border: 1px solid var(--e-line-soft);
-  border-radius: 10px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 20px 22px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
-  transition: border-color 140ms, box-shadow 140ms;
+  transition: border-color 140ms, box-shadow 140ms, background 140ms;
 }
-.e-oss:hover { border-color: var(--e-line-2); box-shadow: 0 2px 8px var(--e-shadow-soft); }
+.e-oss:hover { border-color: var(--e-line-2); background: var(--e-surface-2); box-shadow: 0 3px 12px var(--e-shadow-soft); }
 .e-oss:focus-visible { outline: 2px solid var(--e-accent); outline-offset: 2px; }
 .e-oss__head {
   display: flex;
@@ -1064,8 +1064,8 @@ html {
 }
 .e-oss__name {
   font-family: var(--e-serif);
-  font-size: 15px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 600;
   color: var(--e-fg);
   letter-spacing: -0.01em;
   flex: 1;
@@ -1075,8 +1075,8 @@ html {
   white-space: nowrap;
 }
 .e-oss__note {
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
   color: var(--e-fg-mute);
   margin: 0;
   display: -webkit-box;
@@ -1090,6 +1090,7 @@ html {
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 2px;
 }
 
 /* ── Section 03 — Grants ───────────────────────────────────── */
@@ -1486,9 +1487,10 @@ html {
 
 /* ── OSS card decorations ──────────────────────────────────── */
 .e-oss__stars {
-  font-size: 10.5px;
-  color: var(--e-fg-dim);
+  font-size: 12px;
+  color: var(--e-accent);
   font-family: var(--e-mono);
+  font-weight: 600;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1526,26 +1528,27 @@ html {
 }
 .e-oss__dep-link {
   font-family: var(--e-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--e-fg-dim);
   text-decoration: none;
-  padding: 1px 5px;
-  border-radius: 3px;
-  border: 1px solid var(--e-line-soft);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--e-line);
+  background: var(--e-bg);
   white-space: nowrap;
   letter-spacing: 0.01em;
-  transition: border-color 100ms, color 100ms;
+  transition: border-color 100ms, color 100ms, background 100ms;
 }
-.e-oss__dep-link:hover { color: var(--e-accent); border-color: var(--e-accent); }
+.e-oss__dep-link:hover { color: var(--e-accent); border-color: var(--e-accent); background: var(--e-accent-soft); }
 .e-oss__stats {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 .e-oss__stat {
   font-family: var(--e-mono);
-  font-size: 10.5px;
-  color: var(--e-fg-faint);
+  font-size: 11px;
+  color: var(--e-fg-mute);
 }
 .oss-filter-mono {
   font-family: var(--e-mono);
@@ -1616,6 +1619,234 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
 
 /* Warm open-issues stat (active project with ≥5 issues) */
 .e-oss__stat--issues { color: var(--e-accent); }
+
+/* ── Repo detail page ───────────────────────────────────────── */
+
+.e-repo-breadcrumb {
+  font-size: 13px;
+  color: var(--e-fg-dim);
+  text-decoration: none;
+  transition: color 120ms;
+}
+.e-repo-breadcrumb:hover { color: var(--e-accent-2); }
+
+.e-repo-owner {
+  font-family: var(--e-mono);
+  font-size: 13px;
+  color: var(--e-accent-2);
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
+.e-repo-title {
+  font-family: var(--e-serif);
+  font-size: clamp(26px, 3.4vw, 40px);
+  font-weight: 700;
+  color: var(--e-accent);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin: 0 0 12px;
+}
+
+.e-repo-desc {
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--e-fg);
+  margin: 0;
+  max-width: 680px;
+}
+
+/* Stats bar */
+.e-repo-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 20px 24px;
+  background: var(--e-surface);
+  border: 1px solid var(--e-line-soft);
+  border-radius: 12px;
+}
+
+.e-repo-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.e-repo-stat-pill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 18px;
+  background: var(--e-bg);
+  border: 1px solid var(--e-line-soft);
+  border-radius: 8px;
+  min-width: 72px;
+  transition: border-color 140ms, box-shadow 140ms;
+}
+.e-repo-stat-pill:hover {
+  border-color: var(--e-accent);
+  box-shadow: 0 0 0 1px var(--e-accent-soft), 0 2px 8px var(--e-shadow-soft);
+}
+.e-repo-stat-pill__value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--e-accent);
+  line-height: 1.1;
+  font-family: var(--e-serif);
+}
+.e-repo-stat-pill__value--mono {
+  font-family: var(--e-mono);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--e-fg);
+}
+.e-repo-stat-pill__label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  color: var(--e-fg-mute);
+  font-family: var(--e-mono);
+  margin-top: 4px;
+}
+
+.e-repo-stats-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.e-repo-gh-link {
+  font-family: var(--e-mono);
+  font-size: 13px;
+  color: var(--e-accent-2);
+  text-decoration: none;
+  padding: 8px 14px;
+  border: 1px solid var(--e-accent-2);
+  border-radius: 7px;
+  opacity: 0.85;
+  transition: opacity 120ms, background 120ms;
+  white-space: nowrap;
+}
+.e-repo-gh-link:hover { opacity: 1; background: rgba(6, 174, 213, 0.08); }
+
+.e-repo-last-commit {
+  font-family: var(--e-mono);
+  font-size: 12px;
+  color: var(--e-fg-dim);
+}
+
+/* Maintained by */
+.e-repo-company-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  padding: 12px 16px;
+  background: var(--e-surface);
+  border: 1px solid var(--e-line-soft);
+  border-radius: 8px;
+  transition: border-color 130ms, background 130ms;
+}
+.e-repo-company-row:hover { border-color: var(--e-accent-2); background: var(--e-surface-2); }
+.e-repo-company-row__name {
+  font-family: var(--e-mono);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--e-fg);
+}
+.e-repo-company-row__sector {
+  font-size: 13px;
+  color: var(--e-fg-mute);
+}
+.e-repo-company-row__arrow {
+  font-size: 14px;
+  color: var(--e-accent-2);
+  margin-left: 2px;
+}
+
+/* Funded by rows */
+.e-repo-funding-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--e-surface);
+  border: 1px solid var(--e-line-soft);
+  border-left: 3px solid var(--e-accent-2);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+.e-repo-funding-row__main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+.e-repo-funding-row__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--e-fg);
+  text-decoration: none;
+  transition: color 120ms;
+}
+.e-repo-funding-row__name:hover { color: var(--e-accent); }
+.e-repo-funding-row__via {
+  font-size: 13px;
+  color: var(--e-fg-mute);
+}
+.e-repo-funding-row__funder {
+  color: var(--e-accent-2);
+  text-decoration: none;
+  transition: opacity 120ms;
+}
+.e-repo-funding-row__funder:hover { opacity: 0.75; }
+.e-repo-funding-row__status {
+  font-family: var(--e-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(6, 174, 213, 0.10);
+  color: var(--e-accent-2);
+  border: 1px solid rgba(6, 174, 213, 0.30);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Contribution */
+.e-repo-issues-link {
+  font-family: var(--e-mono);
+  font-size: 14px;
+  color: var(--e-fg-dim);
+  text-decoration: none;
+  transition: color 120ms;
+}
+.e-repo-issues-link--active { color: var(--e-accent); }
+.e-repo-issues-link:hover { color: var(--e-accent); }
+.e-repo-active-note {
+  font-size: 13px;
+  color: var(--e-fg-mute);
+}
+
+/* Footer */
+.e-repo-footer {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 1px solid var(--e-line-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
 /* ── Deps index page ────────────────────────────────────────── */
 
