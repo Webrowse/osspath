@@ -8,8 +8,10 @@ import { BulkDeleteButton } from "@/components/admin/bulk-delete-button"
 
 const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
+const PAGE_SIZE = 100
+
 interface PageProps {
-  searchParams: Promise<{ type?: string }>
+  searchParams: Promise<{ type?: string; page?: string }>
 }
 
 function getItemLabel(item: Record<string, unknown>, type: ContentType): string {
@@ -32,9 +34,12 @@ function getItemMeta(item: Record<string, unknown>, type: ContentType): string {
 }
 
 export default async function PublishedPage({ searchParams }: PageProps) {
-  const { type = "jobs" } = await searchParams
+  const { type = "jobs", page = "0" } = await searchParams
   const activeType = (TABS.includes(type as ContentType) ? type : "jobs") as ContentType
-  const items = readContent(activeType)
+  const pageNum = Math.max(0, parseInt(page) || 0)
+  const allItems = await readContent(activeType)
+  const totalPages = Math.ceil(allItems.length / PAGE_SIZE)
+  const items = allItems.slice(pageNum * PAGE_SIZE, (pageNum + 1) * PAGE_SIZE)
 
   return (
     <>
@@ -52,37 +57,58 @@ export default async function PublishedPage({ searchParams }: PageProps) {
 
       <div className="adm-page-header">
         <span className="adm-page-title">Published — {CONTENT_TYPE_LABELS[activeType]}</span>
-        <span className="adm-page-meta">{items.length} entries</span>
-        <BulkDeleteButton contentType={activeType} count={items.length} />
+        <span className="adm-page-meta">
+          {allItems.length} entries
+          {totalPages > 1 && ` · page ${pageNum + 1}/${totalPages}`}
+        </span>
+        <BulkDeleteButton contentType={activeType} count={allItems.length} />
       </div>
 
       <div className="adm-content">
-        {items.length === 0 ? (
+        {allItems.length === 0 ? (
           <div className="adm-empty">
             <span className="adm-empty__label">No published {activeType}</span>
           </div>
         ) : (
-          <div>
-            {items.map((item, i) => (
-              <div key={i} className="adm-pub-item">
-                <span className="adm-pub-item__name">{getItemLabel(item, activeType)}</span>
-                <span className="adm-pub-item__meta">{getItemMeta(item, activeType)}</span>
-                <a
-                  href={String(item.href ?? "#")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="adm-btn adm-btn--ghost"
-                  style={{ padding: "2px 7px", fontSize: 11 }}
-                  title="Open source URL in new tab"
-                  aria-label="Open source URL"
-                >
-                  ↗
-                </a>
-                <EditPublishedButton contentType={activeType} index={i} item={item} />
-                <DeleteButton contentType={activeType} index={i} />
+          <>
+            <div>
+              {items.map((item, i) => {
+                const globalIndex = pageNum * PAGE_SIZE + i
+                return (
+                  <div key={globalIndex} className="adm-pub-item">
+                    <span className="adm-pub-item__name">{getItemLabel(item, activeType)}</span>
+                    <span className="adm-pub-item__meta">{getItemMeta(item, activeType)}</span>
+                    <a
+                      href={String(item.href ?? "#")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="adm-btn adm-btn--ghost"
+                      style={{ padding: "2px 7px", fontSize: 11 }}
+                      title="Open URL"
+                      aria-label="Open URL"
+                    >
+                      ↗
+                    </a>
+                    <EditPublishedButton contentType={activeType} index={globalIndex} item={item} />
+                    <DeleteButton contentType={activeType} index={globalIndex} />
+                  </div>
+                )
+              })}
+            </div>
+            {totalPages > 1 && (
+              <div className="adm-pagination">
+                {pageNum > 0 ? (
+                  <Link href={`/admin/published?type=${activeType}&page=${pageNum - 1}`} className="adm-btn adm-btn--ghost">← Prev</Link>
+                ) : <span />}
+                <span className="adm-pagination__info">
+                  {pageNum * PAGE_SIZE + 1}–{Math.min((pageNum + 1) * PAGE_SIZE, allItems.length)} of {allItems.length}
+                </span>
+                {pageNum < totalPages - 1 && (
+                  <Link href={`/admin/published?type=${activeType}&page=${pageNum + 1}`} className="adm-btn adm-btn--ghost">Next →</Link>
+                )}
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </div>
     </>

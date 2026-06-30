@@ -4,10 +4,11 @@ import { notFound } from "next/navigation"
 import { getPendingCounts, getPublishedCounts } from "@/lib/admin/storage"
 import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
-import { getSession } from "@/lib/auth"
+import { getSession, signOut } from "@/lib/auth"
 import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
+const ZERO_COUNTS = { jobs: 0, oss: 0, grants: 0, pulse: 0, events: 0, companies: 0, portals: 0 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const host = (await headers()).get("host") ?? ""
@@ -20,8 +21,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     notFound()
   }
 
-  const counts = getPendingCounts()
-  const publishedCounts = getPublishedCounts()
+  let counts = ZERO_COUNTS
+  let publishedCounts = ZERO_COUNTS
+  let dbDown = false
+  try {
+    ;[counts, publishedCounts] = await Promise.all([getPendingCounts(), getPublishedCounts()])
+  } catch {
+    dbDown = true
+  }
+
   const total = Object.values(counts).reduce((a, b) => a + b, 0)
 
   const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
@@ -34,6 +42,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <span>editorial</span>
           <span className="adm-sidebar__env">{isLocal ? "localhost" : "live"}</span>
         </div>
+
+        {dbDown && (
+          <div className="adm-db-warn">DB unreachable — counts unavailable</div>
+        )}
 
         <nav className="adm-nav">
           <div className="adm-nav__section">Queue</div>
@@ -64,6 +76,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         </nav>
 
         <div className="adm-sidebar__footer">
+          <div className="adm-sidebar__user">
+            <span className="adm-sidebar__user-dot" />
+            <span className="adm-sidebar__user-email">{session.user.email}</span>
+          </div>
+          <form action={async () => {
+            "use server"
+            await signOut({ redirectTo: "/login" })
+          }}>
+            <button type="submit" className="adm-sidebar__signout">Sign out</button>
+          </form>
           <Link href="/" className="adm-sidebar__home" target="_blank" rel="noopener">
             ↗ Public site
           </Link>

@@ -1,4 +1,5 @@
 import { ScannerPanel } from "@/components/admin/scanner-panel"
+import { VerifyPanel } from "@/components/admin/verify-panel"
 import { ManualAddForm } from "@/components/admin/manual-add-form"
 import { MaintenancePanel } from "@/components/admin/maintenance-panel"
 
@@ -60,6 +61,25 @@ export default function ScanPage() {
             description="Finds GitHub organizations with multiple high-star Rust repos. Groups repos by owning org, fetches org details, and uses DeepSeek to classify sector and extract company website."
             source="github-orgs"
           />
+          <ScannerPanel
+            id="twir"
+            title="This Week in Rust"
+            description="Parses the latest TWIR issue across all sections — jobs queue, Crate of the Week and CFP repos to OSS queue (via GitHub API), events to events queue, and news links to pulse queue."
+            source="twir"
+          />
+          <ScannerPanel
+            id="careers"
+            title="Company Careers Pages"
+            description="Queries the Greenhouse and Lever public job board APIs (no key required) for all 81 known Rust companies. Filters listings that mention Rust and queues them as jobs."
+            source="company-careers"
+          />
+          <ScannerPanel
+            id="reddit"
+            title="r/rust Community"
+            description="Scans r/rust Who's Hiring threads for job comments with Rust signal, and picks up high-upvote community posts (blogs, release announcements) for the pulse queue."
+            source="reddit-rust"
+          />
+          <VerifyPanel />
           <MaintenancePanel />
         </div>
 

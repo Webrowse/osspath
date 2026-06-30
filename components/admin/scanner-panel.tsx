@@ -4,10 +4,14 @@ import { useState } from "react"
 import {
   scanHNHiring, scanGitHubOSS, scanRustBytes,
   scanGrants, scanPulse, scanEvents, scanPortals, scanCompanies,
+  scanTWIR, scanCompanyCareers, scanRedditRust,
 } from "@/lib/admin/scanners"
 import type { ScanLog } from "@/lib/admin/types"
 
-type ScannerId = "hn" | "github" | "rust-bytes" | "grants" | "pulse" | "events" | "portals" | "companies"
+type ScannerId =
+  | "hn" | "github" | "rust-bytes" | "grants" | "pulse"
+  | "events" | "portals" | "companies"
+  | "twir" | "careers" | "reddit"
 
 interface ScannerPanelProps {
   id: ScannerId
@@ -26,13 +30,16 @@ export function ScannerPanel({ id, title, description }: ScannerPanelProps) {
     setPending(true)
 
     const scanFn =
-      id === "hn"          ? scanHNHiring   :
-      id === "rust-bytes"  ? scanRustBytes  :
-      id === "grants"      ? scanGrants     :
-      id === "pulse"       ? scanPulse      :
-      id === "events"      ? scanEvents     :
-      id === "portals"     ? scanPortals    :
-      id === "companies"   ? scanCompanies  :
+      id === "hn"        ? scanHNHiring      :
+      id === "rust-bytes"? scanRustBytes     :
+      id === "grants"    ? scanGrants        :
+      id === "pulse"     ? scanPulse         :
+      id === "events"    ? scanEvents        :
+      id === "portals"   ? scanPortals       :
+      id === "companies" ? scanCompanies     :
+      id === "twir"      ? scanTWIR          :
+      id === "careers"   ? scanCompanyCareers:
+      id === "reddit"    ? scanRedditRust    :
       scanGitHubOSS
 
     scanFn().then(result => {

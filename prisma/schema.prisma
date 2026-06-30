@@ -6,6 +6,8 @@ datasource db {
   provider = "postgresql"
 }
 
+// ── NextAuth ──────────────────────────────────────────────────────────────────
+
 model User {
   id            String    @id @default(cuid())
   name          String?
@@ -14,7 +16,6 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
   accounts      Account[]
   sessions      Session[]
   @@map("users")
@@ -33,9 +34,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@unique([provider, providerAccountId])
   @@map("accounts")
 }
@@ -45,9 +44,7 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@map("sessions")
 }
 
@@ -55,8 +52,44 @@ model VerificationToken {
   identifier String
   token      String
   expires    DateTime
-
   @@unique([identifier, token])
   @@map("verification_tokens")
 }
 
+// ── Published content ─────────────────────────────────────────────────────────
+// One row per published item. `data` holds the full JSON object as-is.
+// `href` is extracted for fast dedup lookups.
+
+model ContentItem {
+  id        String   @id @default(cuid())
+  type      String   // "jobs" | "oss" | "grants" | "pulse" | "events" | "companies" | "portals"
+  href      String?
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([type])
+  @@index([type, href])
+  @@map("content_items")
+}
+
+// ── Admin queue ───────────────────────────────────────────────────────────────
+// Pending and rejected items across all content types.
+// id is preserved from PendingItem so existing logic works unchanged.
+
+model AdminQueue {
+  id         String   @id
+  type       String
+  status     String   @default("pending")
+  source     String
+  sourceUrl  String
+  foundAt    String
+  confidence Float?
+  rawText    String?
+  extracted  Json
+  whyMatched String?
+  score      Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  @@index([type, status])
+  @@map("admin_queue")
+}

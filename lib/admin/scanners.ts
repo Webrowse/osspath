@@ -1,6 +1,6 @@
 "use server"
 
-import { addPendingItems, readPending, readContent, readRejected } from "./storage"
+import { addPendingItems, readPending, writePending, readContent, readRejected } from "./storage"
 import { extractWithDeepSeek, inferEcoFromRepo, deriveTopicsFromRepo } from "./deepseek"
 import type { RepoInput } from "./deepseek"
 import {
@@ -9,7 +9,7 @@ import {
   shouldQueue,
   QUEUE_THRESHOLD,
 } from "./prefilter"
-import type { PendingItem, ScanLog } from "./types"
+import type { PendingItem, ScanLog, ContentType } from "./types"
 import { auth } from "@/lib/auth"
 
 async function requireAdmin() {
@@ -78,14 +78,14 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
     // Build dedup set: pending IDs + already processed (approved or rejected) IDs
     const processedIds = new Set<string>()
     try {
-      for (const item of readPending("jobs")) processedIds.add(item.id)
-      for (const item of readRejected("jobs")) processedIds.add(item.id)
+      for (const item of (await readPending("jobs"))) processedIds.add(item.id)
+      for (const item of (await readRejected("jobs"))) processedIds.add(item.id)
     } catch { /* non-fatal */ }
 
     // Also dedup by href against published content
     const publishedHrefs = new Set<string>()
     try {
-      for (const item of readContent("jobs")) {
+      for (const item of (await readContent("jobs"))) {
         const href = String(item.href ?? "")
         if (href) publishedHrefs.add(href)
       }
@@ -158,7 +158,7 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
     log.stages!.scoreFiltered = scoreFiltered
     log.stages!.dupFiltered   = dupFiltered
     log.stages!.queued        = pendingItems.length
-    log.added   = addPendingItems("jobs", pendingItems)
+    log.added = await addPendingItems("jobs", pendingItems)
     log.skipped = log.found - pendingItems.length
 
     if (pendingItems.length === 0 && hits.length > 0) {
@@ -176,112 +176,123 @@ export async function scanHNHiring(useAI = false): Promise<ScanLog> {
 
 // ── TWIR Scanner ──────────────────────────────────────────────────────────────
 
+// Fetch a TWIR OSS repo via GitHub API and return a PendingItem, or null if junk.
+async function twirFetchOSSRepos(urls: string[], issueUrl: string, label: string): Promise<PendingItem[]> {
+  const published = new Set(
+    ((await readContent("oss")) as Array<Record<string, unknown>>).map((r) => String(r.href ?? ""))
+  )
+  const items: PendingItem[] = []
+  for (const url of urls) {
+    const m = url.match(/github\.com\/([^/]+)\/([^/]+)/)
+    if (!m) continue
+    if (published.has(url)) continue
+    const [, owner, repo] = m
+    try {
+      const r = await ghFetch(`https://api.github.com/repos/${owner}/${repo}`) as Record<string, unknown>
+      const mapped = mapRepoResponse(r)
+      const { junk } = ossJunkFilter(mapped)
+      if (junk || (mapped.stargazers_count ?? 0) < 10) continue
+      items.push({
+        id: `twir-oss-${owner}-${repo}`,
+        type: "oss",
+        status: "pending",
+        source: "twir",
+        sourceUrl: issueUrl,
+        foundAt: new Date().toISOString(),
+        confidence: 0.9,
+        score: 0.9,
+        whyMatched: `Featured in TWIR (${label})`,
+        rawText: url,
+        extracted: { ...buildOSSExtracted(mapped), labels: [label] },
+      })
+      await sleep(400)
+    } catch { continue }
+  }
+  return items
+}
+
 export async function scanTWIR(useAI = false): Promise<ScanLog> {
   await requireAdmin()
   const shouldUseAI = useAI || !!process.env.DEEPSEEK_API_KEY
   const log: ScanLog = {
     source: "twir",
     startedAt: new Date().toISOString(),
-    found: 0,
-    added: 0,
-    skipped: 0,
-    errors: [],
-    stages: {},
-    notes: [],
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
   }
 
+  // ── Fetch latest issue ─────────────────────────────────────────────────────
+  let issueUrl: string
   try {
     const rssRes = await fetch("https://this-week-in-rust.org/rss.xml", {
-      signal: AbortSignal.timeout(15_000),
-      next: { revalidate: 0 },
+      signal: AbortSignal.timeout(15_000), next: { revalidate: 0 },
     })
     const rssText = await rssRes.text()
-    const linkMatch = rssText.match(
-      /<link>(https:\/\/this-week-in-rust\.org\/blog\/[^<]+)<\/link>/
-    )
+    const linkMatch = rssText.match(/<link>(https:\/\/this-week-in-rust\.org\/blog\/[^<]+)<\/link>/)
     if (!linkMatch) {
       log.errors.push("Could not parse TWIR RSS feed")
       log.finishedAt = new Date().toISOString()
       return log
     }
-
-    const issueUrl = linkMatch[1]
+    issueUrl = linkMatch[1]
     log.notes!.push(`Latest issue: ${issueUrl}`)
-    const htmlRes = await fetch(issueUrl, { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } })
-    const html = await htmlRes.text()
+  } catch (e) {
+    log.errors.push(`RSS fetch failed: ${String(e)}`)
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
 
-    // Extract the Jobs section by its h2 id="jobs" anchor
-    const jobsMatch = html.match(
-      /<h2[^>]*id="jobs"[^>]*>.*?<\/h2>([\s\S]*?)<h[12]/i
+  let html: string
+  try {
+    const htmlRes = await fetch(issueUrl, { signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } })
+    html = await htmlRes.text()
+  } catch (e) {
+    log.errors.push(`Issue fetch failed: ${String(e)}`)
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+
+  function section(id: string): string {
+    const re = new RegExp(
+      `<h2[^>]*id="${id}"[^>]*>[\\s\\S]*?</h2>([\\s\\S]*?)(?=<h[12][^>]*id=|$)`, "i"
     )
-    const jobsSection = jobsMatch ? jobsMatch[1] : ""
+    const m = html.match(re)
+    return m ? m[1] : ""
+  }
 
-    if (!jobsSection || jobsSection.length < 50) {
-      log.errors.push("Jobs section not found in TWIR issue")
-      log.finishedAt = new Date().toISOString()
-      return log
-    }
-
-    // Extract <li> items first (TWIR's preferred format for jobs)
-    const liMatches = Array.from(
-      jobsSection.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)
-    )
-    let entries = liMatches
+  // ── Jobs ───────────────────────────────────────────────────────────────────
+  const jobsSection = section("jobs")
+  if (jobsSection.length > 50) {
+    let entries = Array.from(jobsSection.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi))
       .map((m) => stripHtml(m[1]))
       .filter((s) => s.trim().length > 30)
 
-    // Detect TWIR's "no jobs, see r/rust" redirect pattern
     if (entries.length === 0) {
       const pText = stripHtml(jobsSection).toLowerCase()
       if (pText.includes("who's hiring thread") || pText.includes("r/rust")) {
-        log.notes!.push(
-          "TWIR has stopped publishing jobs — it now redirects to r/rust Who's Hiring."
-        )
-        log.notes!.push(
-          "Recommendation: use the HN Hiring scanner, or check r/rust manually."
-        )
-        log.finishedAt = new Date().toISOString()
-        return log
+        log.notes!.push("TWIR now redirects jobs to r/rust Who's Hiring — use Reddit scanner.")
+      } else {
+        entries = stripHtml(jobsSection)
+          .split(/(?<=\.)\s+(?=[A-Z])/g)
+          .filter((s) => /hiring|rust|engineer|developer|apply/i.test(s) && s.length > 50)
+        log.notes!.push("Used fallback regex parser for jobs")
       }
-      // Fallback: regex scan for "$Company is hiring..." pattern
-      const fallbackEntries = stripHtml(jobsSection)
-        .split(/(?<=\.)\s+(?=[A-Z])/g)
-        .filter((s) => /hiring|rust|engineer|developer|apply/i.test(s) && s.length > 50)
-      entries = fallbackEntries
-      log.notes!.push("Used fallback regex parser")
     }
 
-    log.found = entries.length
-    log.stages!.entriesExtracted = entries.length
-
     let rustFiltered = 0
-    let scoreFiltered = 0
-    const pendingItems: PendingItem[] = []
-
+    const jobItems: PendingItem[] = []
     for (const text of entries.slice(0, 30)) {
-      const signal = classifyRustSignal(text)
-      if (signal !== "strong") {
-        rustFiltered++
-        continue
-      }
-
+      if (classifyRustSignal(text) !== "strong") { rustFiltered++; continue }
       const score = scoreJobText(text)
-      if (!shouldQueue(score)) {
-        scoreFiltered++
-        continue
-      }
-
+      if (!shouldQueue(score)) continue
       let extracted: Record<string, unknown>
       if (shouldUseAI) {
         const result = await extractWithDeepSeek("jobs", text)
-        if (result.ok && result.data) extracted = result.data
-        else extracted = extractMinimalJob(text)
+        extracted = (result.ok && result.data) ? result.data : extractMinimalJob(text)
       } else {
         extracted = extractMinimalJob(text)
       }
-
-      pendingItems.push({
-        id: `twir-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      jobItems.push({
+        id: `twir-job-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         type: "jobs",
         status: "pending",
         source: "twir",
@@ -294,16 +305,112 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
         extracted,
       })
     }
-
-    log.stages!.rustFiltered  = rustFiltered
-    log.stages!.scoreFiltered = scoreFiltered
-    log.stages!.queued        = pendingItems.length
-    log.added = addPendingItems("jobs", pendingItems)
-    log.skipped = log.found - pendingItems.length
-  } catch (e) {
-    log.errors.push(`TWIR scan failed: ${String(e)}`)
+    log.stages!.jobsFound = entries.length
+    log.stages!.jobsRustFiltered = rustFiltered
+    log.stages!.jobsQueued = jobItems.length
+    const addedJobs = await addPendingItems("jobs", jobItems)
+    log.found += entries.length
+    log.added += addedJobs
   }
 
+  // ── Crate of the Week → OSS ────────────────────────────────────────────────
+  const cotwHtml = section("crate-of-the-week")
+  if (cotwHtml) {
+    const urls = extractGitHubRepoUrls(cotwHtml)
+    log.stages!.crateOfWeekRepos = urls.length
+    const ossItems = await twirFetchOSSRepos(urls.slice(0, 3), issueUrl, "crate-of-week")
+    log.found += urls.length
+    log.added += await addPendingItems("oss", ossItems)
+    log.stages!.crateOfWeekQueued = ossItems.length
+  }
+
+  // ── Call for Participation → OSS (cfp label) ───────────────────────────────
+  const cfpHtml = section("call-for-participation")
+  if (cfpHtml) {
+    const urls = extractGitHubRepoUrls(cfpHtml)
+    log.stages!.cfpRepos = urls.length
+    const ossItems = await twirFetchOSSRepos(urls.slice(0, 12), issueUrl, "cfp")
+    log.found += urls.length
+    log.added += await addPendingItems("oss", ossItems)
+    log.stages!.cfpQueued = ossItems.length
+  }
+
+  // ── Events section ─────────────────────────────────────────────────────────
+  const eventsHtml = section("events")
+  if (eventsHtml.length > 50) {
+    const eventItems: PendingItem[] = []
+    for (const m of Array.from(eventsHtml.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)).slice(0, 30)) {
+      const rawLi = m[1]
+      const text = stripHtml(rawLi).trim()
+      if (text.length < 20) continue
+      const linkMatch = rawLi.match(/href="([^"]+)"/)
+      if (!linkMatch || !linkMatch[1].startsWith("http")) continue
+      const href = linkMatch[1]
+      const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})/)
+      const location = text.match(/\|\s*([^|]+)\s*\|/)?.[1]?.trim() ?? ""
+      let extracted: Record<string, unknown>
+      if (shouldUseAI) {
+        const result = await extractWithDeepSeek("events", text)
+        extracted = (result.ok && result.data) ? result.data : { name: text.split("|").pop()?.trim() ?? text, href, date: dateMatch?.[1] ?? "", format: "In-Person", location }
+      } else {
+        extracted = {
+          name: text.split("|").pop()?.trim() ?? text,
+          href,
+          date: dateMatch?.[1] ?? "",
+          format: /virtual|online/i.test(text) ? "Online" : "In-Person",
+          location,
+        }
+      }
+      eventItems.push({
+        id: `twir-event-${href.replace(/[^a-z0-9]/gi, "").slice(-28)}`,
+        type: "events",
+        status: "pending",
+        source: "twir",
+        sourceUrl: issueUrl,
+        foundAt: new Date().toISOString(),
+        confidence: 0.85,
+        score: 0.8,
+        whyMatched: "Listed in TWIR events section",
+        rawText: text.slice(0, 400),
+        extracted,
+      })
+      log.found++
+    }
+    log.stages!.eventsQueued = eventItems.length
+    log.added += await addPendingItems("events", eventItems)
+  }
+
+  // ── News & Blog Posts → Pulse ──────────────────────────────────────────────
+  const newsHtml = section("updates-from-rust-community") || section("news-blog-posts")
+  if (newsHtml.length > 50) {
+    const pulseItems: PendingItem[] = []
+    const linkRe = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi
+    let lm: RegExpExecArray | null
+    while ((lm = linkRe.exec(newsHtml)) !== null) {
+      const [, href, rawTitle] = lm
+      const title = stripHtml(rawTitle).trim()
+      if (!title || title.length < 10) continue
+      if (!href.startsWith("http") || href.includes("this-week-in-rust.org")) continue
+      pulseItems.push({
+        id: `twir-pulse-${href.replace(/[^a-z0-9]/gi, "").slice(-24)}`,
+        type: "pulse",
+        status: "pending",
+        source: "twir",
+        sourceUrl: issueUrl,
+        foundAt: new Date().toISOString(),
+        confidence: 0.75,
+        score: 0.7,
+        whyMatched: "Linked in TWIR news section",
+        rawText: title,
+        extracted: { name: title, href, kind: "Blog", note: title },
+      })
+      log.found++
+    }
+    log.stages!.newsLinksQueued = pulseItems.length
+    log.added += await addPendingItems("pulse", pulseItems)
+  }
+
+  log.skipped = log.found - log.added
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -445,11 +552,11 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
   const existingIds   = new Set<string>()
   const existingHrefs = new Set<string>()
   try {
-    for (const item of readPending("oss")) {
+    for (const item of (await readPending("oss"))) {
       existingIds.add(item.id)
       if (item.sourceUrl) existingHrefs.add(item.sourceUrl)
     }
-    for (const item of readContent("oss")) {
+    for (const item of (await readContent("oss"))) {
       const href = String(item.href ?? "")
       if (href) existingHrefs.add(href)
     }
@@ -571,7 +678,7 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
   }
 
   // ── 4. Queue ──────────────────────────────────────────────────────────────
-  log.added   = addPendingItems("oss", toQueue)
+  log.added = await addPendingItems("oss", toQueue)
   log.skipped = dupCount + junkCount
   log.stages!.queued      = toQueue.length
   log.stages!.duplicates  = dupCount
@@ -745,8 +852,8 @@ export async function scanGrants(): Promise<ScanLog> {
     found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
   }
 
-  const existingIds = new Set(readPending("grants").map(i => i.id))
-  const existingHrefs = new Set(readContent("grants").map(i => String(i.href ?? "")))
+  const existingIds = new Set((await readPending("grants")).map(i => i.id))
+  const existingHrefs = new Set((await readContent("grants")).map(i => String(i.href ?? "")))
   const pendingItems: PendingItem[] = []
 
   // ── 1. Seeded known programs ──────────────────────────────────────────────
@@ -817,7 +924,7 @@ export async function scanGrants(): Promise<ScanLog> {
   }
 
   log.stages!.queued = pendingItems.length
-  log.added = addPendingItems("grants", pendingItems)
+  log.added = await addPendingItems("grants", pendingItems)
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -862,7 +969,7 @@ export async function scanPulse(): Promise<ScanLog> {
   }
 
   log.found = repos.length
-  const existingIds = new Set(readPending("pulse").map(i => i.id))
+  const existingIds = new Set((await readPending("pulse")).map(i => i.id))
   const pendingItems: PendingItem[] = []
 
   for (const repo of repos) {
@@ -890,7 +997,7 @@ export async function scanPulse(): Promise<ScanLog> {
   }
 
   log.stages!.queued = pendingItems.length
-  log.added = addPendingItems("pulse", pendingItems)
+  log.added = await addPendingItems("pulse", pendingItems)
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -924,7 +1031,7 @@ export async function scanEvents(): Promise<ScanLog> {
   }
 
   log.found = stories.length
-  const existingIds = new Set(readPending("events").map(i => i.id))
+  const existingIds = new Set((await readPending("events")).map(i => i.id))
   const pendingItems: PendingItem[] = []
 
   for (const story of stories) {
@@ -948,7 +1055,7 @@ export async function scanEvents(): Promise<ScanLog> {
   }
 
   log.stages!.queued = pendingItems.length
-  log.added = addPendingItems("events", pendingItems)
+  log.added = await addPendingItems("events", pendingItems)
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -1009,8 +1116,8 @@ export async function scanPortals(): Promise<ScanLog> {
     found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
   }
 
-  const existingIds = new Set(readPending("portals").map(i => i.id))
-  const existingHrefs = new Set(readContent("portals").map(i => String(i.href ?? "")))
+  const existingIds = new Set((await readPending("portals")).map(i => i.id))
+  const existingHrefs = new Set((await readContent("portals")).map(i => String(i.href ?? "")))
   const pendingItems: PendingItem[] = []
 
   // Add seeded portals that aren't already published or pending
@@ -1057,7 +1164,7 @@ export async function scanPortals(): Promise<ScanLog> {
 
   log.found = PORTAL_SEEDS.length + hnCandidates.length
   log.stages!.queued = pendingItems.length
-  log.added = addPendingItems("portals", pendingItems)
+  log.added = await addPendingItems("portals", pendingItems)
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -1134,8 +1241,8 @@ export async function scanCompanies(): Promise<ScanLog> {
     )
   )
 
-  const existingIds = new Set(readPending("companies").map(i => i.id))
-  const existingNames = new Set(readContent("companies").map(i => String(i.name ?? "").toLowerCase()))
+  const existingIds = new Set((await readPending("companies")).map(i => i.id))
+  const existingNames = new Set((await readContent("companies")).map(i => String(i.name ?? "").toLowerCase()))
   const pendingItems: PendingItem[] = []
 
   for (let i = 0; i < topOrgs.length; i++) {
@@ -1181,7 +1288,7 @@ export async function scanCompanies(): Promise<ScanLog> {
   }
 
   log.stages!.queued = pendingItems.length
-  log.added = addPendingItems("companies", pendingItems)
+  log.added = await addPendingItems("companies", pendingItems)
   log.finishedAt = new Date().toISOString()
   return log
 }
@@ -1318,11 +1425,11 @@ export async function scanRustBytes(): Promise<ScanLog> {
   const existingHrefs = new Set<string>()
   const existingIds   = new Set<string>()
   try {
-    for (const item of readPending("oss")) {
+    for (const item of (await readPending("oss"))) {
       existingIds.add(item.id)
       if (item.sourceUrl) existingHrefs.add(item.sourceUrl)
     }
-    for (const item of readContent("oss")) {
+    for (const item of (await readContent("oss"))) {
       const h = String(item.href ?? "")
       if (h) existingHrefs.add(h)
     }
@@ -1388,7 +1495,7 @@ export async function scanRustBytes(): Promise<ScanLog> {
   }
 
   // ── 5. Queue ───────────────────────────────────────────────────────────────
-  log.added   = addPendingItems("oss", toQueue)
+  log.added = await addPendingItems("oss", toQueue)
   log.skipped = dupCount + nonRustCount + fetchErrors
   log.stages!.queued     = toQueue.length
   log.stages!.duplicates = dupCount
@@ -1420,3 +1527,337 @@ function mapRepoResponse(r: any): RepoInput {
   }
 }
 
+
+// ── Company Careers Scanner (Greenhouse + Lever public APIs) ──────────────────
+
+async function tryGreenhouse(slug: string): Promise<any[]> {
+  try {
+    const res = await fetch(
+      `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(slug)}/jobs`,
+      { signal: AbortSignal.timeout(8_000), next: { revalidate: 0 } }
+    )
+    if (!res.ok) return []
+    const data = await res.json() as { jobs?: any[] }
+    return data.jobs ?? []
+  } catch { return [] }
+}
+
+async function tryLever(slug: string): Promise<any[]> {
+  try {
+    const res = await fetch(
+      `https://api.lever.co/v0/postings/${encodeURIComponent(slug)}?mode=json`,
+      { signal: AbortSignal.timeout(8_000), next: { revalidate: 0 } }
+    )
+    if (!res.ok) return []
+    return await res.json() as any[]
+  } catch { return [] }
+}
+
+export async function scanCompanyCareers(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "company-careers",
+    startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  let companies: Array<{ slug: string; name: string; href: string }>
+  try {
+    companies = (await readContent("companies")) as typeof companies
+  } catch (e) {
+    log.errors.push(`Failed to read companies: ${String(e)}`)
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+
+  let tried = 0
+  const pendingItems: PendingItem[] = []
+
+  for (const co of companies) {
+    const slug = String(co.slug ?? "")
+    if (!slug) continue
+    tried++
+
+    const [ghJobs, levJobs] = await Promise.all([tryGreenhouse(slug), tryLever(slug)])
+    const allJobs = [...ghJobs, ...levJobs]
+
+    for (const job of allJobs) {
+      const title = String(job.title ?? job.text ?? "")
+      const desc = stripHtml(String(job.content ?? job.description ?? job.descriptionPlain ?? ""))
+      const full = `${title} ${desc}`
+      if (!/\brust\b/i.test(full)) continue
+      const score = scoreJobText(full)
+      if (!shouldQueue(score)) continue
+      const href = String(job.absolute_url ?? job.hostedUrl ?? "")
+      const ats = ghJobs.includes(job) ? "Greenhouse" : "Lever"
+      pendingItems.push({
+        id: `careers-${slug}-${String(job.id ?? Math.random().toString(36).slice(2))}`,
+        type: "jobs",
+        status: "pending",
+        source: "company-careers",
+        sourceUrl: href || co.href,
+        foundAt: new Date().toISOString(),
+        confidence: 0.85,
+        score: score.total,
+        whyMatched: `${co.name} via ${ats}: ${score.reasons.join(" · ")}`,
+        rawText: `${title}\n${desc}`.slice(0, 800),
+        extracted: {
+          title,
+          company: co.name,
+          href,
+          location: String(job.location?.name ?? job.categories?.location ?? ""),
+          remote: /remote/i.test(full),
+          type: "Full-time",
+        },
+      })
+      log.found++
+    }
+
+    if (tried % 15 === 0) await sleep(500)
+  }
+
+  log.stages!.companiesTried = tried
+  log.stages!.jobsFound = log.found
+  log.added = await addPendingItems("jobs", pendingItems)
+  log.skipped = log.found - pendingItems.length
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Reddit r/rust Scanner ─────────────────────────────────────────────────────
+
+export async function scanRedditRust(): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: "reddit-rust",
+    startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  const headers = { "User-Agent": "osspath.com/scanner 1.0" }
+
+  // ── 1. Who's Hiring threads → jobs ────────────────────────────────────────
+  try {
+    const searchRes = await fetch(
+      "https://www.reddit.com/r/rust/search.json?q=who+is+hiring&sort=new&restrict_sr=on&limit=3",
+      { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
+    )
+    const searchData = await searchRes.json() as any
+    const threads: any[] = (searchData?.data?.children ?? []).map((c: any) => c.data)
+    log.stages!.hiringThreadsFound = threads.length
+
+    const jobItems: PendingItem[] = []
+    for (const thread of threads.slice(0, 2)) {
+      log.notes!.push(`Thread: ${String(thread.title ?? "")}`)
+      await sleep(1200)
+      const commRes = await fetch(
+        `https://www.reddit.com/r/rust/comments/${thread.id}.json?limit=100`,
+        { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
+      )
+      const commData = await commRes.json() as any
+      const comments: any[] = (commData?.[1]?.data?.children ?? []).map((c: any) => c.data)
+
+      for (const comment of comments) {
+        const text = String(comment.body ?? "")
+        if (text.length < 50) continue
+        if (classifyRustSignal(text) !== "strong") continue
+        const score = scoreJobText(text)
+        if (!shouldQueue(score)) continue
+        jobItems.push({
+          id: `reddit-job-${String(comment.id ?? Math.random().toString(36).slice(2))}`,
+          type: "jobs",
+          status: "pending",
+          source: "reddit-rust",
+          sourceUrl: `https://reddit.com${String(comment.permalink ?? "")}`,
+          foundAt: new Date().toISOString(),
+          confidence: 0.6,
+          score: score.total,
+          whyMatched: score.reasons.join(" · "),
+          rawText: text.slice(0, 800),
+          extracted: extractMinimalJob(text),
+        })
+        log.found++
+      }
+    }
+    log.stages!.hiringJobsQueued = jobItems.length
+    log.added += await addPendingItems("jobs", jobItems)
+  } catch (e) {
+    log.errors.push(`r/rust hiring search: ${String(e)}`)
+  }
+
+  // ── 2. New community posts → pulse ────────────────────────────────────────
+  await sleep(1200)
+  try {
+    const newRes = await fetch(
+      "https://www.reddit.com/r/rust/new.json?limit=25",
+      { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
+    )
+    const newData = await newRes.json() as any
+    const posts: any[] = (newData?.data?.children ?? []).map((c: any) => c.data)
+
+    const pulseItems: PendingItem[] = []
+    for (const post of posts) {
+      if (post.is_self) continue
+      if ((post.score ?? 0) < 20) continue
+      const href = String(post.url ?? "")
+      if (!href.startsWith("http") || href.includes("reddit.com")) continue
+      if (/github\.com\/[^/]+\/[^/]+\/?$/.test(href)) continue
+      pulseItems.push({
+        id: `reddit-pulse-${String(post.id ?? Math.random().toString(36).slice(2))}`,
+        type: "pulse",
+        status: "pending",
+        source: "reddit-rust",
+        sourceUrl: `https://reddit.com${String(post.permalink ?? "")}`,
+        foundAt: new Date().toISOString(),
+        confidence: Math.min(0.45 + (post.score ?? 0) / 500, 0.85),
+        score: 0.6,
+        whyMatched: `r/rust — ${post.score ?? 0} upvotes`,
+        rawText: String(post.title ?? ""),
+        extracted: {
+          name: String(post.title ?? ""),
+          href,
+          kind: "Blog",
+          note: String(post.title ?? ""),
+        },
+      })
+      log.found++
+    }
+    log.stages!.communityPostsQueued = pulseItems.length
+    log.added += await addPendingItems("pulse", pulseItems)
+  } catch (e) {
+    log.errors.push(`r/rust community posts: ${String(e)}`)
+  }
+
+  log.skipped = log.found - log.added
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Queue Verifier ────────────────────────────────────────────────────────────
+// Fetches the live URL of every pending item for a given type, checks it is
+// still alive and mentions Rust, and optionally re-extracts fields via AI.
+
+export async function scanVerifyQueue(type: ContentType): Promise<ScanLog> {
+  await requireAdmin()
+  const log: ScanLog = {
+    source: `verify-${type}`,
+    startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  }
+
+  const pending = await readPending(type)
+  log.found = pending.length
+
+  if (pending.length === 0) {
+    log.notes!.push(`No pending ${type} items to verify.`)
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+
+  const useAI = !!process.env.DEEPSEEK_API_KEY
+  let confirmed = 0, dead = 0, enriched = 0, skipped = 0
+
+  const BATCH = 8
+  const updated = [...pending]
+
+  for (let i = 0; i < pending.length; i += BATCH) {
+    const batch = pending.slice(i, i + BATCH)
+    const results = await Promise.all(
+      batch.map(async (item) => {
+        const url = String(item.extracted?.href ?? item.sourceUrl ?? "")
+        if (!url.startsWith("http")) return { item, status: "skipped" as const }
+
+        try {
+          const res = await fetch(url, {
+            method: "GET",
+            signal: AbortSignal.timeout(9_000),
+            headers: { "User-Agent": "osspath.com/verifier 1.0" },
+            next: { revalidate: 0 },
+          })
+
+          if (!res.ok) {
+            return {
+              item: {
+                ...item,
+                extracted: {
+                  ...item.extracted,
+                  _verified: false,
+                  _httpStatus: res.status,
+                  _verifiedAt: new Date().toISOString(),
+                },
+              },
+              status: "dead" as const,
+            }
+          }
+
+          const rawHtml = await res.text()
+          const pageText = stripHtml(rawHtml)
+          const hasRust = /\brust\b/i.test(pageText.slice(0, 20_000))
+
+          let patch: Record<string, unknown> = {
+            _verified: hasRust,
+            _httpStatus: res.status,
+            _verifiedAt: new Date().toISOString(),
+          }
+          let aiEnriched = false
+
+          if (useAI && hasRust) {
+            const snippet = pageText.slice(0, 3_500)
+            const result = await extractWithDeepSeek(type, snippet)
+            if (result.ok && result.data) {
+              // Only fill in fields that are currently blank
+              for (const [k, v] of Object.entries(result.data)) {
+                if (k.startsWith("_")) continue
+                const cur = item.extracted[k]
+                if ((!cur || cur === "" || cur === 0) && v) patch[k] = v
+              }
+              aiEnriched = true
+            }
+          }
+
+          return {
+            item: {
+              ...item,
+              confidence: hasRust
+                ? Math.max(item.confidence ?? 0, 0.65)
+                : (item.confidence ?? 0.5) * 0.4,
+              extracted: { ...item.extracted, ...patch },
+            },
+            status: (hasRust ? "confirmed" : "dead") as "confirmed" | "dead",
+            aiEnriched,
+          }
+        } catch {
+          return { item, status: "skipped" as const }
+        }
+      })
+    )
+
+    for (let j = 0; j < results.length; j++) {
+      const { item: updatedItem, status, aiEnriched } = results[j] as {
+        item: typeof pending[0]; status: string; aiEnriched?: boolean
+      }
+      updated[i + j] = updatedItem
+      if (status === "confirmed") confirmed++
+      else if (status === "dead") dead++
+      else skipped++
+      if (aiEnriched) enriched++
+    }
+
+    if (i + BATCH < pending.length) await sleep(300)
+  }
+
+  await writePending(type, updated)
+
+  log.added = confirmed
+  log.skipped = dead + skipped
+  log.stages!.totalChecked = pending.length
+  log.stages!.confirmed = confirmed
+  log.stages!.deadOrMoved = dead
+  log.stages!.unreachable = skipped
+  if (useAI) log.stages!.enrichedWithAI = enriched
+  if (dead > 0) log.notes!.push(`${dead} dead links — items kept with _verified:false, safe to bulk-reject them.`)
+  if (enriched > 0) log.notes!.push(`${enriched} items enriched with fresh AI extraction from live page.`)
+
+  log.finishedAt = new Date().toISOString()
+  return log
+}

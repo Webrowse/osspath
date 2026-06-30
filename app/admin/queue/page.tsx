@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { readPendingUnpublished } from "@/lib/admin/storage"
+import { readPendingUnpublished, getPendingCounts } from "@/lib/admin/storage"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import type { ContentType } from "@/lib/admin/types"
-import { QueueCard } from "@/components/admin/queue-card"
 import { BulkActions } from "@/components/admin/bulk-actions"
+import { QueueSearch } from "@/components/admin/queue-search"
+import { ExportButton } from "@/components/admin/export-button"
 
 const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
 
@@ -14,11 +15,10 @@ interface PageProps {
 export default async function QueuePage({ searchParams }: PageProps) {
   const { type = "jobs" } = await searchParams
   const activeType = (TABS.includes(type as ContentType) ? type : "jobs") as ContentType
-  const items = readPendingUnpublished(activeType)
-
-  const tabCounts = Object.fromEntries(
-    TABS.map((t) => [t, readPendingUnpublished(t).length])
-  )
+  const [items, tabCounts] = await Promise.all([
+    readPendingUnpublished(activeType),
+    getPendingCounts(),
+  ])
 
   return (
     <>
@@ -47,7 +47,10 @@ export default async function QueuePage({ searchParams }: PageProps) {
         <span className="adm-page-meta">
           {items.length} item{items.length !== 1 ? "s" : ""}
         </span>
-        <BulkActions contentType={activeType} count={items.length} />
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <ExportButton items={items} contentType={activeType} />
+          <BulkActions contentType={activeType} items={items} />
+        </div>
       </div>
 
       {/* Queue */}
@@ -61,11 +64,7 @@ export default async function QueuePage({ searchParams }: PageProps) {
             </Link>
           </div>
         ) : (
-          <div>
-            {items.map((item) => (
-              <QueueCard key={item.id} item={item} contentType={activeType} />
-            ))}
-          </div>
+          <QueueSearch items={items} contentType={activeType} />
         )}
       </div>
     </>

@@ -1,7 +1,8 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { readPending, writePending, archiveItem, appendContent, writeContent } from "./storage"
+import { readPending, writePending, archiveItem, appendContent, appendContentBatch, writeContent } from "./storage"
+import { prisma } from "@/lib/prisma"
 import type { ContentType, PendingItem } from "./types"
 import { auth } from "@/lib/auth"
 
@@ -21,7 +22,7 @@ export async function approveItem(
   overrides?: Record<string, unknown>
 ) {
   await requireAdmin()
-  const pending = readPending(type)
+  const pending = await readPending(type)
   const item = pending.find((p) => p.id === id)
   if (!item) throw new Error(`Pending item not found: ${id}`)
 
@@ -47,9 +48,9 @@ export async function approveItem(
       .replace(/^-|-$/g, "")
   }
 
-  appendContent(type, published)
-  writePending(type, pending.filter((p) => p.id !== id))
-  archiveItem(type, { ...item, status: "approved" })
+  await appendContent(type, published)
+  await writePending(type, pending.filter((p) => p.id !== id))
+  await archiveItem(type, { ...item, status: "approved" })
 
   revalidatePath("/admin/queue")
   revalidatePath("/admin/published")
@@ -60,12 +61,12 @@ export async function approveItem(
 
 export async function rejectItem(type: ContentType, id: string) {
   await requireAdmin()
-  const pending = readPending(type)
+  const pending = await readPending(type)
   const item = pending.find((p) => p.id === id)
   if (!item) throw new Error(`Pending item not found: ${id}`)
 
-  writePending(type, pending.filter((p) => p.id !== id))
-  archiveItem(type, { ...item, status: "rejected" })
+  await writePending(type, pending.filter((p) => p.id !== id))
+  await archiveItem(type, { ...item, status: "rejected" })
 
   revalidatePath("/admin/queue")
 }
@@ -74,7 +75,7 @@ export async function rejectItem(type: ContentType, id: string) {
 
 export async function approveAll(type: ContentType) {
   await requireAdmin()
-  const pending = readPending(type)
+  const pending = await readPending(type)
   if (pending.length === 0) return
 
   const today = new Date().toISOString().split("T")[0]
@@ -90,10 +91,10 @@ export async function approveAll(type: ContentType) {
     if (type === "jobs" && !published.expiresAt) {
       published.expiresAt = expiresAt
     }
-    appendContent(type, published)
-    archiveItem(type, { ...item, status: "approved" })
+    await appendContent(type, published)
+    await archiveItem(type, { ...item, status: "approved" })
   }
-  writePending(type, [])
+  await writePending(type, [])
 
   revalidatePath("/admin/queue")
   revalidatePath("/admin/published")
@@ -102,13 +103,13 @@ export async function approveAll(type: ContentType) {
 
 export async function rejectAll(type: ContentType) {
   await requireAdmin()
-  const pending = readPending(type)
+  const pending = await readPending(type)
   if (pending.length === 0) return
 
   for (const item of pending) {
-    archiveItem(type, { ...item, status: "rejected" })
+    await archiveItem(type, { ...item, status: "rejected" })
   }
-  writePending(type, [])
+  await writePending(type, [])
 
   revalidatePath("/admin/queue")
 }
@@ -133,7 +134,7 @@ export async function addManualPending(
     rawText: undefined,
     extracted,
   }
-  addPendingItems(type, [item])
+  await addPendingItems(type, [item])
   revalidatePath("/admin/queue")
 }
 
@@ -142,14 +143,14 @@ export async function addManualPending(
 export async function deletePublished(type: ContentType, index: number) {
   await requireAdmin()
   const { removeContent } = await import("./storage")
-  removeContent(type, index)
+  await removeContent(type, index)
   revalidatePath("/admin/published")
   revalidatePath("/")
 }
 
 export async function deleteAllPublished(type: ContentType) {
   await requireAdmin()
-  writeContent(type, [])
+  await writeContent(type, [])
   revalidatePath("/admin/published")
   revalidatePath("/")
 }
@@ -254,12 +255,12 @@ export async function updatePublished(
 ) {
   await requireAdmin()
   const { readContent, writeContent } = await import("./storage")
-  const items = readContent(type)
+  const items = await readContent(type)
   if (index < 0 || index >= items.length) throw new Error("Index out of range")
   const updated = items.map((item, i) =>
     i === index ? { ...item, ...patch, checkedAt: new Date().toISOString().split("T")[0] } : item
   )
-  writeContent(type, updated)
+  await writeContent(type, updated)
   revalidatePath("/admin/published")
   revalidatePath("/")
 }
@@ -331,6 +332,62 @@ export async function getEnrichStatus(): Promise<string> {
   return `Last 20 lines of ${ENRICH_LOG} (${total} lines total):\n\n${tail}`
 }
 
+// ── Batch approve / reject (single DB round trip each) ───────────────────────
+
+export async function approveAllBatch(
+  type: ContentType,
+  ids: string[]
+): Promise<{ approved: number }> {
+  await requireAdmin()
+  if (ids.length === 0) return { approved: 0 }
+
+  const rows = await prisma.adminQueue.findMany({
+    where: { id: { in: ids }, type, status: "pending" },
+  })
+  if (rows.length === 0) return { approved: 0 }
+
+  const today = new Date().toISOString().split("T")[0]
+  const expiry = new Date()
+  expiry.setMonth(expiry.getMonth() + 3)
+  const expiresAt = expiry.toISOString().split("T")[0]
+
+  const published = rows.map(row => {
+    const extracted = row.extracted as Record<string, unknown>
+    const data: Record<string, unknown> = { ...extracted, checkedAt: today }
+    if (type === "jobs" && !data.expiresAt) data.expiresAt = expiresAt
+    if (type === "companies" && !data.slug && data.name) {
+      data.slug = String(data.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
+    }
+    return data
+  })
+
+  await Promise.all([
+    appendContentBatch(type, published),
+    prisma.adminQueue.updateMany({ where: { id: { in: ids } }, data: { status: "approved" } }),
+  ])
+
+  revalidatePath("/admin/queue")
+  revalidatePath("/admin/published")
+  revalidatePath("/")
+  return { approved: rows.length }
+}
+
+export async function rejectAllBatch(
+  type: ContentType,
+  ids: string[]
+): Promise<{ rejected: number }> {
+  await requireAdmin()
+  if (ids.length === 0) return { rejected: 0 }
+
+  await prisma.adminQueue.updateMany({
+    where: { id: { in: ids }, status: "pending" },
+    data: { status: "rejected" },
+  })
+
+  revalidatePath("/admin/queue")
+  return { rejected: ids.length }
+}
+
 // ── Update pending item (pre-approve edit) ────────────────────────────────────
 
 export async function updatePendingItem(
@@ -339,10 +396,10 @@ export async function updatePendingItem(
   patch: Record<string, unknown>
 ) {
   await requireAdmin()
-  const pending = readPending(type)
+  const pending = await readPending(type)
   const updated = pending.map((p) =>
     p.id === id ? { ...p, extracted: { ...p.extracted, ...patch } } : p
   )
-  writePending(type, updated)
+  await writePending(type, updated)
   revalidatePath("/admin/queue")
 }

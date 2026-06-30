@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "node scripts/build-search-index.mjs",
+    "prebuild": "node scripts/export-db-to-json.mjs && node scripts/build-search-index.mjs",
     "build": "next build",
     "dev": "next dev",
     "start": "next start",
@@ -11,7 +11,9 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate dev",
-    "db:seed": "tsx prisma/seed.ts",
+    "db:setup": "node scripts/setup-db.mjs",
+    "db:seed": "node scripts/seed-all.mjs",
+    "db:export": "node scripts/export-db-to-json.mjs",
     "db:studio": "prisma studio",
     "logos": "tsx scripts/fetch-logos.ts",
     "hn-opps": "tsx scripts/fetch-hn-opportunities.ts"
