@@ -380,10 +380,10 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
     log.added += await addPendingItems("events", eventItems)
   }
 
-  // ── News & Blog Posts → Pulse ──────────────────────────────────────────────
+  // ── News & Blog Posts → News ───────────────────────────────────────────────
   const newsHtml = section("updates-from-rust-community") || section("news-blog-posts")
   if (newsHtml.length > 50) {
-    const pulseItems: PendingItem[] = []
+    const newsItems: PendingItem[] = []
     const linkRe = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi
     let lm: RegExpExecArray | null
     while ((lm = linkRe.exec(newsHtml)) !== null) {
@@ -391,9 +391,9 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
       const title = stripHtml(rawTitle).trim()
       if (!title || title.length < 10) continue
       if (!href.startsWith("http") || href.includes("this-week-in-rust.org")) continue
-      pulseItems.push({
-        id: `twir-pulse-${href.replace(/[^a-z0-9]/gi, "").slice(-24)}`,
-        type: "pulse",
+      newsItems.push({
+        id: `twir-news-${href.replace(/[^a-z0-9]/gi, "").slice(-24)}`,
+        type: "news",
         status: "pending",
         source: "twir",
         sourceUrl: issueUrl,
@@ -402,12 +402,19 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
         score: 0.7,
         whyMatched: "Linked in TWIR news section",
         rawText: title,
-        extracted: { name: title, href, kind: "Blog", note: title },
+        extracted: {
+          title,
+          href,
+          kind: "Blog",
+          date: new Date().toISOString().slice(0, 10),
+          source: "twir",
+          blurb: "",
+        },
       })
       log.found++
     }
-    log.stages!.newsLinksQueued = pulseItems.length
-    log.added += await addPendingItems("pulse", pulseItems)
+    log.stages!.newsLinksQueued = newsItems.length
+    log.added += await addPendingItems("news", newsItems)
   }
 
   log.skipped = log.found - log.added
@@ -1685,7 +1692,7 @@ export async function scanRedditRust(): Promise<ScanLog> {
     log.errors.push(`r/rust hiring search: ${String(e)}`)
   }
 
-  // ── 2. New community posts → pulse ────────────────────────────────────────
+  // ── 2. New community posts → News ────────────────────────────────────────
   await sleep(1200)
   try {
     const newRes = await fetch(
@@ -1695,16 +1702,16 @@ export async function scanRedditRust(): Promise<ScanLog> {
     const newData = await newRes.json() as any
     const posts: any[] = (newData?.data?.children ?? []).map((c: any) => c.data)
 
-    const pulseItems: PendingItem[] = []
+    const communityNewsItems: PendingItem[] = []
     for (const post of posts) {
       if (post.is_self) continue
       if ((post.score ?? 0) < 20) continue
       const href = String(post.url ?? "")
       if (!href.startsWith("http") || href.includes("reddit.com")) continue
       if (/github\.com\/[^/]+\/[^/]+\/?$/.test(href)) continue
-      pulseItems.push({
-        id: `reddit-pulse-${String(post.id ?? Math.random().toString(36).slice(2))}`,
-        type: "pulse",
+      communityNewsItems.push({
+        id: `reddit-news-${String(post.id ?? Math.random().toString(36).slice(2))}`,
+        type: "news",
         status: "pending",
         source: "reddit-rust",
         sourceUrl: `https://reddit.com${String(post.permalink ?? "")}`,
@@ -1714,16 +1721,18 @@ export async function scanRedditRust(): Promise<ScanLog> {
         whyMatched: `r/rust — ${post.score ?? 0} upvotes`,
         rawText: String(post.title ?? ""),
         extracted: {
-          name: String(post.title ?? ""),
+          title: String(post.title ?? ""),
           href,
-          kind: "Blog",
-          note: String(post.title ?? ""),
+          kind: "Discussion",
+          date: new Date().toISOString().slice(0, 10),
+          source: "reddit",
+          blurb: "",
         },
       })
       log.found++
     }
-    log.stages!.communityPostsQueued = pulseItems.length
-    log.added += await addPendingItems("pulse", pulseItems)
+    log.stages!.communityPostsQueued = communityNewsItems.length
+    log.added += await addPendingItems("news", communityNewsItems)
   } catch (e) {
     log.errors.push(`r/rust community posts: ${String(e)}`)
   }

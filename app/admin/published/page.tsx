@@ -6,7 +6,7 @@ import { DeleteButton } from "@/components/admin/delete-button"
 import { EditPublishedButton } from "@/components/admin/edit-published-button"
 import { BulkDeleteButton } from "@/components/admin/bulk-delete-button"
 
-const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
+const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 
 const PAGE_SIZE = 100
 
@@ -20,6 +20,7 @@ function getItemLabel(item: Record<string, unknown>, type: ContentType): string 
   if (type === "grants" || type === "events") return String(item.name ?? item.title ?? "?")
   if (type === "pulse" || type === "portals") return String(item.title ?? item.name ?? "?")
   if (type === "companies") return String(item.name ?? "?")
+  if (type === "news") return String(item.title ?? "?")
   return "?"
 }
 
@@ -30,6 +31,7 @@ function getItemMeta(item: Record<string, unknown>, type: ContentType): string {
   if (type === "pulse" || type === "portals") return String(item.kind ?? "")
   if (type === "events") return String(item.meta ?? "")
   if (type === "companies") return String(item.sector ?? "")
+  if (type === "news") return [item.kind, item.date].filter(Boolean).join(" · ")
   return ""
 }
 

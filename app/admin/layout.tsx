@@ -8,7 +8,7 @@ import { getSession, signOut } from "@/lib/auth"
 import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
-const ZERO_COUNTS = { jobs: 0, oss: 0, grants: 0, pulse: 0, events: 0, companies: 0, portals: 0 }
+const ZERO_COUNTS = { jobs: 0, oss: 0, grants: 0, pulse: 0, events: 0, companies: 0, portals: 0, news: 0 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const host = (await headers()).get("host") ?? ""
@@ -32,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const total = Object.values(counts).reduce((a, b) => a + b, 0)
 
-  const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
+  const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 
   return (
     <div className="adm">

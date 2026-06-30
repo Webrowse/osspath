@@ -216,6 +216,14 @@ function getFieldsForType(type: ContentType): { key: string; label: string; mult
       { key: "description", label: "Description", multiline: true },
       { key: "tags",        label: "Tags (comma-sep)" },
     ]
+    case "news": return [
+      { key: "title",  label: "Title" },
+      { key: "href",   label: "URL" },
+      { key: "kind",   label: "Kind (Release/Blog/Announcement/Tutorial/Discussion)" },
+      { key: "date",   label: "Date (YYYY-MM-DD)" },
+      { key: "source", label: "Source (twir/reddit/…)" },
+      { key: "blurb",  label: "Blurb", multiline: true },
+    ]
     default: return [
       { key: "name",   label: "Name" },
       { key: "sector", label: "Sector" },

@@ -185,7 +185,7 @@ export async function removeContent(type: ContentType, index: number) {
 
 // ── Counts ────────────────────────────────────────────────────────────────────
 
-const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
+const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 
 export async function getPendingCounts(): Promise<Record<ContentType, number>> {
   const rows = await prisma.adminQueue.groupBy({

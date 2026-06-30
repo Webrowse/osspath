@@ -10,6 +10,7 @@ export const SITE_NAV = [
 
 /** Explore dropdown — curated ecosystem resources, not graph entities. */
 export const EXPLORE_NAV = [
+  { label: "News",       href: "/news",     description: "Releases, blog posts, and community links" },
   { label: "Authors",    href: "/authors",  description: "Writers and maintainers worth following" },
   { label: "Learning",   href: "/learning", description: "Curated resources to understand Rust" },
   { label: "Community",  href: "/pulse",    description: "Newsletters, forums, and podcasts" },
@@ -18,6 +19,7 @@ export const EXPLORE_NAV = [
 ] as const
 
 export const FOOTER_NAV = [
+  { label: "News",      href: "/news" },
   { label: "Community", href: "/pulse" },
   { label: "Events",    href: "/events" },
   { label: "Job Boards", href: "/portals" },

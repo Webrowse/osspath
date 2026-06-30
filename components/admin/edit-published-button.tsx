@@ -51,6 +51,14 @@ const FIELD_CONFIGS: Record<ContentType, { key: string; label: string; multiline
     { key: "href",        label: "URL" },
     { key: "description", label: "Description", multiline: true },
   ],
+  news: [
+    { key: "title",  label: "Title" },
+    { key: "href",   label: "URL" },
+    { key: "kind",   label: "Kind" },
+    { key: "date",   label: "Date (YYYY-MM-DD)" },
+    { key: "source", label: "Source" },
+    { key: "blurb",  label: "Blurb", multiline: true },
+  ],
 }
 
 interface EditPublishedButtonProps {

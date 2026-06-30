@@ -50,6 +50,11 @@ name (string), sector (string — short like "Storage"), href (string — compan
 
 Extract a job portal or job board. Return a JSON object with:
 name (string), kind (one of: "Rust-specific", "Aggregator", "Community", "General"), description (string — 1 sentence), href (string), tags (string[] — e.g. ["remote-only", "curated"]).`,
+
+  news: `You are a structured data extractor. Return ONLY valid JSON with no markdown.
+
+Extract a news article, blog post, or release announcement about Rust. Return a JSON object with:
+title (string), href (string), kind (one of: "Release", "Blog", "Announcement", "Tutorial", "Discussion", "Project"), date (string — YYYY-MM-DD if known, else today), source (string — e.g. "twir", "reddit", "rust-blog"), blurb (string — 1 sentence summary).`,
 }
 
 // ── GitHub repo batch classifier ──────────────────────────────────────────────

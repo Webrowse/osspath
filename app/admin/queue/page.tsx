@@ -6,7 +6,7 @@ import { BulkActions } from "@/components/admin/bulk-actions"
 import { QueueSearch } from "@/components/admin/queue-search"
 import { ExportButton } from "@/components/admin/export-button"
 
-const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals"]
+const TABS: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 
 interface PageProps {
   searchParams: Promise<{ type?: string }>

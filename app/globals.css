@@ -1198,6 +1198,85 @@ html {
   .e-pulse__kind { grid-column: 1 / -1; }
 }
 
+/* ── News ──────────────────────────────────────────────────── */
+
+.e-news { display: flex; flex-direction: column; }
+
+.e-news__row {
+  display: grid;
+  grid-template-columns: 96px 1fr auto auto;
+  align-items: baseline;
+  gap: 0 12px;
+  padding: 11px 4px;
+  border-top: 1px solid var(--e-line);
+  text-decoration: none;
+  color: inherit;
+  transition: background 0.1s, padding 0.1s;
+}
+.e-news__row:last-child { border-bottom: 1px solid var(--e-line-soft); }
+.e-news__row:hover { background: var(--e-surface-3); padding-left: 10px; padding-right: 10px; border-radius: 4px; }
+
+.e-news__kind {
+  font-family: var(--e-mono);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--e-accent);
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.e-news__body { display: flex; flex-direction: column; min-width: 0; }
+.e-news__title { font-size: 14.5px; font-weight: 500; color: var(--e-fg); line-height: 1.35; }
+.e-news__row:hover .e-news__title { color: var(--e-accent); }
+
+.e-news__blurb {
+  font-size: 12.5px;
+  color: var(--e-fg-mute);
+  line-height: 1.4;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.e-news__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  white-space: nowrap;
+}
+.e-news__source {
+  font-family: var(--e-mono);
+  font-size: 10.5px;
+  color: var(--e-fg-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.e-news__date {
+  font-family: var(--e-mono);
+  font-size: 11px;
+  color: var(--e-fg-dim);
+}
+
+.e-news__arrow {
+  font-size: 13px;
+  color: var(--e-fg-dim);
+  transition: color 0.1s, transform 0.1s;
+  padding-top: 1px;
+}
+.e-news__row:hover .e-news__arrow { color: var(--e-accent); transform: translate(2px, -2px); }
+
+@media (max-width: 640px) {
+  .e-news__row { grid-template-columns: 1fr auto; gap: 6px 8px; }
+  .e-news__kind { grid-column: 1 / -1; margin-bottom: 1px; }
+  .e-news__meta { grid-column: 2 / 3; grid-row: 2 / 4; align-items: flex-end; justify-content: flex-start; }
+  .e-news__arrow { display: none; }
+  .e-news__blurb { display: none; }
+}
+
 /* ── Authors ───────────────────────────────────────────────── */
 
 .e-author-row {
