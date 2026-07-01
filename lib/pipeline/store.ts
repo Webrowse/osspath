@@ -4,9 +4,7 @@ import { normalizeUrl } from "@/lib/admin/lists"
 
 /**
  * Pipeline data access. Writes published content directly to content_items
- * (the source of truth); the build regenerates content/*.json from it. Kept
- * separate from the legacy admin storage so migrating the pipeline never
- * extends the old queue-based workflow.
+ * (the source of truth); the build regenerates content/*.json from it.
  */
 
 /** Published data objects for a type (read-only input for scanners like careers). */

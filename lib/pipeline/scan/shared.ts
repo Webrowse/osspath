@@ -1,6 +1,6 @@
 /**
- * Shared deterministic helpers used by scanner cores (and, during migration, by
- * the legacy wrappers). Pure functions only — no auth, no persistence, no AI.
+ * Shared deterministic helpers used by the scanner cores. Pure functions only —
+ * no auth, no persistence, no AI.
  */
 
 export function sleep(ms: number): Promise<void> {

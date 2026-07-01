@@ -12,9 +12,7 @@ import { collectCareers } from "./scan/careers"
 import { collectTWIR } from "./scan/twir"
 
 /**
- * Registry of every pure scanner core the pipeline runs. All scanners share this
- * one implementation; the legacy queue wrappers call the same cores and are
- * removed in Stage 4.
+ * Registry of every pure scanner core the pipeline runs.
  */
 export function getCollectors(): Collector[] {
   return [

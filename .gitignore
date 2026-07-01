@@ -61,11 +61,6 @@ next-env.d.ts
 # generated cache
 /data/oss-deps-cache.json
 
-# admin scratch — pending/rejected are local-only; only content/ is deployed
-/data/pending/
-/data/rejected/
-/data/enrich.log
-
 # scanner-generated dataset — lives in PostgreSQL, materialised at build time
 # by scripts/export-db-to-json.mjs. Not committed so the repo does not carry
 # the curated dataset. Editorial content (authors, learning, funders, programs,
