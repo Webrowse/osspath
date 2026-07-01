@@ -713,3 +713,63 @@
   padding: 1px 5px;
   border-radius: 3px;
 }
+
+/* ── Schema status (drift guardrail) ─────────────────────── */
+
+.adm-schema {
+  border: 1px solid var(--line-soft, rgba(255,255,255,0.08));
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  background: var(--bg-1, #171717);
+}
+.adm-schema--warn {
+  border-color: oklch(0.66 0.18 22 / 0.55);
+  background: oklch(0.66 0.18 22 / 0.08);
+}
+
+.adm-schema__ok {
+  font-size: 12px;
+  color: oklch(0.72 0.17 145);
+}
+
+.adm-schema__alert {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+.adm-schema__alert strong { font-size: 13px; color: oklch(0.78 0.16 25); }
+.adm-schema__alert span { font-size: 12px; color: var(--fg-2, #9a9a9a); line-height: 1.5; }
+.adm-schema__alert code {
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  background: var(--bg-3, oklch(0.29 0.01 250));
+  padding: 0 4px;
+  border-radius: 3px;
+}
+.adm-schema__err {
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  font-size: 11px !important;
+  color: oklch(0.66 0.18 22) !important;
+}
+
+.adm-schema__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 4px 16px;
+  margin-top: 8px;
+}
+.adm-schema__grid > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11px;
+}
+.adm-schema__grid span {
+  color: var(--fg-3, oklch(0.50 0.01 250));
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+}
+.adm-schema__grid code {
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+  color: var(--fg-1, #d4d4d4);
+}
