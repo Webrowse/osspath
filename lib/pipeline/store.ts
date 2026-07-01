@@ -56,20 +56,3 @@ export async function removeExpired(type: ContentType, today: string): Promise<n
   await prisma.contentItem.deleteMany({ where: { id: { in: expiredIds } } })
   return expiredIds.length
 }
-
-/** Remove published items of a type by href (dead-link cleanup). */
-export async function removeByHrefs(type: ContentType, hrefs: string[]): Promise<number> {
-  if (hrefs.length === 0) return 0
-  const norm = new Set(hrefs.map(normalizeUrl))
-  const rows = await prisma.contentItem.findMany({ where: { type }, select: { id: true, href: true, data: true } })
-  const ids = rows
-    .filter((r) => {
-      const h = r.href ? normalizeUrl(r.href) : ""
-      const dh = normalizeUrl(String((r.data as Record<string, unknown>)?.href ?? ""))
-      return norm.has(h) || norm.has(dh)
-    })
-    .map((r) => r.id)
-  if (ids.length === 0) return 0
-  await prisma.contentItem.deleteMany({ where: { id: { in: ids } } })
-  return ids.length
-}
