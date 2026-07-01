@@ -14,6 +14,7 @@ import { collectGrants } from "@/lib/pipeline/scan/grants"
 import { collectReddit } from "@/lib/pipeline/scan/reddit"
 import { collectGitHubOSS } from "@/lib/pipeline/scan/github-oss"
 import { collectRustBytes } from "@/lib/pipeline/scan/rust-bytes"
+import { collectPulse } from "@/lib/pipeline/scan/pulse"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
   ghFetch, ossJunkFilter,
@@ -481,72 +482,9 @@ export async function scanGrants(): Promise<ScanLog> {
 
 export async function scanPulse(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "pulse", startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  // Community resource repos (newsletter, forum, podcast, blog) — NOT filtered by language
-  // because pulse resources often live in non-Rust codebases
-  const ghQueries = [
-    "topic:rust-newsletter",
-    "topic:rust-community",
-    "rust+newsletter+in:name",
-    "rust+podcast+in:name",
-    "rust+blog+resources+in:name,description",
-  ]
-
-  const repos: (RepoInput & { homepage?: string })[] = []
-  const seenIds = new Set<number>()
-
-  for (const q of ghQueries) {
-    try {
-      const data = await ghFetch(
-        `https://api.github.com/search/repositories?q=${encodeURIComponent(q)}&sort=stars&per_page=10`
-      ) as { items?: (RepoInput & { homepage?: string })[] }
-      const items = data?.items ?? []
-      log.stages![`gh_${q.slice(0, 20)}`] = items.length
-      for (const r of items) {
-        if (!seenIds.has(r.id) && r.stargazers_count >= 20) {
-          seenIds.add(r.id); repos.push(r)
-        }
-      }
-    } catch (e) {
-      log.errors.push(`GitHub "${q.slice(0, 30)}": ${String(e)}`)
-    }
-  }
-
-  log.found = repos.length
-  const existingIds = new Set((await readPending("pulse")).map(i => i.id))
-  const pendingItems: PendingItem[] = []
-
-  for (const repo of repos) {
-    const id = `gh-pulse-${repo.id}`
-    if (existingIds.has(id)) { log.skipped++; continue }
-
-    const href = repo.homepage || repo.html_url
-    const text = [
-      `${repo.name}: ${repo.description ?? ""}`,
-      `URL: ${href}`,
-      `GitHub: ${repo.html_url}`,
-    ].join("\n")
-
-    const result = await extractWithDeepSeek("pulse", text)
-    if (!result.ok || !result.data) { log.skipped++; continue }
-
-    pendingItems.push({
-      id, type: "pulse", status: "pending",
-      source: "github-pulse", sourceUrl: repo.html_url,
-      foundAt: new Date().toISOString(),
-      confidence: 0.6, whyMatched: `${repo.stargazers_count}★ · community resource`,
-      rawText: text,
-      extracted: { ...result.data, href: result.data.href || href },
-    })
-  }
-
-  log.stages!.queued = pendingItems.length
-  log.added = await addPendingItems("pulse", pendingItems)
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("pulse")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectPulse({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("pulse", items)
   return log
 }
 
