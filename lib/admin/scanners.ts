@@ -11,6 +11,7 @@ import {
 } from "./prefilter"
 import type { PendingItem, ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
+import { collectReddit } from "@/lib/pipeline/scan/reddit"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import { auth } from "@/lib/auth"
 
@@ -1472,112 +1473,15 @@ export async function scanCompanyCareers(): Promise<ScanLog> {
 
 // ── Reddit r/rust Scanner ─────────────────────────────────────────────────────
 
+// Legacy wrapper: delegates to the shared core and persists to admin_queue for
+// the old scan panel. Kept only until the panel is removed in Stage 4.
 export async function scanRedditRust(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "reddit-rust",
-    startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  const headers = { "User-Agent": "osspath.com/scanner 1.0" }
-
-  // ── 1. Who's Hiring threads → jobs ────────────────────────────────────────
-  try {
-    const searchRes = await fetch(
-      "https://www.reddit.com/r/rust/search.json?q=who+is+hiring&sort=new&restrict_sr=on&limit=3",
-      { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
-    )
-    const searchData = await searchRes.json() as any
-    const threads: any[] = (searchData?.data?.children ?? []).map((c: any) => c.data)
-    log.stages!.hiringThreadsFound = threads.length
-
-    const jobItems: PendingItem[] = []
-    for (const thread of threads.slice(0, 2)) {
-      log.notes!.push(`Thread: ${String(thread.title ?? "")}`)
-      await sleep(1200)
-      const commRes = await fetch(
-        `https://www.reddit.com/r/rust/comments/${thread.id}.json?limit=100`,
-        { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
-      )
-      const commData = await commRes.json() as any
-      const comments: any[] = (commData?.[1]?.data?.children ?? []).map((c: any) => c.data)
-
-      for (const comment of comments) {
-        const text = String(comment.body ?? "")
-        if (text.length < 50) continue
-        if (classifyRustSignal(text) !== "strong") continue
-        const score = scoreJobText(text)
-        if (!shouldQueue(score)) continue
-        jobItems.push({
-          id: `reddit-job-${String(comment.id ?? Math.random().toString(36).slice(2))}`,
-          type: "jobs",
-          status: "pending",
-          source: "reddit-rust",
-          sourceUrl: `https://reddit.com${String(comment.permalink ?? "")}`,
-          foundAt: new Date().toISOString(),
-          confidence: 0.6,
-          score: score.total,
-          whyMatched: score.reasons.join(" · "),
-          rawText: text.slice(0, 800),
-          extracted: extractMinimalJob(text),
-        })
-        log.found++
-      }
-    }
-    log.stages!.hiringJobsQueued = jobItems.length
-    log.added += await addPendingItems("jobs", jobItems)
-  } catch (e) {
-    log.errors.push(`r/rust hiring search: ${String(e)}`)
-  }
-
-  // ── 2. New community posts → News ────────────────────────────────────────
-  await sleep(1200)
-  try {
-    const newRes = await fetch(
-      "https://www.reddit.com/r/rust/new.json?limit=25",
-      { headers, signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
-    )
-    const newData = await newRes.json() as any
-    const posts: any[] = (newData?.data?.children ?? []).map((c: any) => c.data)
-
-    const communityNewsItems: PendingItem[] = []
-    for (const post of posts) {
-      if (post.is_self) continue
-      if ((post.score ?? 0) < 20) continue
-      const href = String(post.url ?? "")
-      if (!href.startsWith("http") || href.includes("reddit.com")) continue
-      if (/github\.com\/[^/]+\/[^/]+\/?$/.test(href)) continue
-      communityNewsItems.push({
-        id: `reddit-news-${String(post.id ?? Math.random().toString(36).slice(2))}`,
-        type: "news",
-        status: "pending",
-        source: "reddit-rust",
-        sourceUrl: `https://reddit.com${String(post.permalink ?? "")}`,
-        foundAt: new Date().toISOString(),
-        confidence: Math.min(0.45 + (post.score ?? 0) / 500, 0.85),
-        score: 0.6,
-        whyMatched: `r/rust — ${post.score ?? 0} upvotes`,
-        rawText: String(post.title ?? ""),
-        extracted: {
-          title: String(post.title ?? ""),
-          href,
-          kind: "Discussion",
-          date: new Date().toISOString().slice(0, 10),
-          source: "reddit",
-          blurb: "",
-        },
-      })
-      log.found++
-    }
-    log.stages!.communityPostsQueued = communityNewsItems.length
-    log.added += await addPendingItems("news", communityNewsItems)
-  } catch (e) {
-    log.errors.push(`r/rust community posts: ${String(e)}`)
-  }
-
+  const { log, items } = await collectReddit({ isKnown: () => false })
+  const jobs = items.filter(i => i.type === "jobs")
+  const news = items.filter(i => i.type === "news")
+  log.added = (await addPendingItems("jobs", jobs)) + (await addPendingItems("news", news))
   log.skipped = log.found - log.added
-  log.finishedAt = new Date().toISOString()
   return log
 }
 
