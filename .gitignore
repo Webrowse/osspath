@@ -65,3 +65,19 @@ next-env.d.ts
 /data/pending/
 /data/rejected/
 /data/enrich.log
+
+# scanner-generated dataset — lives in PostgreSQL, materialised at build time
+# by scripts/export-db-to-json.mjs. Not committed so the repo does not carry
+# the curated dataset. Editorial content (authors, learning, funders, programs,
+# lifecycle-edges, eco-overrides) and derived oss-* indexes stay tracked.
+/content/jobs.json
+/content/oss.json
+/content/grants.json
+/content/pulse.json
+/content/events.json
+/content/companies.json
+/content/portals.json
+/content/news.json
+
+# search index — regenerated at build by scripts/build-search-index.mjs
+/public/search-index.json
