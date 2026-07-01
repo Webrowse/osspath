@@ -9,12 +9,12 @@ import { collectEvents } from "./scan/events"
 import { collectPortals } from "./scan/portals"
 import { collectHN } from "./scan/hn"
 import { collectCareers } from "./scan/careers"
+import { collectTWIR } from "./scan/twir"
 
 /**
- * Registry of pure scanner cores the pipeline runs. Cores are added here as each
- * scanner is migrated off the legacy queue workflow. The pipeline scans exactly
- * what is registered; anything not yet migrated is still covered by the old scan
- * panel until it is removed in Stage 4.
+ * Registry of every pure scanner core the pipeline runs. All scanners share this
+ * one implementation; the legacy queue wrappers call the same cores and are
+ * removed in Stage 4.
  */
 export function getCollectors(): Collector[] {
   return [
@@ -28,6 +28,6 @@ export function getCollectors(): Collector[] {
     collectPortals,
     collectHN,
     collectCareers,
-    // more scanner cores are registered here as they are migrated
+    collectTWIR,
   ]
 }

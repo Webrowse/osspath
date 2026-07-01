@@ -2,12 +2,7 @@
 
 import { addPendingItems, readPending, writePending, readContent } from "./storage"
 import { extractWithDeepSeek } from "./deepseek"
-import {
-  classifyRustSignal,
-  scoreJobText,
-  shouldQueue,
-} from "./prefilter"
-import type { PendingItem, ScanLog, ContentType } from "./types"
+import type { ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
 import { collectReddit } from "@/lib/pipeline/scan/reddit"
 import { collectGitHubOSS } from "@/lib/pipeline/scan/github-oss"
@@ -18,11 +13,8 @@ import { collectEvents } from "@/lib/pipeline/scan/events"
 import { collectPortals } from "@/lib/pipeline/scan/portals"
 import { collectHN } from "@/lib/pipeline/scan/hn"
 import { collectCareers } from "@/lib/pipeline/scan/careers"
-import { sleep, stripHtml, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
-import {
-  ghFetch, ossJunkFilter,
-  buildOSSExtracted, mapRepoResponse, extractGitHubRepoUrls,
-} from "@/lib/pipeline/scan/github"
+import { collectTWIR } from "@/lib/pipeline/scan/twir"
+import { sleep, stripHtml } from "@/lib/pipeline/scan/shared"
 import { auth } from "@/lib/auth"
 
 async function requireAdmin() {
@@ -47,249 +39,18 @@ export async function scanHNHiring(): Promise<ScanLog> {
 
 // ── TWIR Scanner ──────────────────────────────────────────────────────────────
 
-// Fetch a TWIR OSS repo via GitHub API and return a PendingItem, or null if junk.
-async function twirFetchOSSRepos(urls: string[], issueUrl: string, label: string): Promise<PendingItem[]> {
-  const published = new Set(
-    ((await readContent("oss")) as Array<Record<string, unknown>>).map((r) => String(r.href ?? ""))
-  )
-  const items: PendingItem[] = []
-  for (const url of urls) {
-    const m = url.match(/github\.com\/([^/]+)\/([^/]+)/)
-    if (!m) continue
-    if (published.has(url)) continue
-    const [, owner, repo] = m
-    try {
-      const r = await ghFetch(`https://api.github.com/repos/${owner}/${repo}`) as Record<string, unknown>
-      const mapped = mapRepoResponse(r)
-      const { junk } = ossJunkFilter(mapped)
-      if (junk || (mapped.stargazers_count ?? 0) < 10) continue
-      items.push({
-        id: `twir-oss-${owner}-${repo}`,
-        type: "oss",
-        status: "pending",
-        source: "twir",
-        sourceUrl: issueUrl,
-        foundAt: new Date().toISOString(),
-        confidence: 0.9,
-        score: 0.9,
-        whyMatched: `Featured in TWIR (${label})`,
-        rawText: url,
-        extracted: { ...buildOSSExtracted(mapped), labels: [label] },
-      })
-      await sleep(400)
-    } catch { continue }
-  }
-  return items
-}
-
-export async function scanTWIR(useAI = false): Promise<ScanLog> {
+// Legacy wrapper: delegates to the shared core and persists per type.
+export async function scanTWIR(): Promise<ScanLog> {
   await requireAdmin()
-  const shouldUseAI = useAI || !!process.env.DEEPSEEK_API_KEY
-  const log: ScanLog = {
-    source: "twir",
-    startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
+  const known = new Set<string>()
+  for (const t of ["oss", "events", "news", "jobs"] as const) {
+    for (const i of await readContent(t)) { const h = String(i.href ?? ""); if (h) known.add(h) }
   }
-
-  // ── Fetch latest issue ─────────────────────────────────────────────────────
-  let issueUrl: string
-  try {
-    const rssRes = await fetch("https://this-week-in-rust.org/rss.xml", {
-      signal: AbortSignal.timeout(15_000), next: { revalidate: 0 },
-    })
-    const rssText = await rssRes.text()
-    const linkMatch = rssText.match(/<link>(https:\/\/this-week-in-rust\.org\/blog\/[^<]+)<\/link>/)
-    if (!linkMatch) {
-      log.errors.push("Could not parse TWIR RSS feed")
-      log.finishedAt = new Date().toISOString()
-      return log
-    }
-    issueUrl = linkMatch[1]
-    log.notes!.push(`Latest issue: ${issueUrl}`)
-  } catch (e) {
-    log.errors.push(`RSS fetch failed: ${String(e)}`)
-    log.finishedAt = new Date().toISOString()
-    return log
+  const { log, items } = await collectTWIR({ isKnown: (href) => known.has(href) })
+  for (const t of ["jobs", "oss", "events", "news"] as const) {
+    log.added += await addPendingItems(t, items.filter(i => i.type === t))
   }
-
-  let html: string
-  try {
-    const htmlRes = await fetch(issueUrl, { signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } })
-    html = await htmlRes.text()
-  } catch (e) {
-    log.errors.push(`Issue fetch failed: ${String(e)}`)
-    log.finishedAt = new Date().toISOString()
-    return log
-  }
-
-  function section(id: string): string {
-    const re = new RegExp(
-      `<h2[^>]*id="${id}"[^>]*>[\\s\\S]*?</h2>([\\s\\S]*?)(?=<h[12][^>]*id=|$)`, "i"
-    )
-    const m = html.match(re)
-    return m ? m[1] : ""
-  }
-
-  // ── Jobs ───────────────────────────────────────────────────────────────────
-  const jobsSection = section("jobs")
-  if (jobsSection.length > 50) {
-    let entries = Array.from(jobsSection.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi))
-      .map((m) => stripHtml(m[1]))
-      .filter((s) => s.trim().length > 30)
-
-    if (entries.length === 0) {
-      const pText = stripHtml(jobsSection).toLowerCase()
-      if (pText.includes("who's hiring thread") || pText.includes("r/rust")) {
-        log.notes!.push("TWIR now redirects jobs to r/rust Who's Hiring — use Reddit scanner.")
-      } else {
-        entries = stripHtml(jobsSection)
-          .split(/(?<=\.)\s+(?=[A-Z])/g)
-          .filter((s) => /hiring|rust|engineer|developer|apply/i.test(s) && s.length > 50)
-        log.notes!.push("Used fallback regex parser for jobs")
-      }
-    }
-
-    let rustFiltered = 0
-    const jobItems: PendingItem[] = []
-    for (const text of entries.slice(0, 30)) {
-      if (classifyRustSignal(text) !== "strong") { rustFiltered++; continue }
-      const score = scoreJobText(text)
-      if (!shouldQueue(score)) continue
-      let extracted: Record<string, unknown>
-      if (shouldUseAI) {
-        const result = await extractWithDeepSeek("jobs", text)
-        extracted = (result.ok && result.data) ? result.data : extractMinimalJob(text)
-      } else {
-        extracted = extractMinimalJob(text)
-      }
-      jobItems.push({
-        id: `twir-job-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-        type: "jobs",
-        status: "pending",
-        source: "twir",
-        sourceUrl: issueUrl,
-        foundAt: new Date().toISOString(),
-        confidence: estimateConfidence(extracted),
-        score: score.total,
-        whyMatched: score.reasons.join(" · "),
-        rawText: text.slice(0, 1000),
-        extracted,
-      })
-    }
-    log.stages!.jobsFound = entries.length
-    log.stages!.jobsRustFiltered = rustFiltered
-    log.stages!.jobsQueued = jobItems.length
-    const addedJobs = await addPendingItems("jobs", jobItems)
-    log.found += entries.length
-    log.added += addedJobs
-  }
-
-  // ── Crate of the Week → OSS ────────────────────────────────────────────────
-  const cotwHtml = section("crate-of-the-week")
-  if (cotwHtml) {
-    const urls = extractGitHubRepoUrls(cotwHtml)
-    log.stages!.crateOfWeekRepos = urls.length
-    const ossItems = await twirFetchOSSRepos(urls.slice(0, 3), issueUrl, "crate-of-week")
-    log.found += urls.length
-    log.added += await addPendingItems("oss", ossItems)
-    log.stages!.crateOfWeekQueued = ossItems.length
-  }
-
-  // ── Call for Participation → OSS (cfp label) ───────────────────────────────
-  const cfpHtml = section("call-for-participation")
-  if (cfpHtml) {
-    const urls = extractGitHubRepoUrls(cfpHtml)
-    log.stages!.cfpRepos = urls.length
-    const ossItems = await twirFetchOSSRepos(urls.slice(0, 12), issueUrl, "cfp")
-    log.found += urls.length
-    log.added += await addPendingItems("oss", ossItems)
-    log.stages!.cfpQueued = ossItems.length
-  }
-
-  // ── Events section ─────────────────────────────────────────────────────────
-  const eventsHtml = section("events")
-  if (eventsHtml.length > 50) {
-    const eventItems: PendingItem[] = []
-    for (const m of Array.from(eventsHtml.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)).slice(0, 30)) {
-      const rawLi = m[1]
-      const text = stripHtml(rawLi).trim()
-      if (text.length < 20) continue
-      const linkMatch = rawLi.match(/href="([^"]+)"/)
-      if (!linkMatch || !linkMatch[1].startsWith("http")) continue
-      const href = linkMatch[1]
-      const dateMatch = text.match(/(\d{4}-\d{2}-\d{2})/)
-      const location = text.match(/\|\s*([^|]+)\s*\|/)?.[1]?.trim() ?? ""
-      let extracted: Record<string, unknown>
-      if (shouldUseAI) {
-        const result = await extractWithDeepSeek("events", text)
-        extracted = (result.ok && result.data) ? result.data : { name: text.split("|").pop()?.trim() ?? text, href, date: dateMatch?.[1] ?? "", format: "In-Person", location }
-      } else {
-        extracted = {
-          name: text.split("|").pop()?.trim() ?? text,
-          href,
-          date: dateMatch?.[1] ?? "",
-          format: /virtual|online/i.test(text) ? "Online" : "In-Person",
-          location,
-        }
-      }
-      eventItems.push({
-        id: `twir-event-${href.replace(/[^a-z0-9]/gi, "").slice(-28)}`,
-        type: "events",
-        status: "pending",
-        source: "twir",
-        sourceUrl: issueUrl,
-        foundAt: new Date().toISOString(),
-        confidence: 0.85,
-        score: 0.8,
-        whyMatched: "Listed in TWIR events section",
-        rawText: text.slice(0, 400),
-        extracted,
-      })
-      log.found++
-    }
-    log.stages!.eventsQueued = eventItems.length
-    log.added += await addPendingItems("events", eventItems)
-  }
-
-  // ── News & Blog Posts → News ───────────────────────────────────────────────
-  const newsHtml = section("updates-from-rust-community") || section("news-blog-posts")
-  if (newsHtml.length > 50) {
-    const newsItems: PendingItem[] = []
-    const linkRe = /<a[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi
-    let lm: RegExpExecArray | null
-    while ((lm = linkRe.exec(newsHtml)) !== null) {
-      const [, href, rawTitle] = lm
-      const title = stripHtml(rawTitle).trim()
-      if (!title || title.length < 10) continue
-      if (!href.startsWith("http") || href.includes("this-week-in-rust.org")) continue
-      newsItems.push({
-        id: `twir-news-${href.replace(/[^a-z0-9]/gi, "").slice(-24)}`,
-        type: "news",
-        status: "pending",
-        source: "twir",
-        sourceUrl: issueUrl,
-        foundAt: new Date().toISOString(),
-        confidence: 0.75,
-        score: 0.7,
-        whyMatched: "Linked in TWIR news section",
-        rawText: title,
-        extracted: {
-          title,
-          href,
-          kind: "Blog",
-          date: new Date().toISOString().slice(0, 10),
-          source: "twir",
-          blurb: "",
-        },
-      })
-      log.found++
-    }
-    log.stages!.newsLinksQueued = newsItems.length
-    log.added += await addPendingItems("news", newsItems)
-  }
-
   log.skipped = log.found - log.added
-  log.finishedAt = new Date().toISOString()
   return log
 }
 
