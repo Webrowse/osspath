@@ -7,7 +7,10 @@ import type { RunRow } from "@/lib/admin/pipeline-runs"
 function fmt(d: Date | string | null): string {
   if (!d) return "—"
   const date = typeof d === "string" ? new Date(d) : d
-  return date.toLocaleString()
+  if (isNaN(date.getTime())) return "—"
+  // Deterministic UTC format so server and client render identically (no
+  // locale/timezone hydration mismatch).
+  return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`
 }
 
 function ReportSummary({ run }: { run: RunRow }) {
