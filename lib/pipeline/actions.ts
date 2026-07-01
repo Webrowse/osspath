@@ -7,7 +7,7 @@ import {
   type RunRow, type PipelineReport,
 } from "@/lib/admin/pipeline-runs"
 import { runPipeline } from "./run"
-import { getCollectors } from "./collectors"
+import { dueScanJobs } from "./dispatch"
 import { triggerRebuild } from "./deploy-hook"
 
 export type RefreshResult =
@@ -30,7 +30,7 @@ export async function runRefresh(): Promise<RefreshResult> {
 
   const runId = acq.run.id
   try {
-    const { report, dirty } = await runPipeline(runId, getCollectors())
+    const { report, dirty } = await runPipeline(runId, await dueScanJobs())
     // Only a dirty run changed published content, so only then rebuild the site.
     if (dirty) {
       const hook = await triggerRebuild()

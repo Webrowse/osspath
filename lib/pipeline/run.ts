@@ -1,7 +1,9 @@
-import type { Collector, Candidate, ScanContext } from "./types"
+import type { Candidate, ScanContext } from "./types"
+import type { ScanJob } from "./dispatch"
 import type { ContentType } from "@/lib/admin/types"
 import type { PipelineReport } from "@/lib/admin/pipeline-runs"
 import { heartbeat } from "@/lib/admin/pipeline-runs"
+import { markSourceRun } from "@/lib/admin/sources"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
 
@@ -64,7 +66,7 @@ async function findDeadUrls(urls: string[]): Promise<Set<string>> {
  */
 export async function runPipeline(
   runId: string,
-  collectors: Collector[],
+  jobs: ScanJob[],
 ): Promise<{ report: PipelineReport; dirty: boolean }> {
   const report = emptyReport()
   const today = new Date().toISOString().slice(0, 10)
@@ -97,7 +99,7 @@ export async function runPipeline(
   }
 
   const candidates: Candidate[] = []
-  for (const collect of collectors) {
+  for (const { source, collect } of jobs) {
     try {
       const { log, items } = await collect(ctx)
       report.scanned += items.length
@@ -107,8 +109,10 @@ export async function runPipeline(
         candidates.push(it)
       }
       if (log.errors?.length) report.errors.push(...log.errors.map((e) => `${log.source}: ${e}`))
+      // Record the watermark so this source is skipped until its interval elapses.
+      await markSourceRun(source.id)
     } catch (e) {
-      report.errors.push(`scan: ${String(e)}`)
+      report.errors.push(`scan ${source.kind}: ${String(e)}`)
     }
   }
   await heartbeat(runId)
