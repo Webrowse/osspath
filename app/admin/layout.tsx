@@ -5,6 +5,7 @@ import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import { getSession, signOut, googleEnabled } from "@/lib/auth"
 import { AdminLogin } from "@/components/admin/admin-login"
+import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
@@ -23,23 +24,28 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   // Authenticated but not the admin account: deny with a sign-out escape hatch.
   if (email !== ADMIN_EMAIL) {
     return (
-      <div className="adm-login">
-        <div className="adm-login__card adm-login__notice">
-          <div className="adm-login__brand">
-            <span className="adm-sidebar__mark" />
-            <span>osspath admin</span>
+      <EditorialLayout>
+        <section className="e-signin">
+          <div className="e-signin__card">
+            <div className="e-signin__eyebrow">Admin</div>
+            <h1 className="e-signin__title">Not authorized</h1>
+            <p className="e-signin__hint">
+              {email} is signed in but does not have access to this admin.
+            </p>
+            <div className="e-signin__providers">
+              <form
+                action={async () => {
+                  "use server"
+                  await signOut({ redirectTo: "/admin" })
+                }}
+              >
+                <button type="submit" className="e-signin__btn">Sign out</button>
+              </form>
+            </div>
+            <Link href="/" className="e-signin__home">← Back to homepage</Link>
           </div>
-          <p className="adm-login__hint">{email} is not authorized for this admin.</p>
-          <form
-            action={async () => {
-              "use server"
-              await signOut({ redirectTo: "/admin" })
-            }}
-          >
-            <button type="submit" className="adm-btn">Sign out</button>
-          </form>
-        </div>
-      </div>
+        </section>
+      </EditorialLayout>
     )
   }
 

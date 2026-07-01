@@ -1,4 +1,6 @@
+import Link from "next/link"
 import { signIn } from "@/lib/auth"
+import { EditorialLayout } from "@/components/editorial/editorial-layout"
 
 function GitHubMark() {
   return (
@@ -20,46 +22,52 @@ function GoogleMark() {
 }
 
 /**
- * Inline sign-in shown inside /admin when there is no authenticated session.
- * Replaces the standalone /login route so the admin is reachable from any
- * device at /admin without a separate login page.
+ * Sign-in shown inside /admin when there is no authenticated session.
+ * Wrapped in the public site shell (header, nav, footer) so the admin login
+ * feels like part of OSSPath rather than a blank dead-end page.
  */
 export function AdminLogin({ googleEnabled }: { googleEnabled: boolean }) {
   return (
-    <div className="adm-login">
-      <div className="adm-login__card">
-        <div className="adm-login__brand">
-          <span className="adm-sidebar__mark" />
-          <span>osspath admin</span>
+    <EditorialLayout>
+      <section className="e-signin">
+        <div className="e-signin__card">
+          <div className="e-signin__eyebrow">Admin</div>
+          <h1 className="e-signin__title">Sign in to OSSPath</h1>
+          <p className="e-signin__hint">
+            This area manages the OSSPath ecosystem index. Sign in to continue.
+          </p>
+
+          <div className="e-signin__providers">
+            <form
+              action={async () => {
+                "use server"
+                await signIn("github", { redirectTo: "/admin" })
+              }}
+            >
+              <button type="submit" className="e-signin__btn">
+                <GitHubMark />
+                <span>Continue with GitHub</span>
+              </button>
+            </form>
+
+            {googleEnabled && (
+              <form
+                action={async () => {
+                  "use server"
+                  await signIn("google", { redirectTo: "/admin" })
+                }}
+              >
+                <button type="submit" className="e-signin__btn">
+                  <GoogleMark />
+                  <span>Continue with Google</span>
+                </button>
+              </form>
+            )}
+          </div>
+
+          <Link href="/" className="e-signin__home">← Back to homepage</Link>
         </div>
-        <p className="adm-login__hint">Sign in to manage the OSSPath pipeline.</p>
-
-        <form
-          action={async () => {
-            "use server"
-            await signIn("github", { redirectTo: "/admin" })
-          }}
-        >
-          <button type="submit" className="adm-btn adm-login__provider">
-            <GitHubMark />
-            <span>Continue with GitHub</span>
-          </button>
-        </form>
-
-        {googleEnabled && (
-          <form
-            action={async () => {
-              "use server"
-              await signIn("google", { redirectTo: "/admin" })
-            }}
-          >
-            <button type="submit" className="adm-btn adm-login__provider">
-              <GoogleMark />
-              <span>Continue with Google</span>
-            </button>
-          </form>
-        )}
-      </div>
-    </div>
+      </section>
+    </EditorialLayout>
   )
 }

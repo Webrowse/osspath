@@ -962,6 +962,91 @@ html {
   background: var(--e-accent);
 }
 
+/* ── Admin sign-in (unauthenticated /admin) ────────────────── */
+
+.e-signin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100dvh - 220px);
+  padding: clamp(40px, 8vw, 96px) 20px;
+}
+
+.e-signin__card {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(24px, 4vw, 34px);
+  border: 1px solid var(--e-line);
+  border-radius: 14px;
+  background: var(--e-bg-2);
+  box-shadow: 0 1px 2px rgba(42, 35, 27, 0.04), 0 8px 28px rgba(42, 35, 27, 0.06);
+}
+
+.e-signin__eyebrow {
+  font-family: var(--e-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--e-accent);
+}
+
+.e-signin__title {
+  font-family: var(--e-serif);
+  font-size: clamp(22px, 3.4vw, 27px);
+  font-weight: 600;
+  color: var(--e-fg);
+  margin: 8px 0 6px;
+  line-height: 1.2;
+}
+
+.e-signin__hint {
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--e-fg-mute);
+  margin: 0 0 20px;
+}
+
+.e-signin__providers {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.e-signin__btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 42px;
+  padding: 0 14px;
+  font-family: var(--e-mono);
+  font-size: 13px;
+  color: var(--e-fg);
+  border: 1px solid var(--e-line);
+  border-radius: 9px;
+  background: var(--e-bg);
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+.e-signin__btn:hover {
+  color: #ffffff;
+  border-color: var(--e-accent);
+  background: var(--e-accent);
+}
+
+.e-signin__home {
+  margin-top: 18px;
+  font-family: var(--e-mono);
+  font-size: 12.5px;
+  color: var(--e-fg-dim);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+.e-signin__home:hover { color: var(--e-accent); }
+
 /* ── Section 01 — Jobs ─────────────────────────────────────── */
 
 .e-jobs { display: flex; flex-direction: column; }
