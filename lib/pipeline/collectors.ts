@@ -4,6 +4,7 @@ import { collectReddit } from "./scan/reddit"
 import { collectGitHubOSS } from "./scan/github-oss"
 import { collectRustBytes } from "./scan/rust-bytes"
 import { collectPulse } from "./scan/pulse"
+import { collectCompanies } from "./scan/companies"
 
 /**
  * Registry of pure scanner cores the pipeline runs. Cores are added here as each
@@ -18,6 +19,7 @@ export function getCollectors(): Collector[] {
     collectGitHubOSS,
     collectRustBytes,
     collectPulse,
+    collectCompanies,
     // more scanner cores are registered here as they are migrated
   ]
 }

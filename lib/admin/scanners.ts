@@ -2,7 +2,6 @@
 
 import { addPendingItems, readPending, writePending, readContent, readRejected } from "./storage"
 import { extractWithDeepSeek } from "./deepseek"
-import type { RepoInput } from "./deepseek"
 import {
   classifyRustSignal,
   scoreJobText,
@@ -15,6 +14,7 @@ import { collectReddit } from "@/lib/pipeline/scan/reddit"
 import { collectGitHubOSS } from "@/lib/pipeline/scan/github-oss"
 import { collectRustBytes } from "@/lib/pipeline/scan/rust-bytes"
 import { collectPulse } from "@/lib/pipeline/scan/pulse"
+import { collectCompanies } from "@/lib/pipeline/scan/companies"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
   ghFetch, ossJunkFilter,
@@ -657,125 +657,12 @@ export async function scanPortals(): Promise<ScanLog> {
 
 // ── Companies Scanner ─────────────────────────────────────────────────────────
 
-type GHOrgDetail = {
-  id: number
-  login: string
-  name?: string
-  html_url: string
-  blog?: string
-  description?: string
-  public_repos?: number
-}
-
+// Legacy wrapper: delegates to the shared core and persists to admin_queue.
 export async function scanCompanies(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "companies", startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  // Find high-star Rust repos, group by owning org to discover companies
-  const since = new Date(Date.now() - 180 * 86400000).toISOString().split("T")[0]
-  const rawRepos: RepoInput[] = []
-  const seenRepoIds = new Set<number>()
-
-  try {
-    for (const q of [
-      `language:Rust+stars:>500+pushed:>${since}+fork:false`,
-      `language:Rust+stars:>100+pushed:>${since}+fork:false`,
-    ]) {
-      const data = await ghFetch(
-        `https://api.github.com/search/repositories?q=${q}&sort=stars&per_page=50`
-      ) as { items?: RepoInput[] }
-      for (const r of data.items ?? []) {
-        if (!seenRepoIds.has(r.id)) { seenRepoIds.add(r.id); rawRepos.push(r) }
-      }
-    }
-  } catch (e) {
-    log.errors.push(`GitHub search: ${String(e)}`)
-  }
-
-  log.found = rawRepos.length
-  log.stages!.reposFound = rawRepos.length
-
-  // Group by org, only Organization owners (not personal repos)
-  const orgToRepos = new Map<string, { repos: RepoInput[]; stars: number }>()
-  for (const repo of rawRepos) {
-    const owner = (repo as any).owner
-    if (!owner || owner.type !== "Organization") continue
-    const login = owner.login as string
-    const entry = orgToRepos.get(login) ?? { repos: [], stars: 0 }
-    entry.repos.push(repo)
-    entry.stars += repo.stargazers_count
-    orgToRepos.set(login, entry)
-  }
-
-  log.stages!.orgsFound = orgToRepos.size
-
-  // Top 15 orgs by total Rust stars
-  const topOrgs = Array.from(orgToRepos.entries())
-    .sort((a, b) => b[1].stars - a[1].stars)
-    .slice(0, 15)
-    .map(([login, { repos, stars }]) => ({ login, repoCount: repos.length, stars }))
-
-  log.notes!.push(`Top ${topOrgs.length} orgs selected out of ${orgToRepos.size}`)
-
-  // Fetch org details in parallel
-  const orgDetailResults = await Promise.allSettled(
-    topOrgs.map(({ login }) =>
-      ghFetch(`https://api.github.com/orgs/${login}`).then(d => d as GHOrgDetail)
-    )
-  )
-
-  const existingIds = new Set((await readPending("companies")).map(i => i.id))
-  const existingNames = new Set((await readContent("companies")).map(i => String(i.name ?? "").toLowerCase()))
-  const pendingItems: PendingItem[] = []
-
-  for (let i = 0; i < topOrgs.length; i++) {
-    const { login, repoCount, stars } = topOrgs[i]
-    const result = orgDetailResults[i]
-
-    if (result.status === "rejected") {
-      log.errors.push(`Org ${login}: ${String(result.reason)}`)
-      continue
-    }
-
-    const org = result.value
-    const id = `gh-org-${org.id}`
-    const displayName = org.name ?? org.login
-
-    if (existingIds.has(id) || existingNames.has(displayName.toLowerCase())) {
-      log.skipped++; continue
-    }
-
-    const href = org.blog?.startsWith("http") ? org.blog : org.html_url
-    const text = [
-      `Org: ${displayName}`,
-      org.description ? `About: ${org.description}` : "",
-      org.blog ? `Website: ${org.blog}` : "",
-      `GitHub: ${org.html_url}`,
-      `${repoCount} Rust repos · ${stars} total stars`,
-    ].filter(Boolean).join("\n")
-
-    const aiResult = await extractWithDeepSeek("companies", text)
-    const extracted = aiResult.ok && aiResult.data
-      ? { ...aiResult.data, href: (aiResult.data.href as string)?.startsWith("http") ? aiResult.data.href : href }
-      : { name: displayName, sector: "Open Source", href }
-
-    pendingItems.push({
-      id, type: "companies", status: "pending",
-      source: "github-orgs", sourceUrl: org.html_url,
-      foundAt: new Date().toISOString(),
-      confidence: 0.65,
-      whyMatched: `${repoCount} Rust repos · ${stars} total stars`,
-      rawText: text,
-      extracted,
-    })
-  }
-
-  log.stages!.queued = pendingItems.length
-  log.added = await addPendingItems("companies", pendingItems)
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("companies")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectCompanies({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("companies", items)
   return log
 }
 
