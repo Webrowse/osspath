@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "prebuild": "node scripts/export-db-to-json.mjs && node scripts/build-search-index.mjs",
+    "prebuild": "node scripts/check-public-purity.mjs && node scripts/export-db-to-json.mjs && node scripts/build-search-index.mjs",
     "build": "next build",
     "dev": "next dev",
+    "check:purity": "node scripts/check-public-purity.mjs",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
