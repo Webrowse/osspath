@@ -103,12 +103,6 @@
 }
 .adm-nav__item--sub:hover { color: var(--fg-1, oklch(0.82 0.008 250)); }
 
-.adm-nav__item--label {
-  cursor: default;
-  pointer-events: none;
-}
-.adm-nav__item--label:hover { background: transparent; }
-
 .adm-nav__item--queue {
   font-weight: 500;
   color: var(--fg-1, oklch(0.82 0.008 250));
@@ -240,36 +234,6 @@
   flex: 1;
 }
 
-/* ── Skeleton / loading states ───────────────────────────── */
-
-@keyframes adm-pulse {
-  0%, 100% { opacity: 0.4; }
-  50%       { opacity: 0.8; }
-}
-
-.adm-skeleton {
-  background: var(--bg-3, oklch(0.29 0.01 250));
-  border-radius: 4px;
-  animation: adm-pulse 1.4s ease-in-out infinite;
-}
-
-.adm-tab--skeleton {
-  opacity: 0.35;
-  pointer-events: none;
-  animation: adm-pulse 1.4s ease-in-out infinite;
-}
-
-.adm-queue-skeleton {
-  height: 88px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  background: var(--bg-1, #171717);
-  border: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  animation: adm-pulse 1.4s ease-in-out infinite;
-}
-.adm-queue-skeleton:nth-child(even) { animation-delay: 0.2s; }
-.adm-queue-skeleton:nth-child(3n)   { animation-delay: 0.4s; }
-
 /* ── Type tabs ───────────────────────────────────────────── */
 
 .adm-tabs {
@@ -302,160 +266,6 @@
   color: var(--fg-0, #e5e5e5);
   border-bottom-color: oklch(0.62 0.14 42);
 }
-.adm-tab--empty {
-  opacity: 0.45;
-}
-
-/* ── Pending item card ───────────────────────────────────── */
-
-.adm-card {
-  background: var(--bg-1, #171717);
-  border: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  border-radius: 8px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  transition: border-color 120ms;
-}
-.adm-card:hover { border-color: var(--line, oklch(0.32 0.01 250)); }
-
-.adm-card__head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  background: var(--bg-0, #0f0f0f);
-}
-
-.adm-card__source {
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  font-size: 10.5px;
-  padding: 2px 6px;
-  border-radius: 4px;
-  background: var(--bg-2, oklch(0.25 0.009 250));
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.adm-card__age {
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  font-size: 11px;
-  color: var(--fg-3, oklch(0.50 0.01 250));
-}
-
-.adm-card__confidence {
-  margin-left: auto;
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  font-size: 10.5px;
-  color: var(--fg-3, oklch(0.50 0.01 250));
-}
-
-.adm-card__confidence-hi { color: oklch(0.72 0.14 155); }
-.adm-card__confidence-med { color: oklch(0.78 0.13 80); }
-
-.adm-card__body {
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.adm-card__title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--fg-0, #e5e5e5);
-  letter-spacing: -0.01em;
-  line-height: 1.3;
-}
-
-.adm-card__subtitle {
-  font-size: 12px;
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-}
-
-.adm-card__note {
-  font-size: 12.5px;
-  color: var(--fg-1, oklch(0.82 0.008 250));
-  line-height: 1.5;
-  max-width: 72ch;
-}
-
-.adm-card__raw {
-  font-size: 11.5px;
-  color: var(--fg-3, oklch(0.50 0.01 250));
-  line-height: 1.5;
-  max-height: 56px;
-  overflow: hidden;
-  border-left: 2px solid var(--line-soft, rgba(255,255,255,0.07));
-  padding-left: 8px;
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-}
-
-.adm-card__why {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  padding: 5px 8px;
-  background: oklch(0.62 0.14 42 / 0.08);
-  border: 1px solid oklch(0.62 0.14 42 / 0.2);
-  border-radius: 5px;
-  line-height: 1.5;
-}
-.adm-card__why-label {
-  color: oklch(0.78 0.12 42);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-size: 10px;
-}
-.adm-card__why-score {
-  margin-left: auto;
-  color: oklch(0.72 0.14 155);
-  font-weight: 600;
-}
-
-.adm-card__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.adm-chip {
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  font-size: 10.5px;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: var(--bg-2, oklch(0.25 0.009 250));
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  border: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  white-space: nowrap;
-}
-.adm-chip--rust {
-  background: oklch(0.62 0.14 42 / 0.15);
-  color: oklch(0.78 0.12 42);
-  border-color: oklch(0.62 0.14 42 / 0.3);
-}
-.adm-chip--remote {
-  background: oklch(0.72 0.14 155 / 0.12);
-  color: oklch(0.72 0.14 155);
-  border-color: oklch(0.72 0.14 155 / 0.3);
-}
-
-.adm-card__actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
-  border-top: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-}
-
-.adm-card__actions-spacer { flex: 1; }
 
 /* ── Buttons ─────────────────────────────────────────────── */
 
@@ -495,15 +305,6 @@
   background: oklch(0.66 0.18 22 / 0.22);
 }
 
-.adm-btn--approve {
-  background: oklch(0.72 0.14 155 / 0.15);
-  color: oklch(0.72 0.14 155);
-  border-color: oklch(0.72 0.14 155 / 0.35);
-}
-.adm-btn--approve:hover {
-  background: oklch(0.72 0.14 155 / 0.25);
-}
-
 .adm-btn--primary {
   background: oklch(0.62 0.14 42);
   color: oklch(0.99 0 0);
@@ -521,29 +322,6 @@
   opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
-}
-
-/* ── Progress bar ────────────────────────────────────────── */
-
-.adm-progress {
-  width: 140px;
-  height: 6px;
-  background: var(--bg-3, oklch(0.29 0.01 250));
-  border-radius: 3px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-.adm-progress__bar {
-  height: 100%;
-  background: oklch(0.72 0.14 155);
-  border-radius: 3px;
-  transition: width 120ms ease-out;
-}
-.adm-progress__label {
-  font-size: 11.5px;
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  white-space: nowrap;
 }
 
 /* ── Select / dropdown ───────────────────────────────────── */
@@ -609,35 +387,6 @@
 }
 
 /* ── Scan page ───────────────────────────────────────────── */
-
-.adm-scan-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
-}
-
-.adm-scan-card {
-  background: var(--bg-1, #171717);
-  border: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.adm-scan-card__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg-0, #e5e5e5);
-}
-
-.adm-scan-card__desc {
-  font-size: 12px;
-  color: var(--fg-2, oklch(0.65 0.01 250));
-  line-height: 1.5;
-  flex: 1;
-}
 
 .adm-log {
   background: var(--bg-0, #0f0f0f);
@@ -716,12 +465,6 @@
   line-height: 1.5;
 }
 
-.adm-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
 .adm-form-actions {
   display: flex;
   gap: 8px;
@@ -759,40 +502,6 @@
   font-family: var(--font-geist-mono, ui-monospace, monospace);
   color: var(--fg-3, oklch(0.50 0.01 250));
   white-space: nowrap;
-}
-
-/* ── Status indicator ────────────────────────────────────── */
-
-.adm-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--font-geist-mono, ui-monospace, monospace);
-  font-size: 11px;
-  color: var(--fg-2, oklch(0.65 0.01 250));
-}
-.adm-status-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: oklch(0.72 0.14 155);
-}
-.adm-status-dot--pending { background: oklch(0.78 0.13 80); }
-.adm-status-dot--error   { background: oklch(0.66 0.18 22); }
-
-/* ── Manual add form (scan page) ─────────────────────────── */
-
-.adm-manual {
-  background: var(--bg-1, #171717);
-  border: 1px solid var(--line-soft, rgba(255,255,255,0.07));
-  border-radius: 8px;
-  padding: 14px;
-}
-.adm-manual__title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--fg-0, #e5e5e5);
-  margin-bottom: 10px;
 }
 
 /* ── Reports (pipeline run history) ──────────────────────── */
