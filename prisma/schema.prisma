@@ -72,6 +72,20 @@ model ContentItem {
   @@map("content_items")
 }
 
+// ── Schema guardrail ──────────────────────────────────────────────────────────
+// Single row recording the fingerprint (normalised hash) of the schema last
+// intentionally applied, plus the git commit it came from. Written automatically
+// by `npm run db:apply`. The admin dashboard compares this to the running app's
+// schema fingerprint to detect a database applied from a stale checkout.
+
+model SchemaMetadata {
+  id          String   @id @default("singleton")
+  fingerprint String
+  gitCommit   String?
+  updatedAt   DateTime @updatedAt
+  @@map("schema_metadata")
+}
+
 // ── Pipeline: managed sources ─────────────────────────────────────────────────
 // Replaces hardcoded scanner constants. Each row is one source the pipeline
 // scans. `fingerprint` and `lastRunAt` are the incremental watermark (RSS URL,
