@@ -15,6 +15,8 @@ import { collectGitHubOSS } from "@/lib/pipeline/scan/github-oss"
 import { collectRustBytes } from "@/lib/pipeline/scan/rust-bytes"
 import { collectPulse } from "@/lib/pipeline/scan/pulse"
 import { collectCompanies } from "@/lib/pipeline/scan/companies"
+import { collectEvents } from "@/lib/pipeline/scan/events"
+import { hnSearch } from "@/lib/pipeline/scan/hn-search"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
   ghFetch, ossJunkFilter,
@@ -444,28 +446,6 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-// ── Shared HN story helper ────────────────────────────────────────────────────
-
-type HNStoryHit = {
-  objectID: string
-  title?: string
-  url?: string
-  created_at?: string
-}
-
-async function hnSearch(query: string, hitsPerPage = 10): Promise<HNStoryHit[]> {
-  try {
-    const res = await fetch(
-      `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=${hitsPerPage}`,
-      { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
-    )
-    const data = await res.json()
-    return data?.hits ?? []
-  } catch {
-    return []
-  }
-}
-
 // ── Grants Scanner ────────────────────────────────────────────────────────────
 
 // Legacy wrapper: delegates to the shared core and persists to admin_queue for
@@ -490,59 +470,12 @@ export async function scanPulse(): Promise<ScanLog> {
 
 // ── Events Scanner ────────────────────────────────────────────────────────────
 
+// Legacy wrapper: delegates to the shared core and persists to admin_queue.
 export async function scanEvents(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "events", startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  const queries = [
-    "RustConf 2025",
-    "EuroRust 2025",
-    "Oxidize conference Rust",
-    "Rust Nation conference",
-    "Rust workshop conference 2025",
-  ]
-
-  const stories: HNStoryHit[] = []
-  const seenIds = new Set<string>()
-
-  for (const q of queries) {
-    const hits = await hnSearch(q, 5)
-    log.stages![`hn_${q.slice(0, 15)}`] = hits.length
-    for (const h of hits) {
-      if (!seenIds.has(h.objectID)) { seenIds.add(h.objectID); stories.push(h) }
-    }
-  }
-
-  log.found = stories.length
-  const existingIds = new Set((await readPending("events")).map(i => i.id))
-  const pendingItems: PendingItem[] = []
-
-  for (const story of stories) {
-    const id = `hn-event-${story.objectID}`
-    if (existingIds.has(id)) { log.skipped++; continue }
-
-    const sourceUrl = `https://news.ycombinator.com/item?id=${story.objectID}`
-    const text = [story.title, story.url ? `URL: ${story.url}` : ""].filter(Boolean).join("\n")
-
-    const result = await extractWithDeepSeek("events", text)
-    if (!result.ok || !result.data) { log.skipped++; continue }
-
-    pendingItems.push({
-      id, type: "events", status: "pending",
-      source: "hn-events", sourceUrl,
-      foundAt: story.created_at ?? new Date().toISOString(),
-      confidence: 0.65, whyMatched: story.title ?? "",
-      rawText: text,
-      extracted: { ...result.data, href: result.data.href || story.url || sourceUrl },
-    })
-  }
-
-  log.stages!.queued = pendingItems.length
-  log.added = await addPendingItems("events", pendingItems)
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("events")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectEvents({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("events", items)
   return log
 }
 
