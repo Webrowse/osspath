@@ -83,6 +83,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/reports" className="adm-nav__item adm-nav__item--sub">
             <span>Reports</span>
           </Link>
+          <Link href="/admin/sources" className="adm-nav__item adm-nav__item--sub">
+            <span>Sources</span>
+          </Link>
 
           <div className="adm-nav__section">Published</div>
           {contentTypes.map((t) => (
