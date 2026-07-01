@@ -2,6 +2,7 @@ import type { Collector } from "./types"
 import { collectGrants } from "./scan/grants"
 import { collectReddit } from "./scan/reddit"
 import { collectGitHubOSS } from "./scan/github-oss"
+import { collectRustBytes } from "./scan/rust-bytes"
 
 /**
  * Registry of pure scanner cores the pipeline runs. Cores are added here as each
@@ -14,6 +15,7 @@ export function getCollectors(): Collector[] {
     collectGrants,
     collectReddit,
     collectGitHubOSS,
+    collectRustBytes,
     // more scanner cores are registered here as they are migrated
   ]
 }
