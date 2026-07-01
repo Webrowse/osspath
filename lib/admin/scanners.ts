@@ -1,12 +1,11 @@
 "use server"
 
-import { addPendingItems, readPending, writePending, readContent, readRejected } from "./storage"
+import { addPendingItems, readPending, writePending, readContent } from "./storage"
 import { extractWithDeepSeek } from "./deepseek"
 import {
   classifyRustSignal,
   scoreJobText,
   shouldQueue,
-  QUEUE_THRESHOLD,
 } from "./prefilter"
 import type { PendingItem, ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
@@ -17,7 +16,8 @@ import { collectPulse } from "@/lib/pipeline/scan/pulse"
 import { collectCompanies } from "@/lib/pipeline/scan/companies"
 import { collectEvents } from "@/lib/pipeline/scan/events"
 import { collectPortals } from "@/lib/pipeline/scan/portals"
-import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
+import { collectHN } from "@/lib/pipeline/scan/hn"
+import { sleep, stripHtml, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
   ghFetch, ossJunkFilter,
   buildOSSExtracted, mapRepoResponse, extractGitHubRepoUrls,
@@ -34,155 +34,13 @@ async function requireAdmin() {
 
 // ── HN Who Is Hiring ──────────────────────────────────────────────────────────
 
-type HNSearchHit = {
-  objectID: string
-  comment_text?: string
-  created_at?: string
-}
-
-async function findLatestHNHiringPost(): Promise<number | null> {
-  try {
-    const res = await fetch(
-      "https://hn.algolia.com/api/v1/search_by_date?tags=story,author_whoishiring&query=hiring&hitsPerPage=1",
-      { signal: AbortSignal.timeout(15_000), next: { revalidate: 0 } }
-    )
-    const data = await res.json()
-    const hit = data?.hits?.[0]
-    return hit ? parseInt(hit.objectID) : null
-  } catch {
-    return null
-  }
-}
-
-export async function scanHNHiring(useAI = false): Promise<ScanLog> {
+// Legacy wrapper: delegates to the shared core and persists to admin_queue.
+export async function scanHNHiring(): Promise<ScanLog> {
   await requireAdmin()
-  // Always use AI when key is present — checkbox is a manual override only
-  const shouldUseAI = useAI || !!process.env.DEEPSEEK_API_KEY
-  const log: ScanLog = {
-    source: "hn-hiring",
-    startedAt: new Date().toISOString(),
-    found: 0,
-    added: 0,
-    skipped: 0,
-    errors: [],
-    stages: {},
-    notes: [],
-  }
-
-  const storyId = await findLatestHNHiringPost()
-  if (!storyId) {
-    log.errors.push("Could not locate the latest Who-is-hiring thread")
-    log.finishedAt = new Date().toISOString()
-    return log
-  }
-  log.notes!.push(`Scanning HN story ${storyId}`)
-
-  try {
-    const res = await fetch(
-      `https://hn.algolia.com/api/v1/search?tags=comment,story_${storyId}&query=rust&hitsPerPage=100&attributesToRetrieve=objectID,comment_text,created_at`,
-      { signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } }
-    )
-    const data = await res.json()
-    const hits: HNSearchHit[] = data?.hits ?? []
-    log.found = hits.length
-    log.stages!.fetched = hits.length
-
-    // Build dedup set: pending IDs + already processed (approved or rejected) IDs
-    const processedIds = new Set<string>()
-    try {
-      for (const item of (await readPending("jobs"))) processedIds.add(item.id)
-      for (const item of (await readRejected("jobs"))) processedIds.add(item.id)
-    } catch { /* non-fatal */ }
-
-    // Also dedup by href against published content
-    const publishedHrefs = new Set<string>()
-    try {
-      for (const item of (await readContent("jobs"))) {
-        const href = String(item.href ?? "")
-        if (href) publishedHrefs.add(href)
-      }
-    } catch { /* non-fatal */ }
-
-    let rustFiltered = 0
-    let scoreFiltered = 0
-    let dupFiltered = 0
-    const pendingItems: PendingItem[] = []
-
-    for (const hit of hits) {
-      const text = decodeHTML(hit.comment_text ?? "")
-
-      // STAGE 1: Hard Rust pre-filter
-      const signal = classifyRustSignal(text)
-      if (signal !== "strong") {
-        rustFiltered++
-        continue
-      }
-
-      // STAGE 2: Scoring (remote / seniority / onsite)
-      const score = scoreJobText(text)
-      if (!shouldQueue(score)) {
-        scoreFiltered++
-        continue
-      }
-
-      const id = `hn-${hit.objectID}`
-      if (processedIds.has(id)) { dupFiltered++; continue }
-
-      const sourceUrl = `https://news.ycombinator.com/item?id=${hit.objectID}`
-
-      let extracted: Record<string, unknown>
-      if (shouldUseAI) {
-        const result = await extractWithDeepSeek("jobs", text)
-        if (!result.ok || !result.data) {
-          log.notes!.push(`AI extract failed for ${id}: ${result.error?.slice(0, 80)}`)
-          extracted = extractMinimalJob(text)
-        } else if ((result.data as any).skip === true) {
-          // DeepSeek determined this is not a Rust-primary role
-          dupFiltered++
-          continue
-        } else {
-          extracted = result.data
-        }
-      } else {
-        extracted = extractMinimalJob(text)
-      }
-
-      // Dedup by href against already-published jobs
-      const extractedHref = String(extracted.href ?? "")
-      if (extractedHref && publishedHrefs.has(extractedHref)) { dupFiltered++; continue }
-
-      pendingItems.push({
-        id,
-        type: "jobs",
-        status: "pending",
-        source: "hn-hiring",
-        sourceUrl,
-        foundAt: hit.created_at ?? new Date().toISOString(),
-        confidence: estimateConfidence(extracted),
-        score: score.total,
-        whyMatched: score.reasons.join(" · "),
-        rawText: text.slice(0, 2000),
-        extracted,
-      })
-    }
-
-    log.stages!.rustFiltered  = rustFiltered
-    log.stages!.scoreFiltered = scoreFiltered
-    log.stages!.dupFiltered   = dupFiltered
-    log.stages!.queued        = pendingItems.length
-    log.added = await addPendingItems("jobs", pendingItems)
-    log.skipped = log.found - pendingItems.length
-
-    if (pendingItems.length === 0 && hits.length > 0) {
-      log.notes!.push(
-        `No comments passed score threshold (${QUEUE_THRESHOLD}). Try relaxing filters or check different thread.`
-      )
-    }
-  } catch (e) {
-    log.errors.push(`Scan failed: ${String(e)}`)
-  }
-
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("jobs")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectHN({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("jobs", items)
+  log.skipped = log.found - log.added
   return log
 }
 
