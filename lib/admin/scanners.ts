@@ -12,10 +12,11 @@ import {
 import type { PendingItem, ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
 import { collectReddit } from "@/lib/pipeline/scan/reddit"
+import { collectGitHubOSS } from "@/lib/pipeline/scan/github-oss"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
-  ghFetch, ossSearchPage, ossJunkFilter, ossActivityTier,
-  buildOSSExtracted, mapRepoResponse, extractGitHubRepoUrls, RUST_ORGS,
+  ghFetch, ossJunkFilter, ossActivityTier,
+  buildOSSExtracted, mapRepoResponse, extractGitHubRepoUrls,
 } from "@/lib/pipeline/scan/github"
 import { auth } from "@/lib/auth"
 
@@ -433,200 +434,9 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
 
 export async function scanGitHubOSS(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "github-oss",
-    startedAt: new Date().toISOString(),
-    found: 0,
-    added: 0,
-    skipped: 0,
-    errors: [],
-    stages: {},
-    notes: [],
-  }
-
-  const since365 = new Date(Date.now() - 365 * 86_400_000).toISOString().split("T")[0]
-
-  // Build dedup sets against everything already in the corpus
-  const existingIds   = new Set<string>()
-  const existingHrefs = new Set<string>()
-  try {
-    for (const item of (await readPending("oss"))) {
-      existingIds.add(item.id)
-      if (item.sourceUrl) existingHrefs.add(item.sourceUrl)
-    }
-    for (const item of (await readContent("oss"))) {
-      const href = String(item.href ?? "")
-      if (href) existingHrefs.add(href)
-    }
-  } catch { /* non-fatal */ }
-
-  const rawRepos: RepoInput[] = []
-  const seenIds = new Set<number>()
-
-  function ingest(r: any) {
-    if (seenIds.has(r.id)) return
-    if (r.archived || r.disabled) return
-    seenIds.add(r.id)
-    rawRepos.push(mapRepoResponse(r))
-  }
-
-  // ── 1. GitHub Search (multiple star ranges + topic-based + issue signals) ──
-  // Split by star range so each query stays inside GitHub's 1000-result cap.
-  // Two pages at 100 per page = up to 200 repos per query.
-  // Sort by `updated` for freshness; GitHub Search API caps results at 10 pages.
-  const SEARCH_QUERIES: Array<{ label: string; q: string }> = [
-    { label: "stars:20-99",        q: `language:Rust+stars:20..99+pushed:>${since365}` },
-    { label: "stars:100-499",      q: `language:Rust+stars:100..499+pushed:>${since365}` },
-    { label: "stars:500-1999",     q: `language:Rust+stars:500..1999+pushed:>${since365}` },
-    { label: "stars:2000-9999",    q: `language:Rust+stars:2000..9999+pushed:>${since365}` },
-    { label: "stars:10000+",       q: `language:Rust+stars:>=10000` },
-    { label: "good-first-issues",  q: `language:Rust+good-first-issues:>0+stars:>=20+pushed:>${since365}` },
-    { label: "help-wanted",        q: `language:Rust+help-wanted-issues:>0+stars:>=20+pushed:>${since365}` },
-    { label: "topic:embedded",     q: `language:Rust+topic:embedded+stars:>=20` },
-    { label: "topic:webassembly",  q: `language:Rust+topic:webassembly+stars:>=20` },
-    { label: "topic:async-rust",   q: `language:Rust+topic:async-rust+stars:>=20` },
-    { label: "topic:database",     q: `language:Rust+topic:database+stars:>=20` },
-    { label: "topic:command-line", q: `language:Rust+topic:command-line+stars:>=20` },
-  ]
-
-  let searchTotal = 0
-  for (const { label, q } of SEARCH_QUERIES) {
-    let queryCount = 0
-    for (let page = 1; page <= 2; page++) {
-      const items = await ossSearchPage(q, page)
-      for (const r of items) ingest(r)
-      queryCount += items.length
-      if (items.length < 100) break // no more pages
-      if (page < 2) await sleep(2000) // stay under search rate limit (30 req/min)
-    }
-    log.stages![`search_${label}`] = queryCount
-    searchTotal += queryCount
-  }
-  log.notes!.push(`Search API: ${searchTotal} results across ${SEARCH_QUERIES.length} queries`)
-
-  // ── 2. Org scans (parallel batches to avoid overwhelming the API) ─────────
-  const ORG_BATCH_SIZE = 10
-  let orgTotal = 0
-  for (let i = 0; i < RUST_ORGS.length; i += ORG_BATCH_SIZE) {
-    const batch = RUST_ORGS.slice(i, i + ORG_BATCH_SIZE)
-    const results = await Promise.allSettled(
-      batch.map((org) =>
-        ghFetch(`https://api.github.com/orgs/${org}/repos?type=public&sort=pushed&per_page=100`)
-          .then((data) => ({ org, repos: (data as any[]) ?? [] }))
-      )
-    )
-    for (const result of results) {
-      if (result.status === "rejected") {
-        log.errors.push(`Org scan: ${String(result.reason).slice(0, 80)}`)
-        continue
-      }
-      const { repos } = result.value
-      let added = 0
-      for (const r of repos) {
-        if (r.language && r.language !== "Rust") continue
-        ingest(r)
-        added++
-      }
-      orgTotal += added
-    }
-  }
-  log.notes!.push(`Org scans: ${orgTotal} Rust repos across ${RUST_ORGS.length} orgs`)
-
-  log.found = rawRepos.length
-
-  // ── 3. Quality filter (deterministic — no AI) ─────────────────────────────
-  const toQueue: PendingItem[] = []
-  const rejectionReasons: Record<string, number> = {}
-  let dupCount = 0
-  let junkCount = 0
-
-  for (const repo of rawRepos) {
-    const id = `gh-${repo.id}`
-
-    // Skip repos already in corpus or pending queue
-    if (existingIds.has(id) || existingHrefs.has(repo.html_url)) {
-      dupCount++
-      continue
-    }
-
-    // Deterministic quality rules
-    const { junk, reason } = ossJunkFilter(repo as any)
-    if (junk) {
-      junkCount++
-      rejectionReasons[reason] = (rejectionReasons[reason] ?? 0) + 1
-      continue
-    }
-
-    const tier       = ossActivityTier(repo.pushed_at)
-    const stars      = repo.stargazers_count
-    const confidence = Math.min(0.9, 0.5 + Math.log10(Math.max(1, stars)) / 10)
-
-    toQueue.push({
-      id,
-      type:       "oss",
-      status:     "pending",
-      source:     "github-oss",
-      sourceUrl:  repo.html_url,
-      foundAt:    new Date().toISOString(),
-      confidence,
-      whyMatched: `${tier} · ★${stars} · ${repo.owner_login}`,
-      rawText:    `${repo.full_name}: ${repo.description ?? ""}`,
-      extracted:  buildOSSExtracted(repo),
-    })
-  }
-
-  // ── 4. Queue ──────────────────────────────────────────────────────────────
-  log.added = await addPendingItems("oss", toQueue)
-  log.skipped = dupCount + junkCount
-  log.stages!.queued      = toQueue.length
-  log.stages!.duplicates  = dupCount
-  log.stages!.junkFiltered = junkCount
-
-  // ── 5. Scan report ────────────────────────────────────────────────────────
-  if (Object.keys(rejectionReasons).length > 0) {
-    const reasonStr = Object.entries(rejectionReasons)
-      .sort((a, b) => b[1] - a[1])
-      .map(([r, n]) => `${r}(${n})`)
-      .join(", ")
-    log.notes!.push(`Quality rejections: ${reasonStr}`)
-  }
-
-  // Star bucket distribution of queued repos
-  const starBuckets: Record<string, number> = {
-    "20-99": 0, "100-499": 0, "500-1999": 0, "2k-9999": 0, "10k+": 0,
-  }
-  const activityBuckets: Record<string, number> = { active: 0, maintenance: 0, dormant: 0 }
-  const ownerCounts: Record<string, number> = {}
-
-  for (const item of toQueue) {
-    const s = (item.extracted.stars as number) ?? 0
-    if (s < 100)        starBuckets["20-99"]++
-    else if (s < 500)   starBuckets["100-499"]++
-    else if (s < 2000)  starBuckets["500-1999"]++
-    else if (s < 10000) starBuckets["2k-9999"]++
-    else                starBuckets["10k+"]++
-
-    const tier = item.extracted.activityTier as string ?? "dormant"
-    activityBuckets[tier] = (activityBuckets[tier] ?? 0) + 1
-
-    const owner = item.extracted.owner as string ?? "unknown"
-    ownerCounts[owner] = (ownerCounts[owner] ?? 0) + 1
-  }
-
-  const starReport = Object.entries(starBuckets).map(([k, v]) => `${k}:${v}`).join(" | ")
-  const actReport  = Object.entries(activityBuckets).map(([k, v]) => `${k}:${v}`).join(" | ")
-  const topOwners  = Object.entries(ownerCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 10)
-    .map(([o, n]) => `${o}(${n})`)
-    .join(", ")
-
-  log.notes!.push(`★ buckets: ${starReport}`)
-  log.notes!.push(`Activity: ${actReport}`)
-  log.notes!.push(`Top owners: ${topOwners}`)
-  log.notes!.push(`Unique repos found: ${rawRepos.length} | already in corpus: ${dupCount} | quality-rejected: ${junkCount} | queued: ${log.added}`)
-
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("oss")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectGitHubOSS({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("oss", items)
   return log
 }
 
