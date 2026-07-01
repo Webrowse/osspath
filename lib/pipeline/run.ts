@@ -4,6 +4,7 @@ import type { ContentType } from "@/lib/admin/types"
 import type { PipelineReport } from "@/lib/admin/pipeline-runs"
 import { heartbeat } from "@/lib/admin/pipeline-runs"
 import { markSourceRun } from "@/lib/admin/sources"
+import { SOURCE_PROBES } from "./probes"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
 
@@ -101,6 +102,16 @@ export async function runPipeline(
   const candidates: Candidate[] = []
   for (const { source, collect } of jobs) {
     try {
+      // Cheap fingerprint fast-exit: skip the full scan if the source's
+      // latest-item signal is unchanged since last run.
+      const probe = SOURCE_PROBES[source.kind]
+      const fingerprint = probe ? await probe() : null
+      if (fingerprint && fingerprint === source.fingerprint) {
+        report.notes!.push(`${source.kind}: unchanged, skipped`)
+        await markSourceRun(source.id, fingerprint)
+        continue
+      }
+
       const { log, items } = await collect(ctx)
       report.scanned += items.length
       report.perSource![log.source] = (report.perSource![log.source] ?? 0) + items.length
@@ -109,8 +120,9 @@ export async function runPipeline(
         candidates.push(it)
       }
       if (log.errors?.length) report.errors.push(...log.errors.map((e) => `${log.source}: ${e}`))
-      // Record the watermark so this source is skipped until its interval elapses.
-      await markSourceRun(source.id)
+      // Record the watermark: lastRun (interval gate) and the new fingerprint
+      // (fast-exit gate). A null fingerprint leaves the stored one untouched.
+      await markSourceRun(source.id, fingerprint ?? undefined)
     } catch (e) {
       report.errors.push(`scan ${source.kind}: ${String(e)}`)
     }
