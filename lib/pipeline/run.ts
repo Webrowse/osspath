@@ -1,4 +1,4 @@
-import type { Collector, Candidate } from "./types"
+import type { Collector, Candidate, ScanContext } from "./types"
 import type { ContentType } from "@/lib/admin/types"
 import type { PipelineReport } from "@/lib/admin/pipeline-runs"
 import { heartbeat } from "@/lib/admin/pipeline-runs"
@@ -86,10 +86,20 @@ export async function runPipeline(
 
   // ── Phase 1: scan — collect candidates, drop blocklisted ───────────────────
   const blocklist: Blocklist = await loadBlocklist()
+  const publishedByType = new Map<ContentType, Set<string>>()
+  for (const type of CONTENT_TYPES) publishedByType.set(type, await publishedHrefSet(type))
+  const knownHrefs = new Set<string>()
+  for (const set of publishedByType.values()) for (const h of set) knownHrefs.add(h)
+
+  // Lets each core skip expensive extraction for already-known/blocklisted URLs.
+  const ctx: ScanContext = {
+    isKnown: (href: string) => knownHrefs.has(normalizeUrl(href)) || isBlocked(blocklist, { url: href }),
+  }
+
   const candidates: Candidate[] = []
   for (const collect of collectors) {
     try {
-      const { log, items } = await collect()
+      const { log, items } = await collect(ctx)
       report.scanned += items.length
       report.perSource![log.source] = (report.perSource![log.source] ?? 0) + items.length
       for (const it of items) {
@@ -104,8 +114,6 @@ export async function runPipeline(
   await heartbeat(runId)
 
   // ── Phase 2: dedup against already-published content ───────────────────────
-  const publishedByType = new Map<ContentType, Set<string>>()
-  for (const type of CONTENT_TYPES) publishedByType.set(type, await publishedHrefSet(type))
   const fresh = candidates.filter((c) => {
     const set = publishedByType.get(c.type)
     if (!set) return true

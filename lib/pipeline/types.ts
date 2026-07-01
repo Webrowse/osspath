@@ -12,9 +12,18 @@ export type Candidate = PendingItem
 export type ScanResult = { log: ScanLog; items: Candidate[] }
 
 /**
+ * Context passed to a scanner core. isKnown lets a core skip expensive
+ * extraction (notably DeepSeek for unstructured sources) for URLs that are
+ * already published or blocklisted, so cost scales with genuinely new content.
+ */
+export type ScanContext = {
+  isKnown: (href: string) => boolean
+}
+
+/**
  * A pure scanner core: no auth, no persistence, just scanning. Both the legacy
  * server-action wrapper and the pipeline call these. The wrappers add
  * persistence to admin_queue for backwards compatibility during the migration;
  * the pipeline consumes the candidates directly.
  */
-export type Collector = () => Promise<ScanResult>
+export type Collector = (ctx: ScanContext) => Promise<ScanResult>
