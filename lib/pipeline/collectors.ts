@@ -6,6 +6,7 @@ import { collectRustBytes } from "./scan/rust-bytes"
 import { collectPulse } from "./scan/pulse"
 import { collectCompanies } from "./scan/companies"
 import { collectEvents } from "./scan/events"
+import { collectPortals } from "./scan/portals"
 
 /**
  * Registry of pure scanner cores the pipeline runs. Cores are added here as each
@@ -22,6 +23,7 @@ export function getCollectors(): Collector[] {
     collectPulse,
     collectCompanies,
     collectEvents,
+    collectPortals,
     // more scanner cores are registered here as they are migrated
   ]
 }

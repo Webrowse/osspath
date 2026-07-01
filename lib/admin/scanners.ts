@@ -16,7 +16,7 @@ import { collectRustBytes } from "@/lib/pipeline/scan/rust-bytes"
 import { collectPulse } from "@/lib/pipeline/scan/pulse"
 import { collectCompanies } from "@/lib/pipeline/scan/companies"
 import { collectEvents } from "@/lib/pipeline/scan/events"
-import { hnSearch } from "@/lib/pipeline/scan/hn-search"
+import { collectPortals } from "@/lib/pipeline/scan/portals"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import {
   ghFetch, ossJunkFilter,
@@ -481,110 +481,12 @@ export async function scanEvents(): Promise<ScanLog> {
 
 // ── Portals Scanner ───────────────────────────────────────────────────────────
 
-// Direct Rust pages on major job boards. These are the canonical filtered URLs —
-// not the homepage, specifically the Rust search/filter landing page.
-const PORTAL_SEEDS = [
-  {
-    name: "LinkedIn — Rust Developer Jobs",
-    kind: "General",
-    href: "https://www.linkedin.com/jobs/rust-developer-jobs/",
-    description: "LinkedIn filtered for Rust developer roles. Largest professional network, high volume of direct employer postings.",
-    tags: ["general", "high-volume"],
-  },
-  {
-    name: "Indeed — Rust Developer Jobs",
-    kind: "General",
-    href: "https://www.indeed.com/q-rust-developer-jobs.html",
-    description: "Indeed filtered for Rust developer roles. Broad reach across startups and enterprise.",
-    tags: ["general", "high-volume"],
-  },
-  {
-    name: "Glassdoor — Rust Developer Jobs",
-    kind: "General",
-    href: "https://www.glassdoor.com/Job/rust-developer-jobs-SRCH_KO0,19.htm",
-    description: "Glassdoor Rust jobs with salary transparency and company culture data.",
-    tags: ["general", "salary-data"],
-  },
-  {
-    name: "We Work Remotely — Rust",
-    kind: "Remote-only",
-    href: "https://weworkremotely.com/remote-rust-jobs",
-    description: "Dedicated Rust section on one of the largest remote job boards.",
-    tags: ["remote-only"],
-  },
-  {
-    name: "Arc.dev — Remote Rust Jobs",
-    kind: "Remote-only",
-    href: "https://arc.dev/remote-jobs/rust",
-    description: "Vetted remote Rust developer roles. Screened candidates and employers.",
-    tags: ["remote-only", "vetted"],
-  },
-  {
-    name: "Hired — Rust Engineering",
-    kind: "Aggregator",
-    href: "https://hired.com/jobs/rust",
-    description: "Hired's Rust engineering listings. Tech-focused with salary transparency and company bids.",
-    tags: ["aggregator", "salary-data"],
-  },
-]
-
+// Legacy wrapper: delegates to the shared core and persists to admin_queue.
 export async function scanPortals(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "portals", startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  const existingIds = new Set((await readPending("portals")).map(i => i.id))
-  const existingHrefs = new Set((await readContent("portals")).map(i => String(i.href ?? "")))
-  const pendingItems: PendingItem[] = []
-
-  // Add seeded portals that aren't already published or pending
-  for (const portal of PORTAL_SEEDS) {
-    const id = `portal-seed-${portal.name.replace(/\W+/g, "-").toLowerCase()}`
-    if (existingIds.has(id) || existingHrefs.has(portal.href)) { log.skipped++; continue }
-
-    pendingItems.push({
-      id, type: "portals", status: "pending",
-      source: "portal-seed", sourceUrl: portal.href,
-      foundAt: new Date().toISOString(),
-      confidence: 0.9, whyMatched: `Known Rust job portal — ${portal.kind}`,
-      rawText: `${portal.name}: ${portal.description}`,
-      extracted: portal,
-    })
-  }
-
-  log.stages!.seeded = pendingItems.length
-  log.notes!.push(`${pendingItems.length} known portals queued`)
-
-  // Search HN for any additional portals people discuss
-  const hnHits = await hnSearch("rust jobs where apply remote", 10)
-  const hnCandidates = hnHits.filter(h => h.url && !h.url.includes("ycombinator"))
-  log.stages!.hnCandidates = hnCandidates.length
-
-  for (const story of hnCandidates.slice(0, 5)) {
-    const id = `hn-portal-${story.objectID}`
-    if (existingIds.has(id)) { log.skipped++; continue }
-
-    const text = [story.title, `URL: ${story.url}`].join("\n")
-    const result = await extractWithDeepSeek("portals", text)
-    if (!result.ok || !result.data) continue
-
-    pendingItems.push({
-      id, type: "portals", status: "pending",
-      source: "hn-portals",
-      sourceUrl: `https://news.ycombinator.com/item?id=${story.objectID}`,
-      foundAt: story.created_at ?? new Date().toISOString(),
-      confidence: 0.5, whyMatched: story.title ?? "",
-      rawText: text,
-      extracted: { ...result.data, href: result.data.href || story.url },
-    })
-  }
-
-  log.found = PORTAL_SEEDS.length + hnCandidates.length
-  log.stages!.queued = pendingItems.length
-  log.added = await addPendingItems("portals", pendingItems)
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("portals")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectPortals({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("portals", items)
   return log
 }
 
