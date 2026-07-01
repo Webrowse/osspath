@@ -1,7 +1,7 @@
 "use server"
 
 import { addPendingItems, readPending, writePending, readContent, readRejected } from "./storage"
-import { extractWithDeepSeek, inferEcoFromRepo, deriveTopicsFromRepo } from "./deepseek"
+import { extractWithDeepSeek } from "./deepseek"
 import type { RepoInput } from "./deepseek"
 import {
   classifyRustSignal,
@@ -13,6 +13,10 @@ import type { PendingItem, ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
 import { collectReddit } from "@/lib/pipeline/scan/reddit"
 import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
+import {
+  ghFetch, ossSearchPage, ossJunkFilter, ossActivityTier,
+  buildOSSExtracted, mapRepoResponse, extractGitHubRepoUrls, RUST_ORGS,
+} from "@/lib/pipeline/scan/github"
 import { auth } from "@/lib/auth"
 
 async function requireAdmin() {
@@ -426,122 +430,6 @@ export async function scanTWIR(useAI = false): Promise<ScanLog> {
 }
 
 // ── GitHub OSS Scanner (metadata-first, no AI required) ──────────────────────
-
-// Deterministic quality filter — no AI needed.
-// Returns { junk: true, reason } for repos that should not enter the corpus.
-function ossJunkFilter(r: RepoInput & { archived?: boolean; disabled?: boolean }): { junk: boolean; reason: string } {
-  if (r.archived || r.disabled) return { junk: true, reason: "archived or disabled" }
-  if ((r.stargazers_count ?? 0) < 20) return { junk: true, reason: "under 20 stars" }
-
-  const nameLc = r.name.toLowerCase()
-  const descLc = (r.description ?? "").toLowerCase()
-
-  // Awesome lists and curated link collections
-  if (nameLc.startsWith("awesome-") || nameLc.startsWith("awesome_") || nameLc === "awesome") {
-    return { junk: true, reason: "awesome-list" }
-  }
-  if (/^(list-of|curated|resources|links)-/.test(nameLc)) {
-    return { junk: true, reason: "resource list" }
-  }
-  if (descLc.includes("curated list") || descLc.includes("a list of") ||
-      descLc.includes("collection of resources") || descLc.includes("a collection of awesome")) {
-    return { junk: true, reason: "curated list (description)" }
-  }
-
-  // Learning / tutorial / course repos
-  if (/-(tutorial|tutorials|guide|guides|course|courses|workshop|workshops|book|exercises|kata)s?$/.test(nameLc)) {
-    return { junk: true, reason: "learning resource" }
-  }
-  if (/^(learn|learning|tutorial|guide|course|workshop|book|study)-/.test(nameLc)) {
-    return { junk: true, reason: "learning resource" }
-  }
-
-  // Documentation repos
-  if (nameLc === "docs" || nameLc === "documentation" || nameLc.endsWith("-docs") || nameLc.endsWith(".github.io")) {
-    return { junk: true, reason: "documentation repo" }
-  }
-
-  // Mirror / fork repos
-  if (descLc.startsWith("mirror of") || descLc.startsWith("[mirror]") || descLc.includes("auto-mirror")) {
-    return { junk: true, reason: "mirror repository" }
-  }
-  if (nameLc.endsWith("-mirror") || nameLc.startsWith("mirror-")) {
-    return { junk: true, reason: "mirror repository" }
-  }
-
-  // Empty repos (no code at all)
-  if (r.size === 0) return { junk: true, reason: "empty repository" }
-
-  // Non-English repos — CJK/non-Latin scripts in name or description.
-  // u flag is required: without it, emoji surrogate pairs (U+D83C etc.) falsely match BMP ranges.
-  // Parenthesized name translations like "Hayabusa (隼)" are stripped before testing.
-  const NON_ENGLISH = /[぀-ヿ㐀-䶿一-鿿가-퟿豈-﫿Ѐ-ӿ؀-ۿ֐-׿ऀ-ॿ฀-๿]/u
-  const stripParens = (s: string) => s.replace(/\s*\([^)]*\)/g, "")
-  if (NON_ENGLISH.test(stripParens(r.name)) || NON_ENGLISH.test(stripParens(r.description ?? ""))) {
-    return { junk: true, reason: "non-English script" }
-  }
-
-  return { junk: false, reason: "" }
-}
-
-// Derive activityTier deterministically from pushed_at timestamp
-function ossActivityTier(pushedAt: string): "active" | "maintenance" | "dormant" {
-  if (!pushedAt) return "dormant"
-  const days = (Date.now() - new Date(pushedAt).getTime()) / 86_400_000
-  if (days <= 30) return "active"
-  if (days <= 90) return "maintenance"
-  return "dormant"
-}
-
-// Build the complete extracted object from raw GitHub API data — no AI required.
-function buildOSSExtracted(repo: RepoInput): Record<string, unknown> {
-  const tier = ossActivityTier(repo.pushed_at)
-  const eco  = inferEcoFromRepo(repo.topics, repo.name, repo.description ?? "")
-  return {
-    // Display fields
-    name:  repo.name,
-    eco,
-    href:  repo.html_url,
-    note:  repo.description ?? "",
-    topics: deriveTopicsFromRepo(repo),
-    // GitHub objective metadata
-    stars:                 repo.stargazers_count,
-    forks:                 repo.forks_count,
-    openIssuesCount:       repo.open_issues_count,
-    goodFirstIssuesCount:  repo.good_first_issues_count ?? 0,
-    helpWantedIssuesCount: repo.help_wanted_issues_count ?? 0,
-    language:              repo.language ?? null,
-    owner:                 repo.owner_login ?? "",
-    license:               repo.license_spdx_id ?? null,
-    pushedAt:              repo.pushed_at,
-    activityTier:          tier,
-    // AI-score fields kept at neutral defaults for schema compatibility.
-    // These are no longer used in the OSS browser (Phase 1 removed them).
-    maintainerFriendliness: 0.5,
-    issueQuality:           0.5,
-    beginnerSuitability:    0.5,
-    maintainerLabel:        "",
-    issueLabel:             `${repo.open_issues_count} open issues`,
-    beginnerLabel:          "",
-    ecosystem:              [],
-    beginnerFriendly:       (repo.good_first_issues_count ?? 0) > 0,
-    queue:                  true,
-    skipReason:             "",
-  }
-}
-
-// Paginated GitHub search — fetches up to `pages` pages at 100 results each.
-// Inserts a polite delay between pages to respect the 30 req/min search limit.
-async function ossSearchPage(query: string, page: number): Promise<any[]> {
-  try {
-    const data = await ghFetch(
-      `https://api.github.com/search/repositories?q=${query}&sort=updated&per_page=100&page=${page}`
-    ) as { items?: any[] }
-    return data?.items ?? []
-  } catch {
-    return []
-  }
-}
 
 export async function scanGitHubOSS(): Promise<ScanLog> {
   await requireAdmin()
@@ -1146,74 +1034,9 @@ export async function scanCompanies(): Promise<ScanLog> {
 
 // Expanded organization list covering the broad Rust ecosystem.
 // Orgs with mixed-language repos are fine — the org scan already filters by language:Rust.
-const RUST_ORGS = [
-  // Core language and toolchain
-  "rust-lang", "rust-cli",
-  // Async / networking
-  "tokio-rs", "hyperium", "smol-rs", "quinn-rs", "libp2p",
-  // Embedded / systems
-  "embassy-rs", "oxidecomputer", "redox-os",
-  // WebAssembly
-  "rustwasm", "bytecodealliance", "fermyon", "wasmerio",
-  // Application frameworks / UI
-  "tauri-apps", "slint-ui", "bevyengine", "linebender",
-  // ORM / serialization / core libs
-  "diesel-rs", "serde-rs", "rayon-rs",
-  // FFI / interop
-  "PyO3",
-  // Data / ML
-  "pola-rs", "tracel-ai", "lance-format",
-  // Search / databases / storage
-  "meilisearch", "qdrant", "paradedb", "databend-labs",
-  "risingwavelabs", "quickwit-oss", "GreptimeTeam", "pgcentralfoundation",
-  // Observability / DevTools
-  "vectordotdev", "rerun-io", "gitbutlerapp",
-  // Shell / terminal
-  "nushell", "zellij-org",
-  // Package / environment management
-  "astral-sh", "prefix-dev",
-  // VCS tooling
-  "jj-vcs",
-  // Runtimes / languages
-  "denoland", "firecracker-microvm",
-  // Big-tech Rust projects (filtered by language=Rust in scan)
-  "awslabs", "cloudflare", "microsoft", "google", "mozilla",
-  // Database / distributed systems
-  "tikv", "pingcap", "apache",
-  // Infrastructure
-  "cachix",
-]
-
-const GH_HEADERS = {
-  Accept: "application/vnd.github.v3+json",
-  "User-Agent": "osspath.com/scanner",
-  ...(process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {}),
-}
-
 const RUST_BYTES_FEED = "https://weeklyrust.substack.com/feed"
 
-async function ghFetch(url: string): Promise<unknown> {
-  const res = await fetch(url, { headers: GH_HEADERS, signal: AbortSignal.timeout(20_000), next: { revalidate: 0 } })
-  if (res.status === 403) throw new Error("GitHub rate-limited (403). Set GITHUB_TOKEN in .env.local.")
-  if (!res.ok) throw new Error(`GitHub API ${res.status}: ${url}`)
-  return res.json()
-}
-
 // ── Rust Bytes newsletter scanner ─────────────────────────────────────────────
-
-/** Extract unique github.com/{owner}/{repo} URLs from raw HTML, normalised to base URL. */
-function extractGitHubRepoUrls(html: string): string[] {
-  const seen = new Set<string>()
-  const re = /https?:\/\/github\.com\/([a-zA-Z0-9_.-]+)\/([a-zA-Z0-9_.-]+)/g
-  let m: RegExpExecArray | null
-  while ((m = re.exec(html)) !== null) {
-    const [, owner, repo] = m
-    // skip .github org config repos, and common non-code paths
-    if (repo === ".github" || owner === "topics" || owner === "trending") continue
-    seen.add(`https://github.com/${owner}/${repo}`)
-  }
-  return [...seen]
-}
 
 /** Fetch and parse the Rust Bytes RSS feed. Returns last `limit` issue item links. */
 async function fetchRustBytesIssues(limit = 10): Promise<Array<{ link: string; html: string; guid: string }>> {
@@ -1352,28 +1175,6 @@ export async function scanRustBytes(): Promise<ScanLog> {
   log.finishedAt = new Date().toISOString()
   return log
 }
-
-function mapRepoResponse(r: any): RepoInput {
-  return {
-    id:                       r.id,
-    name:                     r.name,
-    full_name:                r.full_name,
-    description:              r.description ?? null,
-    topics:                   r.topics ?? [],
-    stargazers_count:         r.stargazers_count ?? 0,
-    pushed_at:                r.pushed_at ?? "",
-    size:                     r.size ?? 0,
-    open_issues_count:        r.open_issues_count ?? 0,
-    good_first_issues_count:  r.good_first_issues_count,
-    help_wanted_issues_count: r.help_wanted_issues_count,
-    forks_count:              r.forks_count ?? 0,
-    html_url:                 r.html_url ?? "",
-    language:                 r.language ?? null,
-    owner_login:              r.owner?.login ?? "",
-    license_spdx_id:          r.license?.spdx_id ?? null,
-  }
-}
-
 
 // ── Company Careers Scanner (Greenhouse + Lever public APIs) ──────────────────
 
