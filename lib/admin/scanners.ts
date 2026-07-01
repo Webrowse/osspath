@@ -11,6 +11,7 @@ import {
 } from "./prefilter"
 import type { PendingItem, ScanLog, ContentType } from "./types"
 import { collectGrants } from "@/lib/pipeline/scan/grants"
+import { sleep, stripHtml, decodeHTML, extractMinimalJob, estimateConfidence } from "@/lib/pipeline/scan/shared"
 import { auth } from "@/lib/auth"
 
 async function requireAdmin() {
@@ -742,63 +743,6 @@ export async function scanGitHubOSS(): Promise<ScanLog> {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function decodeHTML(text: string): string {
-  return text
-    .replace(/&amp;/g,  "&")
-    .replace(/&lt;/g,   "<")
-    .replace(/&gt;/g,   ">")
-    .replace(/&quot;/g, "\"")
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x2F;/g, "/")
-    .replace(/&nbsp;/g, " ")
-    .replace(/<p>/g,    "\n")
-    .replace(/<br\s*\/?>/g, "\n")
-}
-
-function stripHtml(text: string): string {
-  return text
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
-function extractMinimalJob(text: string): Record<string, unknown> {
-  const lower = text.toLowerCase()
-  return {
-    note: text.slice(0, 200).trim(),
-    rustMentioned: lower.includes("rust"),
-    remoteConfirmed: /\bremote\b/i.test(text),
-    tags: [
-      ...(/\bremote\b/i.test(text) ? ["Remote"] : []),
-      ...(lower.includes("eu") || lower.includes("europe") ? ["EU"] : []),
-      ...(/\bus\b|\bunited states\b/i.test(text) ? ["US"] : []),
-      ...(/\bjunior\b/i.test(text) ? ["Junior-friendly"] : []),
-    ].slice(0, 3),
-    topics: [
-      ...(lower.includes("embedded") ? ["embedded"] : []),
-      ...(lower.includes("wasm") || lower.includes("webassembly") ? ["wasm"] : []),
-      ...(lower.includes("backend") ? ["backend"] : []),
-      ...(lower.includes("infra") ? ["infra"] : []),
-      ...(lower.includes("crypto") || lower.includes("blockchain") ? ["blockchain"] : []),
-    ].slice(0, 3),
-  }
-}
-
-function estimateConfidence(extracted: Record<string, unknown>): number {
-  let score = 0.3
-  if (extracted.company) score += 0.15
-  if (extracted.role) score += 0.15
-  if (extracted.href) score += 0.2
-  if (extracted.rustMentioned) score += 0.1
-  if (extracted.remoteConfirmed) score += 0.1
-  return Math.min(score, 1)
-}
-
 // ── Shared HN story helper ────────────────────────────────────────────────────
 
 type HNStoryHit = {
@@ -823,7 +767,6 @@ async function hnSearch(query: string, hitsPerPage = 10): Promise<HNStoryHit[]> 
 
 // ── Grants Scanner ────────────────────────────────────────────────────────────
 
-// Rejects placeholder/hallucinated URLs DeepSeek sometimes invents
 // Legacy wrapper: delegates to the shared core and persists to admin_queue for
 // the old scan panel. Kept only until the panel is removed in Stage 4.
 export async function scanGrants(): Promise<ScanLog> {
@@ -1199,8 +1142,6 @@ export async function scanCompanies(): Promise<ScanLog> {
 }
 
 // ── GitHub shared helpers ─────────────────────────────────────────────────────
-
-function sleep(ms: number) { return new Promise<void>(r => setTimeout(r, ms)) }
 
 // Expanded organization list covering the broad Rust ecosystem.
 // Orgs with mixed-language repos are fine — the org scan already filters by language:Rust.
