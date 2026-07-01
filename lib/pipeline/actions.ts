@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin/pipeline-runs"
 import { runPipeline } from "./run"
 import { getCollectors } from "./collectors"
+import { triggerRebuild } from "./deploy-hook"
 
 export type RefreshResult =
   | { started: true; run: RunRow }
@@ -30,8 +31,12 @@ export async function runRefresh(): Promise<RefreshResult> {
   const runId = acq.run.id
   try {
     const { report, dirty } = await runPipeline(runId, getCollectors())
+    // Only a dirty run changed published content, so only then rebuild the site.
+    if (dirty) {
+      const hook = await triggerRebuild()
+      report.notes.push(hook.note)
+    }
     await finishRun(runId, { status: "done", dirty, report })
-    // A dirty run means published content changed; the rebuild trigger lands next.
   } catch (e) {
     await finishRun(runId, { status: "failed", dirty: false, report: failedReport(e) })
     throw e
