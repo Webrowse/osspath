@@ -9,6 +9,12 @@ import { normalizeUrl } from "@/lib/admin/lists"
  * extends the old queue-based workflow.
  */
 
+/** Published data objects for a type (read-only input for scanners like careers). */
+export async function readPublished(type: ContentType): Promise<Record<string, unknown>[]> {
+  const rows = await prisma.contentItem.findMany({ where: { type }, orderBy: { createdAt: "asc" } })
+  return rows.map((r) => r.data as Record<string, unknown>)
+}
+
 /** Set of normalised hrefs already published for a type (for dedup). */
 export async function publishedHrefSet(type: ContentType): Promise<Set<string>> {
   const rows = await prisma.contentItem.findMany({

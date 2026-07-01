@@ -8,6 +8,7 @@ import { collectCompanies } from "./scan/companies"
 import { collectEvents } from "./scan/events"
 import { collectPortals } from "./scan/portals"
 import { collectHN } from "./scan/hn"
+import { collectCareers } from "./scan/careers"
 
 /**
  * Registry of pure scanner cores the pipeline runs. Cores are added here as each
@@ -26,6 +27,7 @@ export function getCollectors(): Collector[] {
     collectEvents,
     collectPortals,
     collectHN,
+    collectCareers,
     // more scanner cores are registered here as they are migrated
   ]
 }
