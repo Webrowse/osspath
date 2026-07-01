@@ -24,7 +24,6 @@ export type ScanLog = {
   added: number
   skipped: number
   errors: string[]
-  // Optional per-stage diagnostics (HN: rust-filtered, remote-filtered, etc.)
   stages?: Record<string, number>
   notes?: string[]
 }
