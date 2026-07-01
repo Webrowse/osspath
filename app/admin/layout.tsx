@@ -1,25 +1,50 @@
 import Link from "next/link"
 import { headers } from "next/headers"
-import { notFound } from "next/navigation"
 import { getPendingCounts, getPublishedCounts } from "@/lib/admin/storage"
 import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
-import { getSession, signOut } from "@/lib/auth"
+import { getSession, signOut, googleEnabled } from "@/lib/auth"
+import { AdminLogin } from "@/components/admin/admin-login"
 import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
 const ZERO_COUNTS = { jobs: 0, oss: 0, grants: 0, pulse: 0, events: 0, companies: 0, portals: 0, news: 0 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession()
+  const email = session?.user?.email
+
+  // Unauthenticated: show inline login. The admin is reachable from any device
+  // at /admin without a separate login route.
+  if (!email) {
+    return <AdminLogin googleEnabled={googleEnabled} />
+  }
+
+  // Authenticated but not the admin account: deny with a sign-out escape hatch.
+  if (email !== ADMIN_EMAIL) {
+    return (
+      <div className="adm-login">
+        <div className="adm-login__card adm-login__notice">
+          <div className="adm-login__brand">
+            <span className="adm-sidebar__mark" />
+            <span>osspath admin</span>
+          </div>
+          <p className="adm-login__hint">{email} is not authorized for this admin.</p>
+          <form
+            action={async () => {
+              "use server"
+              await signOut({ redirectTo: "/admin" })
+            }}
+          >
+            <button type="submit" className="adm-btn">Sign out</button>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
   const host = (await headers()).get("host") ?? ""
   const isLocal = host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("::1")
-
-  if (!isLocal) notFound()
-
-  const session = await getSession()
-  if (!session?.user?.email || session.user.email !== ADMIN_EMAIL) {
-    notFound()
-  }
 
   let counts = ZERO_COUNTS
   let publishedCounts = ZERO_COUNTS
@@ -39,7 +64,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <aside className="adm-sidebar">
         <div className="adm-sidebar__brand">
           <span className="adm-sidebar__mark" />
-          <span>editorial</span>
+          <span>osspath</span>
           <span className="adm-sidebar__env">{isLocal ? "localhost" : "live"}</span>
         </div>
 
@@ -78,19 +103,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="adm-sidebar__footer">
           <div className="adm-sidebar__user">
             <span className="adm-sidebar__user-dot" />
-            <span className="adm-sidebar__user-email">{session.user.email}</span>
+            <span className="adm-sidebar__user-email">{email}</span>
           </div>
           <form action={async () => {
             "use server"
-            await signOut({ redirectTo: "/login" })
+            await signOut({ redirectTo: "/admin" })
           }}>
             <button type="submit" className="adm-sidebar__signout">Sign out</button>
           </form>
           <Link href="/" className="adm-sidebar__home" target="_blank" rel="noopener">
             ↗ Public site
-          </Link>
-          <Link href="/companies" className="adm-sidebar__home" target="_blank" rel="noopener" style={{ display: "block", marginTop: 4 }}>
-            → Workspace
           </Link>
         </div>
       </aside>
