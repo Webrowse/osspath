@@ -10,6 +10,7 @@ import {
   QUEUE_THRESHOLD,
 } from "./prefilter"
 import type { PendingItem, ScanLog, ContentType } from "./types"
+import { collectGrants } from "@/lib/pipeline/scan/grants"
 import { auth } from "@/lib/auth"
 
 async function requireAdmin() {
@@ -823,116 +824,13 @@ async function hnSearch(query: string, hitsPerPage = 10): Promise<HNStoryHit[]> 
 // ── Grants Scanner ────────────────────────────────────────────────────────────
 
 // Rejects placeholder/hallucinated URLs DeepSeek sometimes invents
-function isRealGrantUrl(href: unknown, fallback: string): boolean {
-  if (!href || typeof href !== "string") return false
-  if (!href.startsWith("http")) return false
-  if (href.includes("example.com")) return false
-  if (href.includes("ycombinator.com")) return false
-  if (href === fallback) return false
-  return true
-}
-
-// Known Rust grant programs — seeded directly, no scraping needed
-const KNOWN_GRANTS = [
-  {
-    id: "grant-rustfound-community",
-    name: "Rust Foundation Community Grants",
-    kind: "Grant",
-    description: "Funded work on Rust libraries, tools, and education. Open to individuals and teams worldwide.",
-    status: "Open",
-    href: "https://foundation.rust-lang.org/grants/",
-  },
-  {
-    id: "grant-rustfound-fellowships",
-    name: "Rust Foundation Fellowships",
-    kind: "Grant",
-    description: "Paid fellowships for contributors who want to work full-time on the Rust compiler, toolchain, or ecosystem.",
-    status: "Open",
-    href: "https://foundation.rust-lang.org/grants/fellowships/",
-  },
-]
-
+// Legacy wrapper: delegates to the shared core and persists to admin_queue for
+// the old scan panel. Kept only until the panel is removed in Stage 4.
 export async function scanGrants(): Promise<ScanLog> {
   await requireAdmin()
-  const log: ScanLog = {
-    source: "grants", startedAt: new Date().toISOString(),
-    found: 0, added: 0, skipped: 0, errors: [], stages: {}, notes: [],
-  }
-
-  const existingIds = new Set((await readPending("grants")).map(i => i.id))
-  const existingHrefs = new Set((await readContent("grants")).map(i => String(i.href ?? "")))
-  const pendingItems: PendingItem[] = []
-
-  // ── 1. Seeded known programs ──────────────────────────────────────────────
-  for (const grant of KNOWN_GRANTS) {
-    if (existingIds.has(grant.id) || existingHrefs.has(grant.href)) { log.skipped++; continue }
-    pendingItems.push({
-      id: grant.id, type: "grants", status: "pending",
-      source: "grant-seed", sourceUrl: grant.href,
-      foundAt: new Date().toISOString(),
-      confidence: 0.9, whyMatched: "Known Rust Foundation grant program",
-      rawText: `${grant.name}: ${grant.description}`,
-      extracted: grant,
-    })
-  }
-  log.stages!.seeded = pendingItems.length
-
-  // ── 2. Scrape foundation.rust-lang.org for grant/bounty/fellowship articles ─
-  const articleLinks: { title: string; href: string }[] = []
-  for (const pageUrl of ["https://foundation.rust-lang.org/grants/", "https://foundation.rust-lang.org/news/"]) {
-    try {
-      const res = await fetch(pageUrl, {
-        signal: AbortSignal.timeout(15_000),
-        headers: { "User-Agent": "osspath.com/scanner" },
-        next: { revalidate: 0 },
-      })
-      const html = await res.text()
-      const linkRe = /<a\s[^>]*href="([^"]+)"[^>]*>([^<]{10,120})<\/a>/gi
-      let m: RegExpExecArray | null
-      while ((m = linkRe.exec(html)) !== null) {
-        const [, href, rawTitle] = m
-        const title = rawTitle.trim().replace(/\s+/g, " ")
-        const lower = (href + title).toLowerCase()
-        if (!lower.includes("grant") && !lower.includes("bounty") && !lower.includes("fellow")) continue
-        const full = href.startsWith("http") ? href : `https://foundation.rust-lang.org${href}`
-        if (!articleLinks.find(l => l.href === full)) articleLinks.push({ title, href: full })
-      }
-    } catch (e) {
-      log.errors.push(`Scrape ${pageUrl}: ${String(e)}`)
-    }
-  }
-
-  log.found = KNOWN_GRANTS.length + articleLinks.length
-  log.stages!.articlesFound = articleLinks.length
-  log.notes!.push(`${articleLinks.length} grant-related articles found on foundation.rust-lang.org`)
-
-  // ── 3. DeepSeek-extract each article (with skip guard) ───────────────────
-  for (const article of articleLinks.slice(0, 10)) {
-    const id = `foundation-${Buffer.from(article.href).toString("base64").slice(0, 16)}`
-    if (existingIds.has(id) || existingHrefs.has(article.href)) { log.skipped++; continue }
-
-    const text = `${article.title}\nURL: ${article.href}`
-    const result = await extractWithDeepSeek("grants", text)
-
-    // DeepSeek returns {skip:true} when content isn't actually a grant
-    if (!result.ok || !result.data || (result.data as any).skip === true) { log.skipped++; continue }
-
-    const rawHref = String(result.data.href ?? "")
-    const resolvedHref = isRealGrantUrl(rawHref, article.href) ? rawHref : article.href
-
-    pendingItems.push({
-      id, type: "grants", status: "pending",
-      source: "foundation-news", sourceUrl: article.href,
-      foundAt: new Date().toISOString(),
-      confidence: 0.75, whyMatched: article.title,
-      rawText: text,
-      extracted: { ...result.data, href: resolvedHref },
-    })
-  }
-
-  log.stages!.queued = pendingItems.length
-  log.added = await addPendingItems("grants", pendingItems)
-  log.finishedAt = new Date().toISOString()
+  const publishedHrefs = new Set((await readContent("grants")).map(i => String(i.href ?? "")))
+  const { log, items } = await collectGrants({ isKnown: (href) => publishedHrefs.has(href) })
+  log.added = await addPendingItems("grants", items)
   return log
 }
 
@@ -1765,6 +1663,7 @@ export async function scanVerifyQueue(type: ContentType): Promise<ScanLog> {
 
   const useAI = !!process.env.DEEPSEEK_API_KEY
   let confirmed = 0, dead = 0, enriched = 0, skipped = 0
+  const deadItems: import("./types").DeadItem[] = []
 
   const BATCH = 8
   const updated = [...pending]
@@ -1803,7 +1702,7 @@ export async function scanVerifyQueue(type: ContentType): Promise<ScanLog> {
           const pageText = stripHtml(rawHtml)
           const hasRust = /\brust\b/i.test(pageText.slice(0, 20_000))
 
-          let patch: Record<string, unknown> = {
+          const patch: Record<string, unknown> = {
             _verified: hasRust,
             _httpStatus: res.status,
             _verifiedAt: new Date().toISOString(),
@@ -1847,7 +1746,16 @@ export async function scanVerifyQueue(type: ContentType): Promise<ScanLog> {
       }
       updated[i + j] = updatedItem
       if (status === "confirmed") confirmed++
-      else if (status === "dead") dead++
+      else if (status === "dead") {
+        dead++
+        const e = updatedItem.extracted as Record<string, unknown>
+        deadItems.push({
+          id: updatedItem.id,
+          label: String(e.name ?? e.title ?? e.role ?? updatedItem.sourceUrl ?? updatedItem.id),
+          href: String(e.href ?? updatedItem.sourceUrl ?? ""),
+          httpStatus: e._httpStatus as number | undefined,
+        })
+      }
       else skipped++
       if (aiEnriched) enriched++
     }
@@ -1864,8 +1772,130 @@ export async function scanVerifyQueue(type: ContentType): Promise<ScanLog> {
   log.stages!.deadOrMoved = dead
   log.stages!.unreachable = skipped
   if (useAI) log.stages!.enrichedWithAI = enriched
-  if (dead > 0) log.notes!.push(`${dead} dead links — items kept with _verified:false, safe to bulk-reject them.`)
+  if (dead > 0) {
+    log.notes!.push(`${dead} dead links — use "Reject dead" button below to remove them.`)
+    log.deadItems = deadItems
+  }
   if (enriched > 0) log.notes!.push(`${enriched} items enriched with fresh AI extraction from live page.`)
+
+  log.finishedAt = new Date().toISOString()
+  return log
+}
+
+// ── Verify Published ──────────────────────────────────────────────────────────
+// Checks live URLs of already-published items. Dead links and expired entries
+// are returned in log.deadItems so the panel can remove them in one click.
+
+export async function scanVerifyPublished(type: ContentType): Promise<ScanLog> {
+  "use server"
+  const log: ScanLog = {
+    source: `verify-published-${type}`,
+    startedAt: new Date().toISOString(),
+    found: 0, added: 0, skipped: 0,
+    errors: [], stages: {}, notes: [], deadItems: [],
+  }
+
+  const { readContent } = await import("./storage")
+  const items = await readContent(type)
+  log.found = items.length
+
+  if (items.length === 0) {
+    log.notes!.push(`No published ${type} items to verify.`)
+    log.finishedAt = new Date().toISOString()
+    return log
+  }
+
+  const today = new Date().toISOString().slice(0, 10)
+  let dead = 0, expired = 0, ok = 0
+
+  // ── 1. Date-expiry check (free, instant) ─────────────────────────────────
+  if (type === "jobs" || type === "events") {
+    for (const item of items) {
+      const exp = String(item.expiresAt ?? "")
+      if (exp && exp < today) {
+        expired++
+        log.deadItems!.push({
+          id: String(item.href ?? ""),
+          label: String(item.name ?? item.title ?? item.role ?? item.href ?? "?"),
+          href: String(item.href ?? ""),
+          httpStatus: undefined,
+        })
+      }
+    }
+    log.stages!.expired = expired
+    if (expired > 0) log.notes!.push(`${expired} expired ${type} (past expiresAt date).`)
+  }
+
+  // ── 2. HTTP liveness check ────────────────────────────────────────────────
+  const toCheck = items.filter(item => {
+    const href = String(item.href ?? "")
+    if (!href.startsWith("http")) return false
+    // Skip items already flagged as expired above
+    const exp = String(item.expiresAt ?? "")
+    if ((type === "jobs" || type === "events") && exp && exp < today) return false
+    return true
+  })
+
+  const BATCH = 8
+  for (let i = 0; i < toCheck.length; i += BATCH) {
+    const batch = toCheck.slice(i, i + BATCH)
+    const results = await Promise.all(
+      batch.map(async (item) => {
+        const url = String(item.href ?? "")
+        try {
+          const res = await fetch(url, {
+            method: "HEAD",
+            signal: AbortSignal.timeout(8_000),
+            headers: { "User-Agent": "osspath.com/verifier 1.0" },
+            next: { revalidate: 0 },
+          })
+          // Follow up with GET if HEAD not allowed
+          if (res.status === 405) {
+            const res2 = await fetch(url, {
+              method: "GET",
+              signal: AbortSignal.timeout(8_000),
+              headers: { "User-Agent": "osspath.com/verifier 1.0" },
+              next: { revalidate: 0 },
+            })
+            return { item, ok: res2.ok, status: res2.status }
+          }
+          return { item, ok: res.ok, status: res.status }
+        } catch {
+          return { item, ok: false, status: 0 }
+        }
+      })
+    )
+
+    for (const { item, ok: isOk, status } of results) {
+      if (isOk) {
+        ok++
+      } else {
+        dead++
+        log.deadItems!.push({
+          id: String(item.href ?? ""),
+          label: String(item.name ?? item.title ?? item.role ?? item.href ?? "?"),
+          href: String(item.href ?? ""),
+          httpStatus: status || undefined,
+        })
+      }
+    }
+
+    if (i + BATCH < toCheck.length) await sleep(300)
+  }
+
+  log.added = ok
+  log.skipped = dead
+  log.stages!.totalChecked = items.length
+  log.stages!.liveChecked = toCheck.length
+  log.stages!.ok = ok
+  log.stages!.deadLinks = dead
+
+  const totalBad = dead + expired
+  if (totalBad > 0) {
+    log.notes!.push(`${totalBad} items to remove — use "Remove all" button below.`)
+  } else {
+    log.notes!.push(`All checked items are live.`)
+  }
 
   log.finishedAt = new Date().toISOString()
   return log
