@@ -17,6 +17,7 @@ export type PipelineReport = {
   scanned: number
   blocked: number
   verified: number
+  reviewed: number
   published: number
   skipped: number
   errors: string[]
