@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { headers } from "next/headers"
-import { getPendingCounts, getPublishedCounts } from "@/lib/admin/storage"
+import { getPublishedCounts } from "@/lib/admin/storage"
 import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
 import { getSession, signOut, googleEnabled } from "@/lib/auth"
@@ -52,18 +52,15 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const host = (await headers()).get("host") ?? ""
   const isLocal = host.startsWith("localhost") || host.startsWith("127.0.0.1") || host.startsWith("::1")
 
-  let counts = ZERO_COUNTS
   let publishedCounts = ZERO_COUNTS
   let dbDown = false
   try {
-    ;[counts, publishedCounts] = await Promise.all([getPendingCounts(), getPublishedCounts()])
+    publishedCounts = await getPublishedCounts()
   } catch {
     dbDown = true
   }
 
-  const total = Object.values(counts).reduce((a, b) => a + b, 0)
-
-  const queueTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
+  const contentTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 
   return (
     <div className="adm">
@@ -79,26 +76,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         )}
 
         <nav className="adm-nav">
-          <div className="adm-nav__section">Queue</div>
-          <Link href={`/admin/queue?type=${total > 0 ? (Object.entries(counts).find(([,v]) => v > 0)?.[0] ?? "jobs") : "jobs"}`} className="adm-nav__item adm-nav__item--queue">
-            <span>Queue</span>
-            {total > 0 && <span className="adm-badge">{total}</span>}
-          </Link>
-          {queueTypes.map((t) => (
-            <Link key={t} href={`/admin/queue?type=${t}`} className="adm-nav__item adm-nav__item--sub">
-              <span>{CONTENT_TYPE_LABELS[t]}</span>
-              {counts[t] > 0 && <span className="adm-badge adm-badge--dim">{counts[t]}</span>}
-            </Link>
-          ))}
-
-          <div className="adm-nav__section">Scan</div>
-          <Link href="/admin/scan" className="adm-nav__item">Scan sources</Link>
-          <Link href="/admin/test-deepseek" className="adm-nav__item adm-nav__item--sub">
-            Test DeepSeek API
+          <div className="adm-nav__section">Pipeline</div>
+          <Link href="/admin" className="adm-nav__item adm-nav__item--queue">
+            <span>Dashboard</span>
           </Link>
 
           <div className="adm-nav__section">Published</div>
-          {queueTypes.map((t) => (
+          {contentTypes.map((t) => (
             <Link key={t} href={`/admin/published?type=${t}`} className="adm-nav__item adm-nav__item--sub">
               <span>{CONTENT_TYPE_LABELS[t]}</span>
               {publishedCounts[t] > 0 && <span className="adm-badge adm-badge--dim">{publishedCounts[t]}</span>}
