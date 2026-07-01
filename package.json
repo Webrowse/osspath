@@ -10,7 +10,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
-    "db:apply": "prisma db push && node scripts/record-schema.mjs",
+    "db:sync-schema": "prisma db push && node scripts/record-schema.mjs",
     "db:export": "node scripts/export-db-to-json.mjs",
     "db:seed-sources": "node scripts/seed-sources.mjs",
     "db:studio": "prisma studio",

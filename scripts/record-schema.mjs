@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Record the fingerprint of the schema that was just applied, into
- * schema_metadata. Runs automatically after `prisma db push` via `db:apply`,
+ * schema_metadata. Runs automatically after `prisma db push` via `db:sync-schema`,
  * so the stored fingerprint always reflects the last intentional apply — no
  * manual version numbers.
  *

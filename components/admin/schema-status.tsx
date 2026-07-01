@@ -18,7 +18,7 @@ export function SchemaStatusPanel({ status }: { status: SchemaStatus }) {
           <strong>⚠ Database schema does not match the running application</strong>
           <span>
             The database may have been applied from a different or stale checkout. From an
-            up-to-date checkout, run <code>npm run db:apply</code>.
+            up-to-date checkout, run <code>npm run db:sync-schema</code>.
           </span>
           {status.error && <span className="adm-schema__err">{status.error}</span>}
         </div>
