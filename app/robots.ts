@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/dashboard", "/api/", "/login", "/admin/", "/demo/"],
+      disallow: ["/dashboard", "/api/", "/admin/", "/demo/"],
     },
     sitemap: "https://osspath.com/sitemap.xml",
   }
