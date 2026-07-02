@@ -142,3 +142,18 @@ model PipelineRun {
   @@index([status])
   @@map("pipeline_runs")
 }
+
+// ── Publishing: last Git snapshot ─────────────────────────────────────────────
+// Single row recording the last successful publish of the content snapshot to
+// Git: the commit SHA, a SHA-256 of the published canonical content, and when it
+// happened. Postgres stays the source of truth; this is bookkeeping so the admin
+// can see which Git commit is currently live. Written only on a successful push.
+
+model PublishMetadata {
+  id                String    @id @default("singleton")
+  lastCommitSha     String?
+  lastContentSha256 String?
+  lastPublishedAt   DateTime?
+  updatedAt         DateTime  @updatedAt
+  @@map("publish_metadata")
+}

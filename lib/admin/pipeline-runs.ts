@@ -11,6 +11,13 @@ import type { ContentType } from "./types"
 
 export type RunStatus = "running" | "done" | "failed"
 
+/** Outcome of publishing the content snapshot to Git after a dirty run. */
+export type PublishReport = {
+  state: "skipped_no_changes" | "committed" | "failed"
+  commitSha?: string
+  error?: string
+}
+
 export type PipelineReport = {
   added: Partial<Record<ContentType, number>>
   removed: Partial<Record<ContentType, number>>
@@ -23,6 +30,7 @@ export type PipelineReport = {
   errors: string[]
   notes: string[]
   perSource?: Record<string, number>
+  publish?: PublishReport
 }
 
 export type RunRow = {

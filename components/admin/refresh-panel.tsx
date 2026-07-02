@@ -1,16 +1,36 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { runRefresh, unlockPipeline } from "@/lib/pipeline/actions"
-import type { RunRow } from "@/lib/admin/pipeline-runs"
+import { runRefresh, republishSnapshot, unlockPipeline, type RefreshResult } from "@/lib/pipeline/actions"
+import type { RunRow, PublishReport } from "@/lib/admin/pipeline-runs"
+import type { PublishMetadata } from "@/lib/admin/publish-metadata"
 
 function fmt(d: Date | string | null): string {
-  if (!d) return "—"
+  if (!d) return "-"
   const date = typeof d === "string" ? new Date(d) : d
-  if (isNaN(date.getTime())) return "—"
+  if (isNaN(date.getTime())) return "-"
   // Deterministic UTC format so server and client render identically (no
   // locale/timezone hydration mismatch).
   return `${date.toISOString().slice(0, 16).replace("T", " ")} UTC`
+}
+
+function PublishBanner({ publish }: { publish?: PublishReport }) {
+  if (!publish) return null
+  if (publish.state === "committed") {
+    return (
+      <div className="adm-log" style={{ color: "var(--e-ok, #2a7d4f)" }}>
+        Published: Git commit {publish.commitSha?.slice(0, 7)} created. Railway will deploy it.
+      </div>
+    )
+  }
+  if (publish.state === "skipped_no_changes") {
+    return <div className="adm-log">No content changes - nothing to publish.</div>
+  }
+  return (
+    <div className="adm-db-warn" style={{ marginLeft: 0 }}>
+      Publish failed: {publish.error}. Postgres is up to date; press Republish to retry.
+    </div>
+  )
 }
 
 function ReportSummary({ run }: { run: RunRow }) {
@@ -33,26 +53,28 @@ function ReportSummary({ run }: { run: RunRow }) {
   ]
   if (r.errors.length) {
     lines.push("", `Errors (${r.errors.length}):`)
-    r.errors.slice(0, 8).forEach((e) => lines.push(`  ✗ ${e}`))
+    r.errors.slice(0, 8).forEach((e) => lines.push(`  x ${e}`))
   }
-  return <div className="adm-log">{lines.filter((l) => l !== "" || true).join("\n")}</div>
+  return <div className="adm-log">{lines.join("\n")}</div>
 }
 
 interface RefreshPanelProps {
   initialActive: RunRow | null
   initialLatest: RunRow | null
+  initialPublish: PublishMetadata | null
 }
 
-export function RefreshPanel({ initialActive, initialLatest }: RefreshPanelProps) {
+export function RefreshPanel({ initialActive, initialLatest, initialPublish }: RefreshPanelProps) {
   const [latest, setLatest] = useState<RunRow | null>(initialLatest)
   const [active, setActive] = useState<RunRow | null>(initialActive)
   const [blocked, setBlocked] = useState(false)
   const [pending, start] = useTransition()
 
-  function refresh() {
+  // Both Refresh and Republish return the same shape, so one handler drives both.
+  function run(action: () => Promise<RefreshResult>) {
     setBlocked(false)
     start(async () => {
-      const res = await runRefresh()
+      const res = await action()
       if (res.started) { setLatest(res.run); setActive(null) }
       else { setActive(res.active); setBlocked(true) }
     })
@@ -66,11 +88,21 @@ export function RefreshPanel({ initialActive, initialLatest }: RefreshPanelProps
     })
   }
 
+  const busy = pending || !!active
+
   return (
     <div className="adm-content" style={{ maxWidth: 640 }}>
       <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
-        <button className="adm-btn adm-btn--primary" onClick={refresh} disabled={pending}>
-          {pending ? "Running…" : "Refresh"}
+        <button className="adm-btn adm-btn--primary" onClick={() => run(runRefresh)} disabled={pending}>
+          {pending ? "Running..." : "Refresh"}
+        </button>
+        <button
+          className="adm-btn adm-btn--ghost"
+          onClick={() => run(republishSnapshot)}
+          disabled={busy}
+          title="Re-export the current Postgres snapshot and publish it to Git"
+        >
+          Republish
         </button>
         {(active || blocked) && (
           <button className="adm-btn adm-btn--ghost" onClick={unlock} disabled={pending}>
@@ -79,15 +111,24 @@ export function RefreshPanel({ initialActive, initialLatest }: RefreshPanelProps
         )}
       </div>
 
+      <div className="adm-page-meta" style={{ marginBottom: 10 }}>
+        Live snapshot:{" "}
+        {initialPublish?.lastCommitSha
+          ? `${initialPublish.lastCommitSha.slice(0, 7)} - published ${fmt(initialPublish.lastPublishedAt)}`
+          : "never published"}
+      </div>
+
       {blocked && active && (
         <div className="adm-db-warn" style={{ marginLeft: 0 }}>
           A run is already in progress (started {fmt(active.startedAt)}). Try again shortly.
         </div>
       )}
 
+      {latest?.report?.publish && <PublishBanner publish={latest.report.publish} />}
+
       {latest ? (
         <>
-          <div className="adm-page-meta" style={{ marginBottom: 6 }}>Last run</div>
+          <div className="adm-page-meta" style={{ marginBottom: 6, marginTop: 10 }}>Last run</div>
           <ReportSummary run={latest} />
         </>
       ) : (

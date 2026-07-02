@@ -8,17 +8,21 @@ import {
 } from "@/lib/admin/pipeline-runs"
 import { runPipeline } from "./run"
 import { dueScanJobs } from "./dispatch"
-import { triggerRebuild } from "./deploy-hook"
+import { publishCurrentSnapshot, publishNote } from "./publish"
 
 export type RefreshResult =
   | { started: true; run: RunRow }
   | { started: false; active: RunRow }
 
-function failedReport(err: unknown): PipelineReport {
+function emptyReport(): PipelineReport {
   return {
     added: {}, removed: {}, scanned: 0, blocked: 0, verified: 0,
-    reviewed: 0, published: 0, skipped: 0, errors: [String(err)], notes: [], perSource: {},
+    reviewed: 0, published: 0, skipped: 0, errors: [], notes: [], perSource: {},
   }
+}
+
+function failedReport(err: unknown): PipelineReport {
+  return { ...emptyReport(), errors: [String(err)] }
 }
 
 /** Run the full pipeline. Returns the active run instead if one is in progress. */
@@ -31,12 +35,42 @@ export async function runRefresh(): Promise<RefreshResult> {
   const runId = acq.run.id
   try {
     const { report, dirty } = await runPipeline(runId, await dueScanJobs())
-    // Only a dirty run changed published content, so only then rebuild the site.
+    // Only a dirty run changed published content, so only then publish the
+    // snapshot to Git. A publish failure never fails the run - Postgres is
+    // already correct; the failure is surfaced for a manual Republish.
     if (dirty) {
-      const hook = await triggerRebuild()
-      report.notes.push(hook.note)
+      report.publish = await publishCurrentSnapshot()
+      report.notes.push(publishNote(report.publish))
     }
     await finishRun(runId, { status: "done", dirty, report })
+  } catch (e) {
+    await finishRun(runId, { status: "failed", dirty: false, report: failedReport(e) })
+    throw e
+  }
+
+  revalidatePath("/admin")
+  const latest = await getLatestRun()
+  return { started: true, run: latest! }
+}
+
+/**
+ * Re-export the current Postgres snapshot and publish it to Git, without
+ * scanning or writing Postgres. Recovery path for a failed or uncertain push.
+ * Takes the same run lock as Refresh so it can never read a half-written
+ * snapshot mid-run, and always regenerates from live Postgres (no replay).
+ */
+export async function republishSnapshot(): Promise<RefreshResult> {
+  await requireAdmin()
+
+  const acq = await acquireRun()
+  if (!acq.acquired) return { started: false, active: acq.active }
+
+  const runId = acq.run.id
+  try {
+    const report = emptyReport()
+    report.publish = await publishCurrentSnapshot()
+    report.notes.push(publishNote(report.publish))
+    await finishRun(runId, { status: "done", dirty: false, report })
   } catch (e) {
     await finishRun(runId, { status: "failed", dirty: false, report: failedReport(e) })
     throw e

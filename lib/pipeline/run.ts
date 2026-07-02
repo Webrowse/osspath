@@ -7,6 +7,7 @@ import { markSourceRun } from "@/lib/admin/sources"
 import { SOURCE_PROBES } from "./probes"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
+import { slugify, deriveJobSlug } from "./slug"
 
 const CONTENT_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
@@ -26,13 +27,17 @@ function candidateHref(c: Candidate): string {
   return String((c.extracted as Record<string, unknown>)?.href ?? c.sourceUrl ?? "")
 }
 
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")
-}
-
 function toPublished(type: ContentType, c: Candidate, today: string, expiresAt: string): Record<string, unknown> {
   const data: Record<string, unknown> = { ...c.extracted, checkedAt: today }
-  if (type === "jobs" && !data.expiresAt) data.expiresAt = expiresAt
+  // Invariant: published jobs are renderable. /jobs/[slug] uses dynamicParams =
+  // false, so a job must carry a slug (and company_slug for company links).
+  // Derive them here rather than dropping malformed records downstream, so the
+  // exported snapshot faithfully represents what is published.
+  if (type === "jobs") {
+    if (!data.expiresAt) data.expiresAt = expiresAt
+    if (!data.slug) data.slug = deriveJobSlug(data)
+    if (!data.company_slug && data.company) data.company_slug = slugify(String(data.company))
+  }
   if (type === "companies" && !data.slug && data.name) data.slug = slugify(String(data.name))
   return data
 }
@@ -76,7 +81,7 @@ export async function runPipeline(
   const expiresAt = expiry.toISOString().slice(0, 10)
   let dirty = false
 
-  // ── Phase 0: cleanup — remove expired jobs/events ──────────────────────────
+  // ── Phase 0: cleanup - remove expired jobs/events ──────────────────────────
   for (const type of EXPIRING_TYPES) {
     try {
       const removed = await removeExpired(type, today)
@@ -87,7 +92,7 @@ export async function runPipeline(
   }
   await heartbeat(runId)
 
-  // ── Phase 1: scan — collect candidates, drop blocklisted ───────────────────
+  // ── Phase 1: scan - collect candidates, drop blocklisted ───────────────────
   const blocklist: Blocklist = await loadBlocklist()
   const publishedByType = new Map<ContentType, Set<string>>()
   for (const type of CONTENT_TYPES) publishedByType.set(type, await publishedHrefSet(type))
@@ -139,13 +144,13 @@ export async function runPipeline(
   })
   await heartbeat(runId)
 
-  // ── Phase 3: verify — drop dead links ──────────────────────────────────────
+  // ── Phase 3: verify - drop dead links ──────────────────────────────────────
   const dead = await findDeadUrls(fresh.map(candidateHref))
   const live = fresh.filter((c) => !dead.has(candidateHref(c)))
   report.verified = live.length
   await heartbeat(runId)
 
-  // ── Phase 4: review — deterministic quality gate + auto-blocklist spam ─────
+  // ── Phase 4: review - deterministic quality gate + auto-blocklist spam ─────
   const accepted: Candidate[] = []
   for (const c of live) {
     const href = candidateHref(c)

@@ -61,18 +61,10 @@ next-env.d.ts
 # generated cache
 /data/oss-deps-cache.json
 
-# scanner-generated dataset — lives in PostgreSQL, materialised at build time
-# by scripts/export-db-to-json.mjs. Not committed so the repo does not carry
-# the curated dataset. Editorial content (authors, learning, funders, programs,
-# lifecycle-edges, eco-overrides) and derived oss-* indexes stay tracked.
-/content/jobs.json
-/content/oss.json
-/content/grants.json
-/content/pulse.json
-/content/events.json
-/content/companies.json
-/content/portals.json
-/content/news.json
+# NOTE: the scanner-generated dataset (content/{jobs,oss,grants,pulse,events,
+# companies,portals,news}.json) is now a TRACKED published snapshot. PostgreSQL
+# is the source of truth; the Refresh pipeline exports the canonical snapshot
+# and commits it to Git, and the build consumes it. See lib/pipeline/snapshot.ts.
 
-# search index — regenerated at build by scripts/build-search-index.mjs
+# search index - regenerated at build by scripts/build-search-index.mjs
 /public/search-index.json

@@ -9,7 +9,9 @@ import { normalizeUrl } from "@/lib/admin/lists"
 
 /** Published data objects for a type (read-only input for scanners like careers). */
 export async function readPublished(type: ContentType): Promise<Record<string, unknown>[]> {
-  const rows = await prisma.contentItem.findMany({ where: { type }, orderBy: { createdAt: "asc" } })
+  // (createdAt, id) is a stable total order: id breaks createdAt ties so the
+  // exported snapshot is byte-identical for identical DB state.
+  const rows = await prisma.contentItem.findMany({ where: { type }, orderBy: [{ createdAt: "asc" }, { id: "asc" }] })
   return rows.map((r) => r.data as Record<string, unknown>)
 }
 

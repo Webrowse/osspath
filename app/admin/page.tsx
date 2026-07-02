@@ -1,15 +1,22 @@
 import { getActiveRun, getLatestRun } from "@/lib/admin/pipeline-runs"
 import { getSchemaStatus } from "@/lib/admin/schema-version"
+import { getPublishMetadata, type PublishMetadata } from "@/lib/admin/publish-metadata"
 import { RefreshPanel } from "@/components/admin/refresh-panel"
 import { SchemaStatusPanel } from "@/components/admin/schema-status"
 
 export default async function AdminPage() {
   let active = null
   let latest = null
+  let publish: PublishMetadata | null = null
   try {
     ;[active, latest] = await Promise.all([getActiveRun(), getLatestRun()])
   } catch {
-    // DB unreachable — panel still renders and Refresh will surface the error.
+    // DB unreachable - panel still renders and Refresh will surface the error.
+  }
+  try {
+    publish = await getPublishMetadata()
+  } catch {
+    // publish_metadata not applied yet (merge-time db:sync-schema); show "never published".
   }
 
   const schema = await getSchemaStatus()
@@ -23,7 +30,7 @@ export default async function AdminPage() {
       <div className="adm-content" style={{ paddingBottom: 0 }}>
         <SchemaStatusPanel status={schema} />
       </div>
-      <RefreshPanel initialActive={active} initialLatest={latest} />
+      <RefreshPanel initialActive={active} initialLatest={latest} initialPublish={publish} />
     </>
   )
 }
