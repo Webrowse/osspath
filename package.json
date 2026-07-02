@@ -9,6 +9,7 @@
     "check:purity": "node scripts/check-public-purity.mjs",
     "check:snapshot": "tsx scripts/check-snapshot-determinism.ts",
     "check:cargo": "tsx scripts/check-cargo-parse.ts",
+    "check:backfill": "tsx scripts/check-backfill-select.ts",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
