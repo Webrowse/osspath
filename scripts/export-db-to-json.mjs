@@ -28,8 +28,11 @@ const TYPES = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals
 const ROOT = process.cwd()
 const CONTENT_DIR = join(ROOT, "content")
 
-if (!process.env.DATABASE_URL) {
-  console.error("✗ export-db-to-json: DATABASE_URL is not set. Aborting (no files written).")
+// Prefer the public proxy URL, which is reachable during a Railway build; the
+// internal DATABASE_URL is runtime-only. Falls back to DATABASE_URL locally.
+const connectionString = process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL
+if (!connectionString) {
+  console.error("✗ export-db-to-json: no DATABASE_PUBLIC_URL or DATABASE_URL set. Aborting (no files written).")
   process.exit(1)
 }
 
@@ -37,7 +40,7 @@ const { PrismaClient } = await import("@prisma/client")
 const { PrismaPg } = await import("@prisma/adapter-pg")
 
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+  adapter: new PrismaPg({ connectionString }),
 })
 
 // Phase 1: load everything into memory. Any failure aborts before writing.

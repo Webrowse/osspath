@@ -32,7 +32,8 @@ if (!gitCommit) {
 
 const { PrismaClient } = await import("@prisma/client")
 const { PrismaPg } = await import("@prisma/adapter-pg")
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }) })
+const connectionString = process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) })
 
 await prisma.schemaMetadata.upsert({
   where: { id: "singleton" },
