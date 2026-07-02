@@ -9,6 +9,8 @@ import {
 import { runPipeline } from "./run"
 import { dueScanJobs } from "./dispatch"
 import { publishCurrentSnapshot, publishNote } from "./publish"
+import { runCorpusIntelligence } from "./corpus"
+import { runExports } from "./exports"
 
 export type RefreshResult =
   | { started: true; run: RunRow }
@@ -25,7 +27,15 @@ function failedReport(err: unknown): PipelineReport {
   return { ...emptyReport(), errors: [String(err)] }
 }
 
-/** Run the full pipeline. Returns the active run instead if one is in progress. */
+/**
+ * Refresh orchestrates the three tiers in order:
+ *   Tier 1  Repository Enrichment - discover, enrich, persist to PostgreSQL.
+ *   Tier 2  Corpus Intelligence   - cross-repo relationships over the corpus.
+ *   Tier 3  Exports               - Git snapshot and other derived artifacts.
+ * Tiers 2 and 3 run only when Tier 1 changed the corpus (dirty). A Tier 3
+ * failure never fails the run - PostgreSQL is already correct and the failure
+ * is surfaced for a manual Republish. Returns the active run if one is running.
+ */
 export async function runRefresh(): Promise<RefreshResult> {
   await requireAdmin()
 
@@ -34,13 +44,10 @@ export async function runRefresh(): Promise<RefreshResult> {
 
   const runId = acq.run.id
   try {
-    const { report, dirty } = await runPipeline(runId, await dueScanJobs())
-    // Only a dirty run changed published content, so only then publish the
-    // snapshot to Git. A publish failure never fails the run - Postgres is
-    // already correct; the failure is surfaced for a manual Republish.
+    const { report, dirty } = await runPipeline(runId, await dueScanJobs()) // Tier 1
     if (dirty) {
-      report.publish = await publishCurrentSnapshot()
-      report.notes.push(publishNote(report.publish))
+      await runCorpusIntelligence(report) // Tier 2
+      await runExports(report)            // Tier 3
     }
     await finishRun(runId, { status: "done", dirty, report })
   } catch (e) {
