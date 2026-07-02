@@ -8,6 +8,7 @@ import { SOURCE_PROBES } from "./probes"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
 import { slugify, deriveJobSlug } from "./slug"
+import { runEnrichment, enrichInputForRepo, parseRepoRef } from "./enrich"
 
 const CONTENT_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
@@ -165,9 +166,43 @@ export async function runPipeline(
   report.reviewed = accepted.length
   await heartbeat(runId)
 
+  // ── Phase 4.5: enrich - no repo reaches Postgres unenriched (fail closed) ──
+  // OSS candidates are turned into fully enriched records (crates, deps,
+  // features, MSRV, license, ...) before publish. A repo whose manifests can't
+  // be fetched is held back, not published bare; it is re-enriched next run.
+  const toPublish: Candidate[] = []
+  let enrichedCount = 0
+  let heldBack = 0
+  for (const c of accepted) {
+    if (c.type !== "oss") { toPublish.push(c); continue }
+    const ref = parseRepoRef(candidateHref(c))
+    if (!ref) { heldBack++; report.errors.push(`enrich: unparseable href ${candidateHref(c)}`); continue }
+    const outcome = await runEnrichment(enrichInputForRepo(ref, c.extracted))
+    if (!outcome.ok) {
+      heldBack++
+      report.errors.push(`enrich ${ref.owner}/${ref.repo}: ${outcome.enricher}: ${outcome.error}`)
+      await heartbeat(runId)
+      continue
+    }
+    const cargo = outcome.enrichment.cargo as { dependencies?: string[] } | undefined
+    c.extracted = {
+      ...c.extracted,
+      enrichment: outcome.enrichment,
+      dependencies: cargo?.dependencies ?? [],
+      depsCheckedAt: outcome.enrichment.enrichedAt.slice(0, 10),
+    }
+    enrichedCount++
+    toPublish.push(c)
+    await heartbeat(runId)
+  }
+  if (enrichedCount > 0 || heldBack > 0) {
+    report.notes!.push(`Enriched ${enrichedCount} repo(s)` + (heldBack > 0 ? `, held back ${heldBack} (retry next run)` : ""))
+  }
+  await heartbeat(runId)
+
   // ── Phase 5: publish once ──────────────────────────────────────────────────
   const byType = new Map<ContentType, Record<string, unknown>[]>()
-  for (const c of accepted) {
+  for (const c of toPublish) {
     const list = byType.get(c.type) ?? []
     list.push(toPublished(c.type, c, today, expiresAt))
     byType.set(c.type, list)
