@@ -31,8 +31,15 @@ export interface Enricher {
   run(input: EnrichInput, acc: Readonly<Record<string, unknown>>): Promise<EnricherResult>
 }
 
-/** The accumulated enrichment stored on a repo record: provenance + namespaced fragments. */
+/**
+ * The accumulated enrichment stored on a repo record: provenance + namespaced
+ * fragments. `version` and `sourcePushedAt` drive re-enrichment: a repo is
+ * re-enriched when the enrichment schema version advances or the repo's
+ * pushedAt changes upstream.
+ */
 export type RepoEnrichment = {
+  version: number
+  sourcePushedAt: string | null
   enrichedAt: string
   enrichers: string[]
 } & Record<string, unknown>

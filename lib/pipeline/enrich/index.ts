@@ -7,9 +7,17 @@ export type { RepoRef, RepoEnrichment }
 export type { CargoEnrichment } from "./cargo-enricher"
 
 /**
- * The enricher chain, in order. Additional enrichers (ecosystem, technologies,
- * similar repos, ...) append here later; each sees earlier results via `acc`,
- * so new capabilities plug in without a pipeline rewrite.
+ * Enrichment schema version. Bump whenever the enricher set or output shape
+ * changes so the backfill re-enriches the whole corpus to the new version and
+ * the dataset never stays permanently heterogeneous.
+ */
+export const ENRICHMENT_VERSION = 1
+
+/**
+ * Tier 1 enricher chain, in order. Additional per-repo enrichers (ecosystem,
+ * technologies, contribution readiness, ...) append here later; each sees
+ * earlier results via `acc`, so new intrinsic capabilities plug in without a
+ * pipeline rewrite. Cross-repo relationships belong to Tier 2, not here.
  */
 export const DEFAULT_ENRICHERS: Enricher[] = [cargoEnricher]
 
@@ -44,7 +52,12 @@ export async function runEnrichment(input: EnrichInput, enrichers: Enricher[] = 
     if (result.notes) notes.push(...result.notes.map((n) => `${enricher.name}: ${n}`))
   }
 
-  return { ok: true, enrichment: { enrichedAt: new Date().toISOString(), enrichers: ran, ...acc }, notes }
+  const sourcePushedAt = typeof input.base.pushedAt === "string" ? input.base.pushedAt : null
+  return {
+    ok: true,
+    enrichment: { version: ENRICHMENT_VERSION, sourcePushedAt, enrichedAt: new Date().toISOString(), enrichers: ran, ...acc },
+    notes,
+  }
 }
 
 /** Build an EnrichInput backed by the live GitHub readers for a repo. */
