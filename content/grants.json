@@ -1,0 +1,59 @@
+[
+  {
+    "checkedAt": "2026-05-28",
+    "description": "European funding for internet infrastructure and privacy tools. Multiple rounds per year. Rust projects on security, protocols, and decentralisation are a good fit.",
+    "href": "https://nlnet.nl/NGI0/",
+    "kind": "Grant",
+    "name": "NLnet Foundation — NGI Zero",
+    "status": "Multiple rounds/year"
+  },
+  {
+    "checkedAt": "2026-05-28",
+    "description": "Rust compiles to WASM and runs natively on Workers. Periodic competitions with prizes for projects built on edge infrastructure.",
+    "href": "https://workers.cloudflare.com/",
+    "kind": "Hackathon",
+    "name": "Cloudflare Workers Hackathon",
+    "status": "Periodic"
+  },
+  {
+    "checkedAt": "2026-06-22",
+    "description": "Paid fellowships for contributors who want to work full-time on the Rust compiler, toolchain, or ecosystem.",
+    "href": "https://foundation.rust-lang.org/grants/fellowships/",
+    "id": "grant-rustfound-fellowships",
+    "kind": "Grant",
+    "name": "Rust Foundation Fellowships",
+    "status": "Open"
+  },
+  {
+    "checkedAt": "2026-05-28",
+    "description": "$5–20/month from a handful of people sustains most small libraries. Find maintainers you depend on and sponsor them directly.",
+    "href": "https://github.com/sponsors/explore",
+    "kind": "Sponsorship",
+    "name": "GitHub Sponsors — Rust maintainers",
+    "status": "Always open"
+  },
+  {
+    "checkedAt": "2026-05-28",
+    "description": "Security-focused grants for projects underpinning the internet. Rust networking and cryptography libraries have qualified previously.",
+    "href": "https://openssf.org/community/alpha-omega/",
+    "kind": "Grant",
+    "name": "OpenSSF Alpha-Omega",
+    "status": "Year-round"
+  },
+  {
+    "checkedAt": "2026-05-28",
+    "description": "Funded Rust rewrites of critical C/C++ infrastructure. Active program with past awards to curl, Apache httpd, and Linux kernel components.",
+    "href": "https://www.memorysafety.org/",
+    "kind": "Grant",
+    "name": "ISRG — Memory Safety Initiative",
+    "status": "Active"
+  },
+  {
+    "checkedAt": "2026-05-28",
+    "description": "Grants for maintainers, contributors, and projects. Three tracks: Project Grants, Hardship Grants, and Event Grants. Applications reviewed on a rolling basis.",
+    "href": "https://foundation.rust-lang.org/grants/",
+    "kind": "Grant",
+    "name": "Rust Foundation — Community Grants",
+    "status": "Rolling"
+  }
+]

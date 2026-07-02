@@ -1,0 +1,488 @@
+[
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://rustfoundation.org/media/rust-foundation-welcomes-openai-as-platinum-member-announces-donation-to-rust-project/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rust Foundation Welcomes OpenAI As Platinum Member"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://rustfoundation.org/media/rust-commercial-network-launches-to-bring-commercial-users-of-rust-language-together/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rust Commercial Network Launches to Unite Commercial Users of Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://rustfoundation.org/media/mainmatter-is-bringing-hands-on-rust-training-to-upskilling-week-in-barcelona/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Mainmatter Is Bringing Hands-On Rust Training"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.theembeddedrustacean.com/p/the-embedded-rustacean-issue-74",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "The Embedded Rustacean Issue #74"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://blog.image-rs.org/2026/06/18/png-adoption.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rust PNG crate gets even faster, used by GNOME and Chromium"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://github.com/kunobi-ninja/kache/releases/tag/v0.7.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "kache 0.7.0: caching real-world C/C++ trees"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.willsearch.com.br/blog/2026/06/23/new-feature-in-guardiandb-introducing-the-odm-object-document-mapper-layer/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "New Feature in GuardianDB: Introducing the ODM (Object Document Mapper) Layer"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://shnatsel.medium.com/safe-simd-in-rust-even-on-the-inside-c6f1ff381828",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Safe SIMD in Rust, even on the inside"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://ratatui.rs/highlights/v0302/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Ratatui 0.30.2 is released - a Rust library for cooking up terminal user interfaces"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://dev.to/alexandr_litvinov/adding-a-post-quantum-hybrid-handshake-to-a-rust-vpn-pk8",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Adding a post-quantum hybrid handshake to a Rust VPN"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://tensor4all.org/blog/introducing-tenferro-rs/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "From Julia to Rust: a differentiable tensor stack for scientific computing in the agentic AI era"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://hotpath.rs/blog/profiling-async-rust",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "hotpath-rs 0.18: Profiling Async and Concurrent Rust - Channels and Lock Contention"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://blog.cloudflare.com/hyper-bug/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "How we found a bug in the hyper HTTP library"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://corrode.dev/podcast/s06e06-clickhouse/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "ClickHouse with Alexey Milovidov and Austin Bonander"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://kerkour.com/iroh-v1-p2p",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Deep dive into iroh: A replacement for WireGuard or a peer-to-peer layer for your application?"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://kobzol.github.io/rust/2026/06/21/optimizing-sqlx-test-rebuild-time.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Optimizing #[sqlx::test] rebuild time"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://bitfieldconsulting.com/posts/rewrite-in-rust",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rewriting the world in Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://docs.litellm.ai/blog/litellm-rust-launch",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Migrating LiteLLM to Rust - Building the Fastest and Litest AI Gateway"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://blog.sheerluck.dev/posts/learn-rust-async-await-by-building-an-http-server/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Learn Rust Async/Await, Tokio, and TCP Networking by Building an HTTP/1.1 Server"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://blog.sheerluck.dev/posts/build-breakout-in-bevy-step-by-step/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Building Breakout in Bevy: Step by Step"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://medium.com/@vbasky/porting-200-000-lines-of-c-to-rust-building-a-byte-identical-mediainfo-replacement-8e9b587d469a",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Porting 300,000 Lines of C++ and Perl to Rust: A Dual-Oracle Media Metadata Engine"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://corentin-core.github.io/posts/ruxe-type-level-disjointness/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "A data race that doesn't compile"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.youtube.com/watch?v=RKojTb9IVJc",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "RustCurious lesson 9: Traits are Interfaces"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.youtube.com/watch?v=X8GDc2AtbG8",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "BAML: a new programming language (created in Rust)"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.youtube.com/watch?v=O3YWQvNqwHc",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "The Future of Version Control"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-01",
+    "date": "2026-07-01",
+    "href": "https://www.youtube.com/watch?v=1Xz1E_27Uqc",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Borrowing Beauty: My Beginner's Quest to Create Approachable Bevy & Rust Code"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.rust-lang.org/2026/06/30/Rust-1.96.1/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Announcing Rust 1.96.1 | Rust Blog"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.rust-lang.org/2026/06/25/vision-doc-journeys-to-learning-rust/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "The many journeys of learning Rust | Rust Blog"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://rustfoundation.org/media/rust-foundation-trusted-training-program-launches-giving-learners-a-mark-of-quality-to-trust/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rust Foundation Trusted Training Program Launches, Giving Learners a Mark of Quality to Trust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://scientificcomputing.rs/monthly/2026-06",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Scientific Computing in Rust #19 (June 2026)"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://slint.dev/blog/slint-1.17-released",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Slint 1.17 Released"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.antoyo.xyz/rustc_codegen_gcc-progress-report-42",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "rustc_codegen_gcc: Progress Report #42"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://hovinen.me/announcements/2026/06/24/introducing-test-that.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Introducing Test That!"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://hovinen.me/announcements/2026/06/24/introducing-test-that.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Introducing Test That!: A rich test assertion library for Rust from the original author of GoogleTest Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://github.com/shihuili1218/rssh/blob/main/docs/article_arch_en.md",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Inside RSSH: one Rust crate, three binaries, and the Tauri lessons along the way"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://github.com/Aleixenandros/Rustty/releases/tag/v1.38.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rustty 1.38 – accessibility & keyboard nav"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://www.willsearch.com.br/blog/2026/06/25/guardiandb-0-17-0-secure-namespaces-iroh-1-0-and-the-arrival-of-the-odm/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "GuardianDB 0.17.0: Secure namespaces, Iroh 1.0, and the arrival of the ODM"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://dev.to/iam_suriyan_b9078a5b3a553/building-a-real-time-voice-agent-runtime-in-rust-no-gil-one-binary-2000-calls-a-box-12ko",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Building a real-time voice-agent runtime in Rust: no GIL, one binary, 2,000 calls a box"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://aimdb.dev/blog/aimdb-bring-your-own-connector",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "AimDB: Bring Your Own Connector"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://github.com/kunobi-ninja/kache/releases/tag/v0.8.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "kache 0.8.0: zero-copy restores on Windows (ReFS)"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://miskibin.github.io/warbell/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Warbell — a castle-defense action-RPG built with Bevy 0.19"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://dev.to/gregorymc86/i-built-a-macos-ftp-client-entirely-in-rust-no-electron-no-webview-2a8i",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "I built a macOS FTP client entirely in Rust - no Electron, no webview"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.yoshuawuyts.com/hoisting-expressions",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Hoisting Expressions"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.jetbrains.com/rust/2026/06/25/rust-web-development-2026/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "The Unglamorous Side of Rust Web Development"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://dev.to/ernesto_arias_148b35bc25d/-how-i-found-out-52-of-my-knowledge-graph-was-duplicates-and-what-i-did-about-it-3coh",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "How I Found Out 52% of My Knowledge Graph Was Duplicates (and What I Did About It)"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://jtjlehi.github.io/2026/06/25/novel-rust-error-handling.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "A Novel Approach to Rust Error Handling"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://encore.dev/blog/redis-runtime",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "We put a Redis server inside our runtime"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://kerkour.com/rust-high-performance-memory-fragmentation-allocations",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "High-performance Rust: Understanding and eliminating memory fragmentation"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://kunobi.ninja/blog/kache-storage-worktrees",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "AI and worktrees are filling our disks: kache storage, measured"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://dev.to/sicklefire/designing-a-cross-platform-terminal-memory-visualizer-in-rust-2365",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Designing a cross-platform terminal memory visualizer in Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://pranitha.dev/posts/rust-and-memory-allocators",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Your Rust Service Isn't Leaking — It Could Be the Allocator"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://blog.sheerluck.dev/posts/learn-sql-and-sqlx-by-building-a-book-library-cli-in-rust/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Learn SQL and SQLx by Building a Book Library CLI in Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://aibodh.com/posts/async-rust-chapter-2-what-async-fn-compiles-into/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Reasoning About Async Rust with State Machines"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-02",
+    "date": "2026-07-02",
+    "href": "https://mainmatter.com/c-to-rust-migration-book/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "The C to Rust Migration Book"
+  }
+]
