@@ -2,14 +2,14 @@ import Link from "next/link"
 import { headers } from "next/headers"
 import { getPublishedCounts } from "@/lib/admin/storage"
 import type { ContentType } from "@/lib/admin/types"
-import { CONTENT_TYPE_LABELS } from "@/lib/admin/types"
+import { CONTENT_SCHEMA, CONTENT_TYPES } from "@/lib/admin/content-schema"
 import { getSession, signOut, googleEnabled } from "@/lib/auth"
 import { AdminLogin } from "@/components/admin/admin-login"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import "./admin.css"
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL
-const ZERO_COUNTS = { jobs: 0, oss: 0, grants: 0, pulse: 0, events: 0, companies: 0, portals: 0, news: 0 }
+const ZERO_COUNTS = Object.fromEntries(CONTENT_TYPES.map((t) => [t, 0])) as Record<ContentType, number>
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession()
@@ -60,7 +60,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     dbDown = true
   }
 
-  const contentTypes: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
+  const contentTypes: ContentType[] = CONTENT_TYPES
 
   return (
     <div className="adm">
@@ -98,7 +98,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <div className="adm-nav__section">Published</div>
           {contentTypes.map((t) => (
             <Link key={t} href={`/admin/published?type=${t}`} className="adm-nav__item adm-nav__item--sub">
-              <span>{CONTENT_TYPE_LABELS[t]}</span>
+              <span>{CONTENT_SCHEMA[t].label}</span>
               {publishedCounts[t] > 0 && <span className="adm-badge adm-badge--dim">{publishedCounts[t]}</span>}
             </Link>
           ))}

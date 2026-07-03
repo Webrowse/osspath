@@ -2,64 +2,8 @@
 
 import { useState, useTransition } from "react"
 import { updatePublished } from "@/lib/admin/actions"
+import { CONTENT_SCHEMA } from "@/lib/admin/content-schema"
 import type { ContentType } from "@/lib/admin/types"
-
-const FIELD_CONFIGS: Record<ContentType, { key: string; label: string; multiline?: boolean }[]> = {
-  jobs: [
-    { key: "company",   label: "Company" },
-    { key: "role",      label: "Role" },
-    { key: "href",      label: "URL" },
-    { key: "checkedAt", label: "Checked At" },
-    { key: "expiresAt", label: "Expires At" },
-    { key: "note",      label: "Note", multiline: true },
-  ],
-  oss: [
-    { key: "name",  label: "Name" },
-    { key: "eco",   label: "Eco" },
-    { key: "href",  label: "URL" },
-    { key: "note",  label: "Note", multiline: true },
-  ],
-  grants: [
-    { key: "kind",        label: "Kind" },
-    { key: "name",        label: "Name" },
-    { key: "href",        label: "URL" },
-    { key: "status",      label: "Status" },
-    { key: "description", label: "Description", multiline: true },
-  ],
-  pulse: [
-    { key: "kind",        label: "Kind" },
-    { key: "title",       label: "Title" },
-    { key: "href",        label: "URL" },
-    { key: "description", label: "Description", multiline: true },
-  ],
-  events: [
-    { key: "title",    label: "Title" },
-    { key: "day",      label: "Day" },
-    { key: "month",    label: "Month / Period" },
-    { key: "href",     label: "URL" },
-    { key: "meta",     label: "Meta" },
-    { key: "expiresAt", label: "Expires At" },
-  ],
-  companies: [
-    { key: "name",   label: "Name" },
-    { key: "sector", label: "Sector" },
-    { key: "href",   label: "URL" },
-  ],
-  portals: [
-    { key: "name",        label: "Name" },
-    { key: "kind",        label: "Kind" },
-    { key: "href",        label: "URL" },
-    { key: "description", label: "Description", multiline: true },
-  ],
-  news: [
-    { key: "title",  label: "Title" },
-    { key: "href",   label: "URL" },
-    { key: "kind",   label: "Kind" },
-    { key: "date",   label: "Date (YYYY-MM-DD)" },
-    { key: "source", label: "Source" },
-    { key: "blurb",  label: "Blurb", multiline: true },
-  ],
-}
 
 interface EditPublishedButtonProps {
   contentType: ContentType
@@ -71,7 +15,7 @@ export function EditPublishedButton({ contentType, index, item }: EditPublishedB
   const [open, setOpen] = useState(false)
   const [fields, setFields] = useState<Record<string, string>>(
     () => Object.fromEntries(
-      (FIELD_CONFIGS[contentType] ?? []).map((f) => [f.key, String(item[f.key] ?? "")])
+      CONTENT_SCHEMA[contentType].fields.map((f) => [f.key, String(item[f.key] ?? "")])
     )
   )
   const [saving, startSave] = useTransition()
@@ -103,7 +47,7 @@ export function EditPublishedButton({ contentType, index, item }: EditPublishedB
     )
   }
 
-  const fieldConfig = FIELD_CONFIGS[contentType] ?? []
+  const fieldConfig = CONTENT_SCHEMA[contentType].fields
 
   return (
     <div
@@ -144,10 +88,10 @@ export function EditPublishedButton({ contentType, index, item }: EditPublishedB
         </div>
 
         <div className="adm-form" style={{ maxHeight: "60vh", overflowY: "auto" }}>
-          {fieldConfig.map(({ key, label, multiline }) => (
+          {fieldConfig.map(({ key, label, kind }) => (
             <div key={key} className="adm-field">
               <label>{label}</label>
-              {multiline ? (
+              {kind === "textarea" ? (
                 <textarea
                   className="adm-input adm-textarea"
                   value={fields[key] ?? ""}

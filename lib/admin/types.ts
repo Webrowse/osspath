@@ -34,25 +34,6 @@ export type ExtractionResult = {
   error?: string
 }
 
-// Maps content type to its filename stem
-export const CONTENT_FILES: Record<ContentType, string> = {
-  jobs:      "jobs",
-  oss:       "oss",
-  grants:    "grants",
-  pulse:     "pulse",
-  events:    "events",
-  companies: "companies",
-  portals:   "portals",
-  news:      "news",
-}
-
-export const CONTENT_TYPE_LABELS: Record<ContentType, string> = {
-  jobs:      "Jobs",
-  oss:       "Repos",
-  grants:    "Funding",
-  pulse:     "Pulse",
-  events:    "Events",
-  companies: "Companies",
-  portals:   "Job Portals",
-  news:      "News",
-}
+// Content type registration, labels, filenames, and form fields now live in
+// ./content-schema (CONTENT_SCHEMA, CONTENT_TYPES) - the single registry for
+// every published content type.

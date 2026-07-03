@@ -1,5 +1,6 @@
 import { createHash } from "crypto"
 import type { ContentType } from "@/lib/admin/types"
+import { CONTENT_TYPES } from "@/lib/admin/content-schema"
 import { readPublished } from "./store"
 
 /**
@@ -22,13 +23,11 @@ import { readPublished } from "./store"
 export type SnapshotFile = { path: string; content: string }
 
 /**
- * Content types included in the published snapshot, in fixed order. Mirrors the
- * pipeline's content types; the order is also the canonical order used when a
- * hash of the whole snapshot is computed downstream.
+ * Content types included in the published snapshot, in fixed order (the
+ * registry order from CONTENT_SCHEMA). This order is also the canonical order
+ * used when a hash of the whole snapshot is computed downstream.
  */
-export const SNAPSHOT_TYPES: ContentType[] = [
-  "jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news",
-]
+export const SNAPSHOT_TYPES: ContentType[] = CONTENT_TYPES
 
 /** Recursively sort object keys so serialisation is independent of key order. */
 function canonicalize(value: unknown): unknown {
