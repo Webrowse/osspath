@@ -9,8 +9,7 @@ import {
 import { runPipeline } from "./run"
 import { dueScanJobs } from "./dispatch"
 import { publishCurrentSnapshot, publishNote } from "./publish"
-import { runCorpusIntelligence } from "./corpus"
-import { runExports } from "./exports"
+import { runPipelineOrchestrator } from "./orchestrator"
 
 export type RefreshResult =
   | { started: true; run: RunRow }
@@ -28,13 +27,13 @@ function failedReport(err: unknown): PipelineReport {
 }
 
 /**
- * Refresh orchestrates the three tiers in order:
- *   Tier 1  Repository Enrichment - discover, enrich, persist to PostgreSQL.
- *   Tier 2  Corpus Intelligence   - cross-repo relationships over the corpus.
- *   Tier 3  Exports               - Git snapshot and other derived artifacts.
- * Tiers 2 and 3 run only when Tier 1 changed the corpus (dirty). A Tier 3
- * failure never fails the run - PostgreSQL is already correct and the failure
- * is surfaced for a manual Republish. Returns the active run if one is running.
+ * Refresh supplies Tier 1 (discover, enrich, persist to PostgreSQL) and hands
+ * it to the shared pipeline orchestrator, which runs Tier 2 (Corpus
+ * Intelligence) and Tier 3 (Exports) when Tier 1 changed the corpus (dirty).
+ * Refresh does not contain the tier sequence itself - see orchestrator.ts. A
+ * Tier 3 failure never fails the run - PostgreSQL is already correct and the
+ * failure is surfaced for a manual Republish. Returns the active run if one
+ * is already in progress.
  */
 export async function runRefresh(): Promise<RefreshResult> {
   await requireAdmin()
@@ -44,11 +43,9 @@ export async function runRefresh(): Promise<RefreshResult> {
 
   const runId = acq.run.id
   try {
-    const { report, dirty } = await runPipeline(runId, await dueScanJobs()) // Tier 1
-    if (dirty) {
-      await runCorpusIntelligence(report) // Tier 2
-      await runExports(report)            // Tier 3
-    }
+    const jobs = await dueScanJobs()
+    const report = emptyReport()
+    const { dirty } = await runPipelineOrchestrator(report, (r) => runPipeline(runId, jobs, r))
     await finishRun(runId, { status: "done", dirty, report })
   } catch (e) {
     await finishRun(runId, { status: "failed", dirty: false, report: failedReport(e) })

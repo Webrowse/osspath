@@ -17,13 +17,6 @@ const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
 // spending a DeepSeek call. The DeepSeek reviewer (later) handles subtler cases.
 const SPAM_RE = /\b(casino|porn|viagra|essay writing|forex signals|crypto pump|buy followers)\b/i
 
-function emptyReport(): PipelineReport {
-  return {
-    added: {}, removed: {}, scanned: 0, blocked: 0, verified: 0,
-    reviewed: 0, published: 0, skipped: 0, errors: [], notes: [], perSource: {},
-  }
-}
-
 function candidateHref(c: Candidate): string {
   return String((c.extracted as Record<string, unknown>)?.href ?? c.sourceUrl ?? "")
 }
@@ -67,15 +60,16 @@ async function findDeadUrls(urls: string[]): Promise<Set<string>> {
 }
 
 /**
- * Run the full pipeline for a held run. Processes everything in memory and
- * publishes once. Returns the report and whether the published dataset changed
- * (dirty), which the caller uses to decide whether to trigger a rebuild.
+ * Tier 1 (Repository Enrichment): discover, enrich, and publish to PostgreSQL
+ * for a held run. Processes everything in memory and publishes once. Mutates
+ * `report` in place and returns whether the published dataset changed (dirty)
+ * - the shape a Tier1 function needs to compose with runPipelineOrchestrator.
  */
 export async function runPipeline(
   runId: string,
   jobs: ScanJob[],
-): Promise<{ report: PipelineReport; dirty: boolean }> {
-  const report = emptyReport()
+  report: PipelineReport,
+): Promise<{ dirty: boolean }> {
   const today = new Date().toISOString().slice(0, 10)
   const expiry = new Date()
   expiry.setMonth(expiry.getMonth() + 3)
@@ -217,5 +211,5 @@ export async function runPipeline(
   }
   await heartbeat(runId)
 
-  return { report, dirty }
+  return { dirty }
 }
