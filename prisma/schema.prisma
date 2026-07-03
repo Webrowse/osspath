@@ -157,3 +157,23 @@ model PublishMetadata {
   updatedAt         DateTime  @updatedAt
   @@map("publish_metadata")
 }
+
+// ── Tier 2: Knowledge Graph snapshot ──────────────────────────────────────────
+// Single row holding the current corpus-wide knowledge graph (typed nodes +
+// typed edges), derived entirely from Tier 1 and Tier 2 data already stored on
+// content_items. Deterministic and idempotent: recomputing an unchanged corpus
+// yields an identical contentHash and no write. Independent from export/UI -
+// nothing reads this yet. nodeCount/edgeCount/contentHash are duplicated out of
+// `data` as scalar columns purely for cheap inspection without parsing the JSON.
+
+model GraphSnapshot {
+  id          String   @id @default("singleton")
+  version     Int
+  nodeCount   Int
+  edgeCount   Int
+  contentHash String
+  data        Json
+  computedAt  DateTime
+  updatedAt   DateTime @updatedAt
+  @@map("graph_snapshots")
+}

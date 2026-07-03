@@ -90,6 +90,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <span>Lists</span>
           </Link>
 
+          <div className="adm-nav__section">Maintenance</div>
+          <Link href="/admin/maintenance" className="adm-nav__item adm-nav__item--sub">
+            <span>Enrichment backfill</span>
+          </Link>
+
           <div className="adm-nav__section">Published</div>
           {contentTypes.map((t) => (
             <Link key={t} href={`/admin/published?type=${t}`} className="adm-nav__item adm-nav__item--sub">

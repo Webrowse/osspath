@@ -8,6 +8,7 @@ import { SOURCE_PROBES } from "./probes"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
 import { slugify, deriveJobSlug } from "./slug"
+import { runEnrichment, enrichInputForRepo, parseRepoRef } from "./enrich"
 
 const CONTENT_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
@@ -15,13 +16,6 @@ const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
 // Deterministic spam markers; matches here are rejected and blocklisted without
 // spending a DeepSeek call. The DeepSeek reviewer (later) handles subtler cases.
 const SPAM_RE = /\b(casino|porn|viagra|essay writing|forex signals|crypto pump|buy followers)\b/i
-
-function emptyReport(): PipelineReport {
-  return {
-    added: {}, removed: {}, scanned: 0, blocked: 0, verified: 0,
-    reviewed: 0, published: 0, skipped: 0, errors: [], notes: [], perSource: {},
-  }
-}
 
 function candidateHref(c: Candidate): string {
   return String((c.extracted as Record<string, unknown>)?.href ?? c.sourceUrl ?? "")
@@ -66,15 +60,16 @@ async function findDeadUrls(urls: string[]): Promise<Set<string>> {
 }
 
 /**
- * Run the full pipeline for a held run. Processes everything in memory and
- * publishes once. Returns the report and whether the published dataset changed
- * (dirty), which the caller uses to decide whether to trigger a rebuild.
+ * Tier 1 (Repository Enrichment): discover, enrich, and publish to PostgreSQL
+ * for a held run. Processes everything in memory and publishes once. Mutates
+ * `report` in place and returns whether the published dataset changed (dirty)
+ * - the shape a Tier1 function needs to compose with runPipelineOrchestrator.
  */
 export async function runPipeline(
   runId: string,
   jobs: ScanJob[],
-): Promise<{ report: PipelineReport; dirty: boolean }> {
-  const report = emptyReport()
+  report: PipelineReport,
+): Promise<{ dirty: boolean }> {
   const today = new Date().toISOString().slice(0, 10)
   const expiry = new Date()
   expiry.setMonth(expiry.getMonth() + 3)
@@ -165,9 +160,43 @@ export async function runPipeline(
   report.reviewed = accepted.length
   await heartbeat(runId)
 
+  // ── Phase 4.5: enrich - no repo reaches Postgres unenriched (fail closed) ──
+  // OSS candidates are turned into fully enriched records (crates, deps,
+  // features, MSRV, license, ...) before publish. A repo whose manifests can't
+  // be fetched is held back, not published bare; it is re-enriched next run.
+  const toPublish: Candidate[] = []
+  let enrichedCount = 0
+  let heldBack = 0
+  for (const c of accepted) {
+    if (c.type !== "oss") { toPublish.push(c); continue }
+    const ref = parseRepoRef(candidateHref(c))
+    if (!ref) { heldBack++; report.errors.push(`enrich: unparseable href ${candidateHref(c)}`); continue }
+    const outcome = await runEnrichment(enrichInputForRepo(ref, c.extracted))
+    if (!outcome.ok) {
+      heldBack++
+      report.errors.push(`enrich ${ref.owner}/${ref.repo}: ${outcome.enricher}: ${outcome.error}`)
+      await heartbeat(runId)
+      continue
+    }
+    const cargo = outcome.enrichment.cargo as { dependencies?: string[] } | undefined
+    c.extracted = {
+      ...c.extracted,
+      enrichment: outcome.enrichment,
+      dependencies: cargo?.dependencies ?? [],
+      depsCheckedAt: outcome.enrichment.enrichedAt.slice(0, 10),
+    }
+    enrichedCount++
+    toPublish.push(c)
+    await heartbeat(runId)
+  }
+  if (enrichedCount > 0 || heldBack > 0) {
+    report.notes!.push(`Enriched ${enrichedCount} repo(s)` + (heldBack > 0 ? `, held back ${heldBack} (retry next run)` : ""))
+  }
+  await heartbeat(runId)
+
   // ── Phase 5: publish once ──────────────────────────────────────────────────
   const byType = new Map<ContentType, Record<string, unknown>[]>()
-  for (const c of accepted) {
+  for (const c of toPublish) {
     const list = byType.get(c.type) ?? []
     list.push(toPublished(c.type, c, today, expiresAt))
     byType.set(c.type, list)
@@ -182,5 +211,5 @@ export async function runPipeline(
   }
   await heartbeat(runId)
 
-  return { report, dirty }
+  return { dirty }
 }

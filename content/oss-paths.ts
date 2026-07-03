@@ -33,6 +33,27 @@ export type OSSPath = {
   dependencies?: string[]
   depsCheckedAt?: string
   labels?: string[]
+  /** Tier 2 (Corpus Intelligence): similarity + companion-crate relationships. Not yet rendered. */
+  relationships?: {
+    version: number
+    computedAt: string
+    similar: Array<{ repo: string; score: number }>
+    companions: Array<{ name: string; count: number; percent: number }>
+  }
+  /**
+   * Tier 2 (Corpus Intelligence): deterministic, rule-based ecosystem/technology/
+   * domain classification from Tier 1 Cargo data. Distinct from the older `ecosystem`
+   * field above. Not yet rendered.
+   */
+  ecosystemIntelligence?: {
+    version: number
+    computedAt: string
+    ecosystems: string[]
+    technologies: string[]
+    domain: string | null
+    confidence: number
+    reasoning: string[]
+  }
 }
 
 export const OSS_PATHS = rawOSS as OSSPath[]

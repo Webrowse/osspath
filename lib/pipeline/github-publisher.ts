@@ -1,5 +1,5 @@
 import { Octokit } from "@octokit/rest"
-import { type SnapshotFile, SNAPSHOT_TYPES, snapshotSha256 } from "./snapshot"
+import { type SnapshotFile, snapshotSha256 } from "./snapshot"
 
 /**
  * Publish a content snapshot to Git as one atomic commit via the GitHub Git
@@ -23,7 +23,6 @@ export type PublishResult =
 type Config = { token: string; owner: string; repo: string; branch: string }
 
 const COMMIT_MESSAGE = "content: publish snapshot from Postgres"
-const SNAPSHOT_PATHS = SNAPSHOT_TYPES.map((t) => `content/${t}.json`)
 
 /** Read config from env. Returns an error string if anything required is missing. */
 function readConfig(): Config | { error: string } {
@@ -37,15 +36,19 @@ function readConfig(): Config | { error: string } {
 }
 
 /**
- * Fetch the snapshot files currently committed on the branch, in SNAPSHOT_TYPES
- * order. Returns null if any file is absent (e.g. before the first publish),
- * which the caller treats as "changed". Uses the git blob API so large files
- * (oss.json) are handled, unlike the 1 MB-capped contents API.
+ * Fetch the files currently committed on the branch at the given paths, in the
+ * order given. Returns null if any file is absent (e.g. before the first
+ * publish of this file set), which the caller treats as "changed". Uses the
+ * git blob API so large files (oss.json) are handled, unlike the 1 MB-capped
+ * contents API. Generic over the path set so any caller's file list - the
+ * 8-file content snapshot, a single search index file, or any future artifact
+ * - reuses this same atomic-commit-with-no-op-gate logic without duplicating it.
  */
 async function fetchCurrentSnapshot(
   octokit: Octokit,
   cfg: Config,
   baseTreeSha: string,
+  paths: string[],
 ): Promise<SnapshotFile[] | null> {
   const tree = await octokit.git.getTree({
     owner: cfg.owner,
@@ -58,7 +61,7 @@ async function fetchCurrentSnapshot(
     if (entry.path && entry.sha && entry.type === "blob") shaByPath.set(entry.path, entry.sha)
   }
   const files: SnapshotFile[] = []
-  for (const path of SNAPSHOT_PATHS) {
+  for (const path of paths) {
     const sha = shaByPath.get(path)
     if (!sha) return null
     const blob = await octokit.git.getBlob({ owner: cfg.owner, repo: cfg.repo, file_sha: sha })
@@ -110,6 +113,7 @@ async function commitSnapshot(
  */
 export async function publishSnapshot(files: SnapshotFile[]): Promise<PublishResult> {
   const contentSha256 = snapshotSha256(files)
+  const paths = files.map((f) => f.path)
   const cfg = readConfig()
   if ("error" in cfg) return { state: "failed", error: cfg.error }
 
@@ -123,7 +127,7 @@ export async function publishSnapshot(files: SnapshotFile[]): Promise<PublishRes
       const headCommit = await octokit.git.getCommit({ owner: cfg.owner, repo: cfg.repo, commit_sha: headSha })
       const baseTreeSha = headCommit.data.tree.sha
 
-      const current = await fetchCurrentSnapshot(octokit, cfg, baseTreeSha)
+      const current = await fetchCurrentSnapshot(octokit, cfg, baseTreeSha, paths)
       if (current && snapshotSha256(current) === contentSha256) {
         return { state: "skipped_no_changes" }
       }
