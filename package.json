@@ -13,6 +13,7 @@
     "check:orchestrator": "tsx scripts/check-orchestrator.ts",
     "check:corpus": "tsx scripts/check-corpus-relationships.ts",
     "check:ecosystem": "tsx scripts/check-ecosystem-rules.ts",
+    "check:graph": "tsx scripts/check-graph-engine.ts",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
