@@ -4,13 +4,13 @@ import type { ContentType } from "@/lib/admin/types"
 import type { PipelineReport } from "@/lib/admin/pipeline-runs"
 import { heartbeat } from "@/lib/admin/pipeline-runs"
 import { markSourceRun } from "@/lib/admin/sources"
+import { CONTENT_TYPES } from "@/lib/admin/content-schema"
 import { SOURCE_PROBES } from "./probes"
 import { loadBlocklist, isBlocked, blockUrl, normalizeUrl, type Blocklist } from "@/lib/admin/lists"
 import { publishedHrefSet, publishBatch, removeExpired } from "./store"
 import { slugify, deriveJobSlug } from "./slug"
 import { runEnrichment, enrichInputForRepo, parseRepoRef } from "./enrich"
 
-const CONTENT_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 const EXPIRING_TYPES: ContentType[] = ["jobs", "events"]
 
 // Deterministic spam markers; matches here are rejected and blocklisted without

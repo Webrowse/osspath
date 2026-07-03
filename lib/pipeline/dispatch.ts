@@ -6,7 +6,6 @@ import { collectTWIR } from "./scan/twir"
 import { collectGitHubOSS } from "./scan/github-oss"
 import { collectPulse } from "./scan/pulse"
 import { collectCompanies } from "./scan/companies"
-import { collectGrants } from "./scan/grants"
 import { collectEvents } from "./scan/events"
 import { collectPortals } from "./scan/portals"
 import { collectRustBytes } from "./scan/rust-bytes"
@@ -20,7 +19,6 @@ export const KIND_TO_COLLECTOR: Record<SourceKind, Collector> = {
   "github-oss": collectGitHubOSS,
   "github-pulse": collectPulse,
   "github-orgs": collectCompanies,
-  "grants": collectGrants,
   "events": collectEvents,
   "portals": collectPortals,
   "rust-bytes": collectRustBytes,

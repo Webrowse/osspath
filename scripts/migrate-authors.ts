@@ -1,0 +1,97 @@
+import { config } from "dotenv"
+config({ path: ".env.local" }); config()
+
+/**
+ * One-time migration: seed the curated Authors (previously a 100%
+ * hand-authored content/authors.json with zero admin surface) into
+ * ContentItem(type="authors"), so /admin/published?type=authors manages
+ * the real data. Safe to delete this script once it has been run against
+ * production and verified.
+ *
+ * Data embedded below is a point-in-time copy of content/authors.json.
+ */
+
+const SEED_AUTHORS = [
+  {
+    "name": "David Tolnay",
+    "handle": "dtolnay",
+    "href": "https://github.com/dtolnay",
+    "writing": "https://docs.rs/dtolnay",
+    "description": "Author of serde, syn, anyhow, thiserror, and proc-macro2 — the crates that most production Rust depends on. His four published essays cover async pitfalls, reference mental models, soundness bugs in safe code, and scaling open source triage.",
+    "tags": ["crate-author", "essays"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Andrew Gallant",
+    "handle": "BurntSushi",
+    "href": "https://github.com/BurntSushi",
+    "writing": "https://blog.burntsushi.net",
+    "description": "Author of ripgrep, regex, csv, and memchr. Writes with unusual depth on performance, correctness, Unicode handling, and the real tradeoffs in systems programming.",
+    "tags": ["crate-author", "performance"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Aleksei Kladov",
+    "handle": "matklad",
+    "href": "https://github.com/matklad",
+    "writing": "https://matklad.github.io",
+    "description": "Architect of rust-analyzer. Writes precisely on compiler internals, software architecture, and language tooling. His posts on salsa and incremental computation are required reading for anyone building language tools.",
+    "tags": ["tooling", "compiler"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Saoirse Rooney",
+    "handle": "withoutboats",
+    "href": "https://github.com/withoutboats",
+    "writing": "https://without.boats",
+    "description": "Proposed and co-designed async/await for Rust. Her writing on Pin, Waker, the polling model, and language design is essential for understanding async Rust at a conceptual level.",
+    "tags": ["async", "language-design"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Niko Matsakis",
+    "handle": "nikomatsakis",
+    "href": "https://github.com/nikomatsakis",
+    "writing": "https://smallcultfollowing.com/babysteps",
+    "description": "Lead designer of Rust's ownership and borrow-checking system. Blogs at Babysteps with rare candor about language design decisions, the limits of NLL, and the direction of the type system.",
+    "tags": ["language-design", "compiler"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Jon Gjengset",
+    "handle": "jonhoo",
+    "href": "https://github.com/jonhoo",
+    "writing": "https://thesquareplanet.com",
+    "description": "Author of Rust for Rustaceans and the Crust of Rust video series. Exceptionally skilled at explaining Rust internals — atomics, channels, lifetime variance — to developers who already know the basics.",
+    "tags": ["teaching", "video"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Steve Klabnik",
+    "handle": "steveklabnik",
+    "href": "https://github.com/steveklabnik",
+    "writing": "https://steveklabnik.com",
+    "description": "Co-author of The Rust Programming Language. Shaped how the Rust community explains the language to newcomers. Writes on programming languages, community dynamics, and software history.",
+    "tags": ["teaching", "community"],
+    "checkedAt": "2026-06-23"
+  },
+  {
+    "name": "Carol Nichols",
+    "handle": "carols10cents",
+    "href": "https://github.com/carols10cents",
+    "writing": "https://carol-nichols.com",
+    "description": "Co-author of The Rust Programming Language and co-founder of Integer 32. Helped establish the editorial standards and pedagogical approach that makes the Rust Book unusually good.",
+    "tags": ["teaching", "community"],
+    "checkedAt": "2026-06-23"
+  },
+]
+
+async function main() {
+  const { writeContent } = await import("@/lib/admin/storage")
+  console.log(`Seeding ${SEED_AUTHORS.length} curated Authors into ContentItem(type="authors")...`)
+  await writeContent("authors", SEED_AUTHORS)
+  console.log("Done. Verify at /admin/published?type=authors and on the live /authors page after publish.")
+  process.exit(0)
+}
+
+main().catch((e) => { console.error("FAILED", e); process.exit(1) })

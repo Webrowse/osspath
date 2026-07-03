@@ -1,7 +1,7 @@
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "fs"
 import { join, dirname } from "path"
 import type { ContentType } from "./types"
-import { CONTENT_FILES } from "./types"
+import { CONTENT_SCHEMA, CONTENT_TYPES } from "./content-schema"
 import { prisma } from "@/lib/prisma"
 
 const ROOT = process.cwd()
@@ -45,7 +45,7 @@ export async function writeContent(type: ContentType, items: Record<string, unkn
       data: items.map((item) => ({ type, href: String(item.href ?? "") || null, data: item as never })),
     })
   }
-  writeJSONFile(`content/${CONTENT_FILES[type]}.json`, items)
+  writeJSONFile(`content/${CONTENT_SCHEMA[type].file}.json`, items)
 }
 
 export async function removeContent(type: ContentType, index: number) {
@@ -56,16 +56,14 @@ export async function removeContent(type: ContentType, index: number) {
   })
   const target = rows[index]
   if (target) await prisma.contentItem.delete({ where: { id: target.id } })
-  const existing = readJSONFile<Record<string, unknown>>(`content/${CONTENT_FILES[type]}.json`)
-  writeJSONFile(`content/${CONTENT_FILES[type]}.json`, existing.filter((_, i) => i !== index))
+  const existing = readJSONFile<Record<string, unknown>>(`content/${CONTENT_SCHEMA[type].file}.json`)
+  writeJSONFile(`content/${CONTENT_SCHEMA[type].file}.json`, existing.filter((_, i) => i !== index))
 }
 
 // ── Counts ────────────────────────────────────────────────────────────────────
 
-const ALL_TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
-
 export async function getPublishedCounts(): Promise<Record<ContentType, number>> {
   const rows = await prisma.contentItem.groupBy({ by: ["type"], _count: { id: true } })
   const map = Object.fromEntries(rows.map((r) => [r.type, r._count.id]))
-  return Object.fromEntries(ALL_TYPES.map((t) => [t, map[t] ?? 0])) as Record<ContentType, number>
+  return Object.fromEntries(CONTENT_TYPES.map((t) => [t, map[t] ?? 0])) as Record<ContentType, number>
 }

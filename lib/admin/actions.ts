@@ -6,10 +6,20 @@ import { requireAdmin } from "./require-admin"
 import type { ContentType } from "./types"
 
 /**
- * Published-content actions used by the admin Published page. The scan/approve
- * workflow is gone; content is produced by the pipeline. These actions cover
- * manual curation: removing or editing already-published items.
+ * Published-content actions used by the admin Published page. Pipeline-scanned
+ * types (jobs, oss, ...) get new items from the scanner; purely editorial types
+ * (authors, ...) have no scanner, so createPublished is their only way to gain
+ * a new item. Generic over every ContentType either way.
  */
+
+export async function createPublished(type: ContentType, data: Record<string, unknown>) {
+  await requireAdmin()
+  const items = await readContent(type)
+  const stamped = { ...data, checkedAt: new Date().toISOString().split("T")[0] }
+  await writeContent(type, [...items, stamped])
+  revalidatePath("/admin/published")
+  revalidatePath("/")
+}
 
 export async function deletePublished(type: ContentType, index: number) {
   await requireAdmin()

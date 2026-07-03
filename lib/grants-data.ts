@@ -1,8 +1,8 @@
 import "server-only"
 import { FUNDERS } from "@/content/funders"
-import { PROGRAMS } from "@/content/programs"
+import { GRANTS as PROGRAMS } from "@/content/grants"
 import type { Funder } from "@/content/funders"
-import type { FundingProgram } from "@/content/programs"
+import type { FundingProgram } from "@/content/grants"
 import type { EcoTag } from "@/lib/eco-tags"
 
 export type { Funder, FundingProgram }

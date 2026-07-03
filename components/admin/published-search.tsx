@@ -3,32 +3,12 @@
 import { useState, useMemo } from "react"
 import { DeleteButton } from "@/components/admin/delete-button"
 import { EditPublishedButton } from "@/components/admin/edit-published-button"
+import { CONTENT_BEHAVIOR } from "@/lib/admin/content-behavior"
 import type { ContentType } from "@/lib/admin/types"
 
 const PAGE_SIZE = 100
 
 export type IndexedItem = { item: Record<string, unknown>; index: number }
-
-function getItemLabel(item: Record<string, unknown>, type: ContentType): string {
-  if (type === "jobs") return `${item.role ?? "?"} — ${item.company ?? "?"}`
-  if (type === "oss") return String(item.name ?? "?")
-  if (type === "grants" || type === "events") return String(item.name ?? item.title ?? "?")
-  if (type === "pulse" || type === "portals") return String(item.title ?? item.name ?? "?")
-  if (type === "companies") return String(item.name ?? "?")
-  if (type === "news") return String(item.title ?? "?")
-  return "?"
-}
-
-function getItemMeta(item: Record<string, unknown>, type: ContentType): string {
-  if (type === "jobs") return [item.checkedAt, item.expiresAt ? `exp ${item.expiresAt}` : ""].filter(Boolean).join(" · ")
-  if (type === "oss") return String(item.eco ?? "")
-  if (type === "grants") return String(item.status ?? "")
-  if (type === "pulse" || type === "portals") return String(item.kind ?? "")
-  if (type === "events") return String(item.meta ?? "")
-  if (type === "companies") return String(item.sector ?? "")
-  if (type === "news") return [item.kind, item.date].filter(Boolean).join(" · ")
-  return ""
-}
 
 function scoreItem(item: Record<string, unknown>, q: string): number {
   const name = String(item.name ?? item.title ?? item.role ?? "").toLowerCase()
@@ -100,8 +80,8 @@ export function PublishedSearch({ items, contentType }: PublishedSearchProps) {
       ) : (
         pageItems.map(({ item, index }) => (
           <div key={index} className="adm-pub-item">
-            <span className="adm-pub-item__name">{getItemLabel(item, contentType)}</span>
-            <span className="adm-pub-item__meta">{getItemMeta(item, contentType)}</span>
+            <span className="adm-pub-item__name">{CONTENT_BEHAVIOR[contentType].listLabel(item)}</span>
+            <span className="adm-pub-item__meta">{CONTENT_BEHAVIOR[contentType].listMeta(item)}</span>
             <a
               href={String(item.href ?? "#")}
               target="_blank"

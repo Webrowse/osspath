@@ -94,7 +94,7 @@ model SchemaMetadata {
 model Source {
   id            String    @id @default(cuid())
   type          String    // ContentType this source feeds
-  kind          String    // scanner kind: github-search | github-org | twir | hn | reddit | greenhouse | lever | grants | events | portals | rust-bytes
+  kind          String    // scanner kind: github-search | github-org | twir | hn | reddit | greenhouse | lever | events | portals | rust-bytes
   label         String
   url           String?   // query string, org slug, feed URL, or ATS slug
   parser        String?   // optional parser id
@@ -176,4 +176,26 @@ model GraphSnapshot {
   computedAt  DateTime
   updatedAt   DateTime @updatedAt
   @@map("graph_snapshots")
+}
+
+// ── Overrides: manual configuration, not content ──────────────────────────────
+// Small hand-curated exception datasets layered on top of automatic pipeline
+// output (e.g. a manual ecosystem-tag correction, a tracked company
+// acquisition). Deliberately NOT a ContentItem: overrides are configuration
+// admins tune directly, not discovered/published editorial content, so they
+// get their own lightweight table and purpose-built editors instead of the
+// generic Published CRUD screen. `kind` discriminates the override family;
+// `key` is a natural dedup key scoped to that kind (e.g. "owner/repo" for
+// eco-tags, "edge_type:from:to" for lifecycle-edges); `data` holds the rest.
+
+model Override {
+  id        String   @id @default(cuid())
+  kind      String   // "eco-tags" | "lifecycle-edges"
+  key       String   // dedup key, meaning is kind-specific
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@unique([kind, key])
+  @@index([kind])
+  @@map("overrides")
 }

@@ -4,12 +4,13 @@ import { useState, useTransition } from "react"
 import { addSource, setSourceEnabled, setSourceInterval, removeSource } from "@/lib/admin/source-actions"
 import type { SourceRow, SourceKind } from "@/lib/admin/sources"
 import type { ContentType } from "@/lib/admin/types"
+import { CONTENT_TYPES } from "@/lib/admin/content-schema"
 
 const KINDS: SourceKind[] = [
   "hn", "twir", "github-oss", "github-pulse", "github-orgs",
-  "grants", "events", "portals", "rust-bytes", "careers", "reddit",
+  "events", "portals", "rust-bytes", "careers", "reddit",
 ]
-const TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
+const TYPES: ContentType[] = CONTENT_TYPES
 
 function fmtLast(d: Date | null): string {
   if (!d) return "never"

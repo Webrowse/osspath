@@ -1,7 +1,7 @@
 import "server-only"
 
 import { COMPANIES }                       from "@/content/companies"
-import { PROGRAMS }                        from "@/content/programs"
+import { GRANTS as PROGRAMS }              from "@/content/grants"
 import { FUNDERS }                         from "@/content/funders"
 import { JOBS }                            from "@/content/jobs"
 import { LIFECYCLE_EDGES }                 from "@/content/lifecycle-edges"
@@ -13,7 +13,7 @@ import { getFunderBySlug }                 from "@/lib/grants-data"
 import type { EcoTag }                     from "@/lib/eco-tags"
 import type { OSSPath }                    from "@/content/oss-paths"
 import type { EcosystemCompany, OrgType }  from "@/content/companies"
-import type { FundingProgram }             from "@/content/programs"
+import type { FundingProgram }             from "@/content/grants"
 import type { Funder }                     from "@/content/funders"
 import type { EditorialJob }               from "@/content/jobs"
 

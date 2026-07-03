@@ -1,4 +1,22 @@
-[
+import { config } from "dotenv"
+config({ path: ".env.local" }); config()
+
+/**
+ * One-time migration: replace the pipeline's `grants` ContentType rows (7
+ * low-fidelity, unreviewed scanner candidates - never rendered publicly,
+ * since content/grants.ts was a dead re-export of content/programs.ts) with
+ * the real, curated Funding Program data that has powered /grants all along.
+ *
+ * After this runs, `grants` is the single canonical Funding data source:
+ * admin-editable at /admin/published?type=grants, and read directly by the
+ * public /grants pages via content/grants.ts. Safe to delete this script
+ * once it has been run against production and verified.
+ *
+ * Data embedded below is a point-in-time copy of content/programs.json as it
+ * existed before that file was retired in this same change.
+ */
+
+const SEED_GRANTS = [
   {
     "slug": "rust-foundation-community-grants",
     "name": "Rust Foundation — Community Grants",
@@ -9,21 +27,11 @@
     "status": "rolling",
     "ecosystems": ["bevy","tauri","blockchain","embedded","ai","wasm","database","grpc","cli","axum","tokio"],
     "funded_repos": [
-      "rust-lang/rust",
-      "servo/servo",
-      "tokio-rs/axum",
-      "rust-lang/mdBook",
-      "bytecodealliance/wasmtime",
-      "rust-lang/book",
-      "rust-lang/rust-analyzer",
-      "hyperium/hyper",
-      "rust-lang/cargo",
-      "rust-lang/rust-clippy",
-      "rust-lang/rustfmt",
-      "tokio-rs/tracing",
-      "nextest-rs/nextest",
-      "tokio-rs/bytes",
-      "rust-lang/reference"
+      "rust-lang/rust", "servo/servo", "tokio-rs/axum", "rust-lang/mdBook",
+      "bytecodealliance/wasmtime", "rust-lang/book", "rust-lang/rust-analyzer",
+      "hyperium/hyper", "rust-lang/cargo", "rust-lang/rust-clippy",
+      "rust-lang/rustfmt", "tokio-rs/tracing", "nextest-rs/nextest",
+      "tokio-rs/bytes", "rust-lang/reference"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -42,12 +50,8 @@
     "eligibility": "Individual contributors with demonstrated Rust ecosystem involvement",
     "experience_level": ["intermediate", "senior"],
     "funded_repos": [
-      "rust-lang/rust",
-      "rust-lang/rust-analyzer",
-      "rust-lang/cargo",
-      "rust-lang/rust-clippy",
-      "rust-lang/rustfmt",
-      "rust-lang/miri"
+      "rust-lang/rust", "rust-lang/rust-analyzer", "rust-lang/cargo",
+      "rust-lang/rust-clippy", "rust-lang/rustfmt", "rust-lang/miri"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -90,14 +94,8 @@
     "eligibility": "Individuals and organizations worldwide. No nationality restrictions.",
     "rounds_per_year": 3,
     "funded_repos": [
-      "rustls/rustls",
-      "servo/servo",
-      "embassy-rs/embassy",
-      "smoltcp-rs/smoltcp",
-      "probe-rs/probe-rs",
-      "esp-rs/esp-hal",
-      "esp-rs/esp-idf-svc",
-      "drogue-iot/drogue-device"
+      "rustls/rustls", "servo/servo", "embassy-rs/embassy", "smoltcp-rs/smoltcp",
+      "probe-rs/probe-rs", "esp-rs/esp-hal", "esp-rs/esp-idf-svc", "drogue-iot/drogue-device"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -116,10 +114,7 @@
     "eligibility": "Individuals and organizations worldwide.",
     "rounds_per_year": 2,
     "funded_repos": [
-      "RustCrypto/traits",
-      "RustCrypto/formats",
-      "RustCrypto/AEADs",
-      "RustCrypto/crypto-bigint"
+      "RustCrypto/traits", "RustCrypto/formats", "RustCrypto/AEADs", "RustCrypto/crypto-bigint"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -137,11 +132,7 @@
     "currency": "EUR",
     "eligibility": "Individuals and organizations worldwide.",
     "rounds_per_year": 2,
-    "funded_repos": [
-      "servo/servo",
-      "LemmyNet/lemmy",
-      "matrix-org/matrix-rust-sdk"
-    ],
+    "funded_repos": ["servo/servo", "LemmyNet/lemmy", "matrix-org/matrix-rust-sdk"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -153,10 +144,7 @@
     "href": "https://openssf.org/community/alpha-omega/",
     "status": "rolling",
     "ecosystems": ["embedded","wasm","cli","database","grpc"],
-    "funded_repos": [
-      "rust-lang/rust",
-      "hyperium/hyper"
-    ],
+    "funded_repos": ["rust-lang/rust", "hyperium/hyper"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -168,11 +156,7 @@
     "href": "https://www.memorysafety.org/",
     "status": "rolling",
     "ecosystems": ["embedded","wasm","cli"],
-    "funded_repos": [
-      "rustls/rustls",
-      "hyperium/hyper",
-      "hickory-dns/hickory-dns"
-    ],
+    "funded_repos": ["rustls/rustls", "hyperium/hyper", "hickory-dns/hickory-dns"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -189,11 +173,8 @@
     "currency": "EUR",
     "eligibility": "Maintainers of widely-used digital infrastructure. STF typically initiates contact.",
     "funded_repos": [
-      "rustls/rustls",
-      "rust-lang/rust",
-      "rust-lang/rust-analyzer",
-      "rust-lang/cargo",
-      "matrix-org/matrix-rust-sdk"
+      "rustls/rustls", "rust-lang/rust", "rust-lang/rust-analyzer",
+      "rust-lang/cargo", "matrix-org/matrix-rust-sdk"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -210,10 +191,7 @@
     "max_award_usd": 100000,
     "currency": "USD",
     "eligibility": "Teams and individuals building on Polkadot or Substrate",
-    "funded_repos": [
-      "paritytech/polkadot-sdk",
-      "polkadot-fellows/runtimes"
-    ],
+    "funded_repos": ["paritytech/polkadot-sdk", "polkadot-fellows/runtimes"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -226,10 +204,7 @@
     "status": "rolling",
     "ecosystems": ["blockchain","cli"],
     "eligibility": "Individual contributors and small teams working on Bitcoin open source",
-    "funded_repos": [
-      "rust-bitcoin/rust-bitcoin",
-      "lightningdevkit/rust-lightning"
-    ],
+    "funded_repos": ["rust-bitcoin/rust-bitcoin", "lightningdevkit/rust-lightning"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -257,11 +232,7 @@
     "status": "rolling",
     "ecosystems": ["cli","database","grpc","wasm"],
     "eligibility": "Widely-used open source projects seeking a professional security audit",
-    "funded_repos": [
-      "bytecodealliance/wasmtime",
-      "hyperium/hyper",
-      "rust-lang/rust"
-    ],
+    "funded_repos": ["bytecodealliance/wasmtime", "hyperium/hyper", "rust-lang/rust"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -275,9 +246,7 @@
     "ecosystems": ["blockchain","wasm"],
     "rounds_per_year": 4,
     "eligibility": "Open source projects. GG rounds focus on Ethereum ecosystem; OSS round is language-agnostic.",
-    "funded_repos": [
-      "paradigmxyz/reth"
-    ],
+    "funded_repos": ["paradigmxyz/reth"],
     "checkedAt": "2026-06-11"
   },
   {
@@ -290,10 +259,7 @@
     "status": "periodic",
     "ecosystems": ["wasm","cli"],
     "funded_repos": [
-      "cloudflare/pingora",
-      "cloudflare/quiche",
-      "cloudflare/boringtun",
-      "cloudflare/workers-rs"
+      "cloudflare/pingora", "cloudflare/quiche", "cloudflare/boringtun", "cloudflare/workers-rs"
     ],
     "checkedAt": "2026-06-11"
   },
@@ -309,10 +275,17 @@
     "currency": "DOT",
     "chain": "polkadot",
     "governance_track": "medium-spender",
-    "funded_repos": [
-      "paritytech/polkadot-sdk",
-      "polkadot-fellows/runtimes"
-    ],
+    "funded_repos": ["paritytech/polkadot-sdk", "polkadot-fellows/runtimes"],
     "checkedAt": "2026-06-11"
-  }
+  },
 ]
+
+async function main() {
+  const { writeContent } = await import("@/lib/admin/storage")
+  console.log(`Seeding ${SEED_GRANTS.length} curated Funding Programs into ContentItem(type="grants")...`)
+  await writeContent("grants", SEED_GRANTS)
+  console.log("Done. Verify at /admin/published?type=grants and on the live /grants page after publish.")
+  process.exit(0)
+}
+
+main().catch((e) => { console.error("FAILED", e); process.exit(1) })

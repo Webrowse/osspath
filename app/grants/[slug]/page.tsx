@@ -2,7 +2,7 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
-import { PROGRAMS } from "@/content/programs"
+import { GRANTS } from "@/content/grants"
 import { getFunderBySlug } from "@/lib/grants-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
 import { formatCheckedAt } from "@/lib/content-utils"
@@ -15,12 +15,12 @@ interface PageProps {
 }
 
 export function generateStaticParams(): { slug: string }[] {
-  return PROGRAMS.map(p => ({ slug: p.slug }))
+  return GRANTS.map(p => ({ slug: p.slug }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
-  const program = PROGRAMS.find(p => p.slug === slug)
+  const program = GRANTS.find(p => p.slug === slug)
   if (!program) return { title: "Not Found" }
 
   const title = `${program.name} — Rust Funding`
@@ -66,7 +66,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 export default async function ProgramDetailPage({ params }: PageProps) {
   const { slug } = await params
-  const program  = PROGRAMS.find(p => p.slug === slug)
+  const program  = GRANTS.find(p => p.slug === slug)
   if (!program) notFound()
 
   const funder = getFunderBySlug(program.funder_slug)

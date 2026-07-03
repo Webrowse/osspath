@@ -1,5 +1,5 @@
 import Link from "next/link"
-import type { FundingProgram } from "@/content/programs"
+import type { FundingProgram } from "@/content/grants"
 import { formatCheckedAt } from "@/lib/content-utils"
 
 const KIND_LABEL: Record<string, string> = {

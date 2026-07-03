@@ -15,7 +15,6 @@ export type SourceKind =
   | "github-oss"
   | "github-pulse"
   | "github-orgs"
-  | "grants"
   | "events"
   | "portals"
   | "rust-bytes"
