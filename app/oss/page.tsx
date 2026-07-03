@@ -4,6 +4,7 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSBrowser } from "@/components/editorial/oss-browser"
 import { OSS_PATHS } from "@/content/oss-paths"
 import { getDepPageCounts, getQualifiedCrates } from "@/lib/deps-data"
+import { getOwnerCompanyIndex } from "@/lib/company-data"
 
 export const metadata: Metadata = {
   title: "Repos — Rust Ecosystem",
@@ -34,6 +35,11 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
   const initialEcos = Array.isArray(eco) ? eco : eco ? [eco] : []
   const depPageCounts = getDepPageCounts()
   const depPageCount  = getQualifiedCrates().length
+  // Plain, serializable owner -> company map for the client component
+  // (lib/company-data.ts is server-only, so OSSBrowser can't call it itself).
+  const companyByOwner = Object.fromEntries(
+    [...getOwnerCompanyIndex().entries()].map(([owner, c]) => [owner, { slug: c.slug, name: c.name }]),
+  )
 
   return (
     <EditorialLayout>
@@ -59,6 +65,7 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
             depPageCounts={depPageCounts}
             initialDeps={initialDeps}
             initialEcos={initialEcos}
+            companyByOwner={companyByOwner}
           />
         </div>
       </section>

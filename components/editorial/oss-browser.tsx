@@ -12,7 +12,7 @@ import type { OSSPath } from "@/content/oss-paths"
 
 type SortKey       = "stars-desc" | "stars-asc" | "forks-desc" | "updated" | "issues"
 type StarBucketKey = "any" | "20-59" | "60-99" | "100-499" | "500-1999" | "2000-9999" | "10000+"
-type DropdownId    = "license" | "topics" | "owner" | "deps"
+type DropdownId    = "license" | "topics" | "owner" | "deps" | "tech" | "company"
 type KindFilter    = "all" | "code" | "reference"
 
 const PAGE_SIZE = 100
@@ -31,9 +31,11 @@ export interface NormalizedRepo extends OSSPath {
   activityTier:    "active" | "maintenance" | "dormant"
   dependencies:    string[]
   ecoTags:         EcoTag[]
+  technologies:    string[]
+  companyName:     string | null
 }
 
-function normalize(r: OSSPath): NormalizedRepo {
+function normalize(r: OSSPath, companyByOwner: Record<string, { slug: string; name: string }>): NormalizedRepo {
   return {
     ...r,
     stars:           r.stars           ?? 0,
@@ -47,6 +49,8 @@ function normalize(r: OSSPath): NormalizedRepo {
     activityTier:    (r.activityTier as "active" | "maintenance" | "dormant") ?? "dormant",
     dependencies:    r.dependencies    ?? [],
     ecoTags:         getEcoTags(r.dependencies, { owner: r.owner, name: r.name ?? undefined, topics: r.topics ?? undefined }),
+    technologies:    r.ecosystemIntelligence?.technologies ?? [],
+    companyName:     companyByOwner[r.owner.toLowerCase()]?.name ?? null,
   }
 }
 
@@ -94,11 +98,14 @@ function buildFilter(
     selectedTopics:    Set<string>
     selectedDeps:      Set<string>
     selectedEcos:      Set<EcoTag>
+    selectedTechs:     Set<string>
+    selectedCompanies: Set<string>
     star?: { lo: number; hi: number }
   }
 ): NormalizedRepo[] {
   const { q, selectedKind, selectedActivity, selectedLicenses,
-          selectedOwners, selectedTopics, selectedDeps, selectedEcos, star } = opts
+          selectedOwners, selectedTopics, selectedDeps, selectedEcos,
+          selectedTechs, selectedCompanies, star } = opts
   return items.filter(r => {
     if (q) {
       const lc = q.toLowerCase()
@@ -118,15 +125,21 @@ function buildFilter(
         ![...selectedDeps].every(d => r.dependencies.includes(d))) return false
     if (selectedEcos.size      > 0 &&
         !r.ecoTags.some(tag => selectedEcos.has(tag))) return false
+    if (selectedTechs.size     > 0 &&
+        ![...selectedTechs].every(t => r.technologies.includes(t))) return false
+    if (selectedCompanies.size > 0 &&
+        !selectedCompanies.has(r.companyName ?? "")) return false
     return true
   })
 }
 
 function buildFacets(items: NormalizedRepo[]) {
-  const activity: Record<string, number> = {}
-  const licenses: Record<string, number> = {}
-  const owners:   Record<string, number> = {}
-  const topics:   Record<string, number> = {}
+  const activity:   Record<string, number> = {}
+  const licenses:   Record<string, number> = {}
+  const owners:     Record<string, number> = {}
+  const topics:     Record<string, number> = {}
+  const techs:      Record<string, number> = {}
+  const companies:  Record<string, number> = {}
 
   for (const r of items) {
     activity[r.activityTier] = (activity[r.activityTier] ?? 0) + 1
@@ -140,16 +153,24 @@ function buildFacets(items: NormalizedRepo[]) {
       if (t === "rust") continue
       topics[t] = (topics[t] ?? 0) + 1
     }
+    for (const t of r.technologies) {
+      techs[t] = (techs[t] ?? 0) + 1
+    }
+    if (r.companyName) {
+      companies[r.companyName] = (companies[r.companyName] ?? 0) + 1
+    }
   }
 
   const sort = (obj: Record<string, number>) =>
     Object.entries(obj).sort((a, b) => b[1] - a[1])
 
   return {
-    activity: sort(activity),
-    licenses: sort(licenses),
-    owners:   sort(owners),
-    topics:   sort(topics),
+    activity:  sort(activity),
+    licenses:  sort(licenses),
+    owners:    sort(owners),
+    topics:    sort(topics),
+    techs:     sort(techs),
+    companies: sort(companies),
   }
 }
 
@@ -174,15 +195,20 @@ export function OSSBrowser({
   depPageCounts,
   initialDeps,
   initialEcos,
+  companyByOwner,
 }: {
   repos: OSSPath[]
   depPageCounts?: Record<string, number>
   initialDeps?: string[]
   initialEcos?: string[]
+  companyByOwner?: Record<string, { slug: string; name: string }>
 }) {
   const router   = useRouter()
   const pathname = usePathname()
-  const normalized = useMemo(() => repos.map(normalize), [repos])
+  const normalized = useMemo(
+    () => repos.map(r => normalize(r, companyByOwner ?? {})),
+    [repos, companyByOwner],
+  )
 
   // Filter state
   const [q,                 setQ]                 = useState("")
@@ -203,6 +229,10 @@ export function OSSBrowser({
       ECO_OPTIONS.some(o => o.value === e)
     ))
   )
+  const [selectedTechs,     setSelectedTechs]     = useState<Set<string>>(new Set())
+  const [techSearch,        setTechSearch]        = useState("")
+  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set())
+  const [companySearch,     setCompanySearch]     = useState("")
   const [sort,              setSort]              = useState<SortKey>("stars-desc")
   const [openDropdown,      setOpenDropdown]      = useState<DropdownId | null>(null)
   const [visibleCount,      setVisibleCount]      = useState(PAGE_SIZE)
@@ -240,6 +270,7 @@ export function OSSBrowser({
   const filterOpts = {
     q, selectedKind, selectedActivity, selectedLicenses,
     selectedOwners, selectedTopics, selectedDeps, selectedEcos,
+    selectedTechs, selectedCompanies,
   }
 
   const activeBucket = starBucket === "any"
@@ -251,7 +282,8 @@ export function OSSBrowser({
     () => buildFilter(normalized, { ...filterOpts, star: activeBucket }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [normalized, q, starBucket, selectedKind, selectedActivity,
-     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
+     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos,
+     selectedTechs, selectedCompanies]
   )
 
   // Filtered without star constraint — drives bucket counts
@@ -259,7 +291,8 @@ export function OSSBrowser({
     () => buildFilter(normalized, { ...filterOpts }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [normalized, q, selectedKind, selectedActivity,
-     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos]
+     selectedLicenses, selectedOwners, selectedTopics, selectedDeps, selectedEcos,
+     selectedTechs, selectedCompanies]
   )
 
   // Sorted display list
@@ -371,6 +404,32 @@ export function OSSBrowser({
     return slice
   }, [allFacets.owners, ownerSearch, selectedOwners])
 
+  // Technologies panel options - from full corpus, filtered by search
+  const visibleTechs = useMemo(() => {
+    const lc = techSearch.toLowerCase().trim()
+    const list = lc
+      ? allFacets.techs.filter(([t]) => t.toLowerCase().includes(lc))
+      : allFacets.techs
+    const slice = list.slice(0, 20).map(([t]) => t)
+    for (const t of selectedTechs) {
+      if (!slice.includes(t)) slice.push(t)
+    }
+    return slice
+  }, [allFacets.techs, techSearch, selectedTechs])
+
+  // Companies panel options - from full corpus, filtered by search
+  const visibleCompanies = useMemo(() => {
+    const lc = companySearch.toLowerCase().trim()
+    const list = lc
+      ? allFacets.companies.filter(([c]) => c.toLowerCase().includes(lc))
+      : allFacets.companies
+    const slice = list.slice(0, 20).map(([c]) => c)
+    for (const c of selectedCompanies) {
+      if (!slice.includes(c)) slice.push(c)
+    }
+    return slice
+  }, [allFacets.companies, companySearch, selectedCompanies])
+
   // Deps panel options — from full corpus, filtered by search
   const visibleDeps = useMemo(() => {
     const lc = depSearch.toLowerCase().trim()
@@ -427,10 +486,18 @@ export function OSSBrowser({
       chips.push({ key: `eco:${e}`, label,
         onRemove: () => setSelectedEcos(prev => toggleSet(prev, e)) })
     }
+    for (const t of selectedTechs) {
+      chips.push({ key: `tech:${t}`, label: t,
+        onRemove: () => setSelectedTechs(prev => toggleSet(prev, t)) })
+    }
+    for (const c of selectedCompanies) {
+      chips.push({ key: `company:${c}`, label: c,
+        onRemove: () => setSelectedCompanies(prev => toggleSet(prev, c)) })
+    }
     return chips
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [q, starBucket, selectedKind, selectedActivity, selectedLicenses,
-      selectedOwners, selectedTopics, selectedDeps, selectedEcos])
+      selectedOwners, selectedTopics, selectedDeps, selectedEcos,
+      selectedTechs, selectedCompanies])
 
   function clearAll() {
     setQ("")
@@ -442,9 +509,13 @@ export function OSSBrowser({
     setSelectedTopics(new Set())
     setSelectedDeps(new Set())
     setSelectedEcos(new Set())
+    setSelectedTechs(new Set())
+    setSelectedCompanies(new Set())
     setTopicSearch("")
     setOwnerSearch("")
     setDepSearch("")
+    setTechSearch("")
+    setCompanySearch("")
     setOpenDropdown(null)
   }
 
@@ -705,6 +776,84 @@ export function OSSBrowser({
                           onChange={() => setSelectedDeps(prev => toggleSet(prev, dep))}
                         />
                         <span className="oss-dd-option oss-filter-mono">{dep}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Technologies (Tier 2 Ecosystem Intelligence) */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedTechs.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("tech")}
+            >
+              Technology{selectedTechs.size > 0 ? ` (${selectedTechs.size})` : ""} ▾
+            </button>
+            {openDropdown === "tech" && (
+              <div className="oss-dd-panel oss-dd-panel--wide">
+                <input
+                  className="oss-dd-input"
+                  placeholder="Search technologies..."
+                  value={techSearch}
+                  onChange={e => setTechSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="oss-dd-list">
+                  {visibleTechs.map(tech => {
+                    const count = facets.techs.find(([t]) => t === tech)?.[1] ?? 0
+                    return (
+                      <label key={tech} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedTechs.has(tech)}
+                          onChange={() => setSelectedTechs(prev => toggleSet(prev, tech))}
+                        />
+                        <span className="oss-dd-option">{tech}</span>
+                        <span className="oss-dd-count">{count}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Companies (Knowledge Graph maintained_by_company) */}
+          <div className="oss-dd">
+            <button
+              type="button"
+              className={`oss-dd-btn${selectedCompanies.size > 0 ? " oss-dd-btn--on" : ""}`}
+              onClick={() => toggleDropdown("company")}
+            >
+              Company{selectedCompanies.size > 0 ? ` (${selectedCompanies.size})` : ""} ▾
+            </button>
+            {openDropdown === "company" && (
+              <div className="oss-dd-panel oss-dd-panel--wide oss-dd-panel--right">
+                <input
+                  className="oss-dd-input"
+                  placeholder="Search companies..."
+                  value={companySearch}
+                  onChange={e => setCompanySearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="oss-dd-list">
+                  {visibleCompanies.map(company => {
+                    const count = facets.companies.find(([c]) => c === company)?.[1] ?? 0
+                    return (
+                      <label key={company} className="oss-dd-row">
+                        <input
+                          type="checkbox"
+                          className="oss-filter-radio"
+                          checked={selectedCompanies.has(company)}
+                          onChange={() => setSelectedCompanies(prev => toggleSet(prev, company))}
+                        />
+                        <span className="oss-dd-option">{company}</span>
                         <span className="oss-dd-count">{count}</span>
                       </label>
                     )
