@@ -5,7 +5,6 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSCard } from "@/components/editorial/oss-card"
 import { getOSSRepos } from "@/lib/oss-data"
 import { getDepPageCounts } from "@/lib/deps-data"
-import { getSimilarRepos } from "@/lib/oss-similar"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import { getCompanyForOwner } from "@/lib/company-data"
 import { getProgramsForRepo } from "@/lib/grants-data"
@@ -90,12 +89,20 @@ export default async function OSSRepoPage({ params }: PageProps) {
   const slug          = `${owner}/${repoName}`
   const fundingForRepo = getProgramsForRepo(slug)
 
-  // Similar repos: look up precomputed similarity, then hydrate from corpus
+  // Similar repos: Tier 2 relationships (Jaccard similarity on Cargo deps),
+  // computed by the pipeline and stored inline on the repo record.
   const slugIndex     = Object.fromEntries(allRepos.map(r => [`${r.owner}/${r.name}`, r]))
-  const similarEntries = getSimilarRepos(slug).slice(0, 10)
+  const similarEntries = (r.relationships?.similar ?? []).slice(0, 10)
   const similarRepos  = similarEntries
     .map(e => slugIndex[e.repo])
     .filter((r): r is OSSPath => r != null)
+
+  // Companion crates: Tier 2 co-occurrence - crates commonly used alongside
+  // this repo's own dependencies.
+  const companionCrates = (r.relationships?.companions ?? []).map(c => c.name)
+
+  // Technologies: Tier 2 Ecosystem Intelligence's curated, named subset of deps.
+  const technologies = r.ecosystemIntelligence?.technologies ?? []
 
   // Qualified deps sorted by their own page's dependent count — all of them, slicing happens in DepList
   const sortedDeps = (r.dependencies ?? [])
@@ -220,6 +227,26 @@ export default async function OSSRepoPage({ params }: PageProps) {
             </div>
           )}
 
+          {/* Technologies (Tier 2 Ecosystem Intelligence) */}
+          {technologies.length > 0 && (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 10 }}>
+                Technologies
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {technologies.map(t => (
+                  <span
+                    key={t}
+                    className="e-tag e-tag--soft"
+                    style={{ fontFamily: "var(--font-ibm-plex-mono)", fontSize: 12 }}
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Company */}
           {company && (
             <div style={{ marginBottom: 32 }}>
@@ -322,6 +349,16 @@ export default async function OSSRepoPage({ params }: PageProps) {
                 Dependencies ({sortedDeps.length} total)
               </div>
               <DepList deps={sortedDeps} />
+            </div>
+          )}
+
+          {/* Companion crates (Tier 2 co-occurrence) */}
+          {companionCrates.length > 0 && (
+            <div style={{ marginBottom: 40 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 12 }}>
+                Often used with
+              </div>
+              <DepList deps={companionCrates} />
             </div>
           )}
 
