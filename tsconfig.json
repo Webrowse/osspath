@@ -38,6 +38,7 @@
   ],
   "exclude": [
     "node_modules",
-    "prisma/migrate-to-state.ts"
+    "prisma/migrate-to-state.ts",
+    "design-reference/ghibli"
   ]
 }
