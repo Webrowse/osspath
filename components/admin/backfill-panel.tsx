@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { runEnrichmentBackfill } from "@/lib/pipeline/maintenance-actions"
+import { runEnrichmentBackfill, runCorpusIntelligenceAndPublish } from "@/lib/pipeline/maintenance-actions"
 import type { BackfillProgress } from "@/lib/pipeline/backfill"
 import type { RunRow } from "@/lib/admin/pipeline-runs"
 
@@ -32,6 +32,20 @@ export function BackfillPanel({ initialProgress, initialActive }: BackfillPanelP
     })
   }
 
+  function publishNow() {
+    setLastResult(null)
+    start(async () => {
+      const res = await runCorpusIntelligenceAndPublish()
+      if (res.started) {
+        setActive(null)
+        const notes = res.run.report?.notes?.join(" | ") ?? "done"
+        setLastResult(`Corpus Intelligence + Publish: ${notes}`)
+      } else {
+        setActive(res.active)
+      }
+    })
+  }
+
   const done = progress ? progress.remaining === 0 : false
 
   return (
@@ -43,9 +57,19 @@ export function BackfillPanel({ initialProgress, initialActive }: BackfillPanelP
             {" "}({progress.remaining} remaining)
           </div>
 
-          <button className="adm-btn adm-btn--primary" onClick={runBatch} disabled={pending || done || !!active}>
-            {pending ? "Enriching..." : done ? "All repos enriched" : "Run backfill batch"}
-          </button>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button className="adm-btn adm-btn--primary" onClick={runBatch} disabled={pending || done || !!active}>
+              {pending ? "Enriching..." : done ? "All repos enriched" : "Run backfill batch"}
+            </button>
+            <button
+              className="adm-btn adm-btn--ghost"
+              onClick={publishNow}
+              disabled={pending || !!active}
+              title="Run Corpus Intelligence (relationships, ecosystem, graph) and publish - no scan, no re-enrichment"
+            >
+              {pending ? "Working..." : "Run Corpus Intelligence + Publish"}
+            </button>
+          </div>
 
           {active && (
             <div className="adm-db-warn" style={{ marginLeft: 0, marginTop: 12 }}>
@@ -56,9 +80,12 @@ export function BackfillPanel({ initialProgress, initialActive }: BackfillPanelP
           {lastResult && <div className="adm-log" style={{ marginTop: 12 }}>{lastResult}</div>}
 
           <div className="adm-log" style={{ marginTop: 12 }}>
-            {"Each batch enriches up to 100 repos and can be re-run until 0 remain.\n"}
+            {"Each batch enriches up to 25 repos and can be re-run until 0 remain.\n"}
             {"A repo is re-selected when its enrichment version is behind, or its\n"}
-            {"source pushedAt changed. Failed repos back off for 6 hours before retry."}
+            {"source pushedAt changed. Failed repos back off for 6 hours before retry.\n"}
+            {"Backfill only writes Postgres - it never publishes. Once remaining is 0,\n"}
+            {"use \"Run Corpus Intelligence + Publish\" to recompute relationships,\n"}
+            {"ecosystems, and the graph over the full corpus, then publish the snapshot."}
           </div>
         </>
       ) : (
