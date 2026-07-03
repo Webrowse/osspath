@@ -1,4 +1,4 @@
-export type ContentType = "jobs" | "oss" | "grants" | "pulse" | "events" | "companies" | "portals" | "news" | "authors"
+export type ContentType = "jobs" | "oss" | "grants" | "pulse" | "events" | "companies" | "portals" | "news" | "authors" | "learning" | "funders"
 
 export type PendingStatus = "pending" | "approved" | "rejected"
 

@@ -49,4 +49,12 @@ export const CONTENT_BEHAVIOR: Record<ContentType, ContentBehavior> = {
     listLabel: (item) => String(item.name ?? "?"),
     listMeta: (item) => String(item.handle ?? ""),
   },
+  learning: {
+    listLabel: (item) => String(item.title ?? "?"),
+    listMeta: (item) => String(item.kind ?? ""),
+  },
+  funders: {
+    listLabel: (item) => String(item.name ?? "?"),
+    listMeta: (item) => String(item.kind ?? ""),
+  },
 }

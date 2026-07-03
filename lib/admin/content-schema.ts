@@ -126,6 +126,32 @@ export const CONTENT_SCHEMA: Record<ContentType, ContentTypeSchema> = {
       { key: "tags", label: "Tags", kind: "tags" },
     ],
   },
+  learning: {
+    label: "Learning",
+    file: "learning",
+    fields: [
+      { key: "kind", label: "Kind", kind: "text" },
+      { key: "title", label: "Title", kind: "text" },
+      { key: "href", label: "URL", kind: "text" },
+      { key: "description", label: "Description", kind: "textarea" },
+    ],
+  },
+  funders: {
+    label: "Funders",
+    file: "funders",
+    fields: [
+      { key: "slug", label: "Slug", kind: "text" },
+      { key: "name", label: "Name", kind: "text" },
+      { key: "kind", label: "Kind", kind: "text" },
+      { key: "href", label: "URL", kind: "text" },
+      { key: "description", label: "Description", kind: "textarea" },
+      { key: "hq_country", label: "HQ Country", kind: "text" },
+      { key: "github_org", label: "GitHub Org", kind: "text" },
+      { key: "company_slug", label: "Company Slug", kind: "text" },
+      { key: "chain", label: "Chain", kind: "text" },
+      { key: "ecosystems", label: "Ecosystems", kind: "tags" },
+    ],
+  },
 }
 
 /** Every registered content type, in registry order. Replaces the ~7 hand-kept copies of this same list. */
