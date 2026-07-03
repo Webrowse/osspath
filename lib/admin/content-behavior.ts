@@ -45,4 +45,8 @@ export const CONTENT_BEHAVIOR: Record<ContentType, ContentBehavior> = {
     listLabel: (item) => String(item.title ?? "?"),
     listMeta: (item) => [item.kind, item.date].filter(Boolean).join(" · "),
   },
+  authors: {
+    listLabel: (item) => String(item.name ?? "?"),
+    listMeta: (item) => String(item.handle ?? ""),
+  },
 }

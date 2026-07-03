@@ -13,7 +13,7 @@ import type { ContentType } from "./types"
  * (how to summarise an item for a list row) lives in content-behavior.ts.
  */
 
-export type FieldKind = "text" | "textarea"
+export type FieldKind = "text" | "textarea" | "tags"
 
 export type FieldConfig = {
   key: string
@@ -112,6 +112,18 @@ export const CONTENT_SCHEMA: Record<ContentType, ContentTypeSchema> = {
       { key: "date", label: "Date (YYYY-MM-DD)", kind: "text" },
       { key: "source", label: "Source", kind: "text" },
       { key: "blurb", label: "Blurb", kind: "textarea" },
+    ],
+  },
+  authors: {
+    label: "Authors",
+    file: "authors",
+    fields: [
+      { key: "name", label: "Name", kind: "text" },
+      { key: "handle", label: "Handle", kind: "text" },
+      { key: "href", label: "URL", kind: "text" },
+      { key: "writing", label: "Writing URL", kind: "text" },
+      { key: "description", label: "Description", kind: "textarea" },
+      { key: "tags", label: "Tags", kind: "tags" },
     ],
   },
 }

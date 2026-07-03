@@ -4,7 +4,11 @@ import type { ContentType, ExtractionResult } from "./types"
 const DEEPSEEK_API = "https://api.deepseek.com/v1/chat/completions"
 const MODEL = "deepseek-chat"
 
-const PROMPTS: Record<ContentType, string> = {
+// Partial, not total: only scanner-driven content types participate in AI
+// extraction. Purely editorial types (authors, ...) have no scanner and never
+// call extractWithDeepSeek - the editorial framework stays independent of the
+// scanning/AI pipeline.
+const PROMPTS: Partial<Record<ContentType, string>> = {
   jobs: `You are a structured data extractor for a Rust-only jobs site. Return ONLY valid JSON with no markdown.
 
 FIRST: Is Rust the primary or co-primary programming language for this specific role?

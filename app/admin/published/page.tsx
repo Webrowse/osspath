@@ -3,6 +3,7 @@ import { readContent } from "@/lib/admin/storage"
 import { CONTENT_SCHEMA, CONTENT_TYPES } from "@/lib/admin/content-schema"
 import type { ContentType } from "@/lib/admin/types"
 import { BulkDeleteButton } from "@/components/admin/bulk-delete-button"
+import { AddPublishedButton } from "@/components/admin/add-published-button"
 import { PublishedSearch } from "@/components/admin/published-search"
 
 const TABS: ContentType[] = CONTENT_TYPES
@@ -34,6 +35,7 @@ export default async function PublishedPage({ searchParams }: PageProps) {
       <div className="adm-page-header">
         <span className="adm-page-title">Published — {CONTENT_SCHEMA[activeType].label}</span>
         <span className="adm-page-meta">{allItems.length} entries</span>
+        <AddPublishedButton contentType={activeType} />
         <BulkDeleteButton contentType={activeType} count={allItems.length} />
       </div>
 
