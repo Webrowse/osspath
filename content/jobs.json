@@ -533,5 +533,25 @@
       "no_std",
       "BMS"
     ]
+  },
+  {
+    "checkedAt": "2026-07-03",
+    "company": "Mainmatter",
+    "company_slug": "mainmatter",
+    "expiresAt": "2026-10-03",
+    "href": "https://mainmatter.notion.site/Rust-Engineering-Consultant-2026-37464e58ddfa8065902adbe135671de0",
+    "note": "Mainmatter, the company behind EuroRust, is hiring a Rust engineering consultant to support clients like Google, BMW, and Redis in adopting Rust. The role involves reviewing codebases, recommending improvements, and training teams on advanced Rust concepts.",
+    "remoteConfirmed": true,
+    "role": "Rust Engineering Consultant",
+    "rustMentioned": true,
+    "slug": "mainmatter-rust-engineering-consultant",
+    "tags": [
+      "Remote",
+      "EU"
+    ],
+    "topics": [
+      "consulting",
+      "training"
+    ]
   }
 ]
