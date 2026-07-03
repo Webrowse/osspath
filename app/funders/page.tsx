@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { FUNDERS } from "@/content/funders"
-import { PROGRAMS } from "@/content/programs"
+import { GRANTS } from "@/content/grants"
 import { ECO_LABEL } from "@/lib/eco-tags"
 
 export const metadata: Metadata = {
@@ -35,7 +35,7 @@ const KIND_LABEL: Record<string, string> = {
 
 export default function FundersPage() {
   const programsByFunder = new Map<string, number>()
-  for (const p of PROGRAMS) {
+  for (const p of GRANTS) {
     programsByFunder.set(p.funder_slug, (programsByFunder.get(p.funder_slug) ?? 0) + 1)
   }
 

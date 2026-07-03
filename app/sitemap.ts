@@ -3,7 +3,7 @@ import { getQualifiedCrates } from "@/lib/deps-data"
 import { getQualifiedTopics } from "@/lib/topics-data"
 import { OSS_PATHS } from "@/content/oss-paths"
 import { JOBS } from "@/content/jobs"
-import { PROGRAMS } from "@/content/programs"
+import { GRANTS } from "@/content/grants"
 import { FUNDERS } from "@/content/funders"
 import { COMPANIES } from "@/content/companies"
 import { ECO_TAG_ORDER } from "@/lib/eco-tags"
@@ -51,7 +51,7 @@ function jobUrls(): MetadataRoute.Sitemap {
 }
 
 function grantUrls(): MetadataRoute.Sitemap {
-  return PROGRAMS.map((p) => ({
+  return GRANTS.map((p) => ({
     url: `${BASE}/grants/${p.slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly" as const,

@@ -11,7 +11,7 @@ import { getProgramsForEcosystem } from "@/lib/grants-data"
 import { getDepPageCounts } from "@/lib/deps-data"
 import { ECO_LABEL } from "@/lib/eco-tags"
 import type { EcoTag } from "@/lib/eco-tags"
-import type { FundingProgram } from "@/content/programs"
+import type { FundingProgram } from "@/content/grants"
 import { formatCheckedAt } from "@/lib/content-utils"
 import { CorrectionLink } from "@/components/editorial/correction-link"
 

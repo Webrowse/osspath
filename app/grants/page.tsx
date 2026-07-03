@@ -3,7 +3,7 @@ import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { GrantCard } from "@/components/editorial/grant-card"
 import { ArchiveSearch } from "@/components/editorial/archive-search"
-import { PROGRAMS } from "@/content/programs"
+import { GRANTS } from "@/content/grants"
 import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
@@ -31,7 +31,7 @@ interface PageProps {
 
 export default async function GrantsArchivePage({ searchParams }: PageProps) {
   const { q = "" } = await searchParams
-  const active = filterActive(PROGRAMS)
+  const active = filterActive(GRANTS)
   const items  = q ? active.filter((p) => matchesQuery(p as Record<string, unknown>, q)) : active
 
   return (

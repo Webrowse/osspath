@@ -7,7 +7,7 @@ import type { ContentType } from "@/lib/admin/types"
 
 const KINDS: SourceKind[] = [
   "hn", "twir", "github-oss", "github-pulse", "github-orgs",
-  "grants", "events", "portals", "rust-bytes", "careers", "reddit",
+  "events", "portals", "rust-bytes", "careers", "reddit",
 ]
 const TYPES: ContentType[] = ["jobs", "oss", "grants", "pulse", "events", "companies", "portals", "news"]
 

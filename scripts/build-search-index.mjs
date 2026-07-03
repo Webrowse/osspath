@@ -184,8 +184,8 @@ for (const c of COMPANIES) {
 }
 
 // ── Grants ────────────────────────────────────────────────────────────────────
-const PROGRAMS = load("content/programs.json")
-for (const p of PROGRAMS) {
+const GRANTS = load("content/grants.json")
+for (const p of GRANTS) {
   entries.push({ type: "grant", title: p.name, sub: p.status, href: `/grants/${p.slug}` })
 }
 

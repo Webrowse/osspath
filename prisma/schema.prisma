@@ -94,7 +94,7 @@ model SchemaMetadata {
 model Source {
   id            String    @id @default(cuid())
   type          String    // ContentType this source feeds
-  kind          String    // scanner kind: github-search | github-org | twir | hn | reddit | greenhouse | lever | grants | events | portals | rust-bytes
+  kind          String    // scanner kind: github-search | github-org | twir | hn | reddit | greenhouse | lever | events | portals | rust-bytes
   label         String
   url           String?   // query string, org slug, feed URL, or ATS slug
   parser        String?   // optional parser id
