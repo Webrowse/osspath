@@ -33,6 +33,13 @@ export type OSSPath = {
   dependencies?: string[]
   depsCheckedAt?: string
   labels?: string[]
+  /** Tier 2 (Corpus Intelligence): similarity + companion-crate relationships. Not yet rendered. */
+  relationships?: {
+    version: number
+    computedAt: string
+    similar: Array<{ repo: string; score: number }>
+    companions: Array<{ name: string; count: number; percent: number }>
+  }
 }
 
 export const OSS_PATHS = rawOSS as OSSPath[]

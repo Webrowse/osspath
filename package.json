@@ -11,6 +11,7 @@
     "check:cargo": "tsx scripts/check-cargo-parse.ts",
     "check:backfill": "tsx scripts/check-backfill-select.ts",
     "check:orchestrator": "tsx scripts/check-orchestrator.ts",
+    "check:corpus": "tsx scripts/check-corpus-relationships.ts",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",

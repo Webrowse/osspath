@@ -1,4 +1,5 @@
 import type { PipelineReport } from "@/lib/admin/pipeline-runs"
+import { relationshipsProcessor } from "./relationships"
 
 /**
  * Tier 2 - Corpus Intelligence.
@@ -18,7 +19,7 @@ export interface CorpusProcessor {
   run(): Promise<{ notes?: string[] }>
 }
 
-export const CORPUS_PROCESSORS: CorpusProcessor[] = []
+export const CORPUS_PROCESSORS: CorpusProcessor[] = [relationshipsProcessor]
 
 export async function runCorpusIntelligence(report: PipelineReport): Promise<void> {
   for (const processor of CORPUS_PROCESSORS) {
