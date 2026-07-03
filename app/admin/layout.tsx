@@ -102,6 +102,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {publishedCounts[t] > 0 && <span className="adm-badge adm-badge--dim">{publishedCounts[t]}</span>}
             </Link>
           ))}
+
+          <div className="adm-nav__section">Overrides</div>
+          <Link href="/admin/overrides" className="adm-nav__item adm-nav__item--sub">
+            <span>Configuration</span>
+          </Link>
         </nav>
 
         <div className="adm-sidebar__footer">

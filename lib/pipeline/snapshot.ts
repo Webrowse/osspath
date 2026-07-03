@@ -1,6 +1,8 @@
 import { createHash } from "crypto"
 import type { ContentType } from "@/lib/admin/types"
 import { CONTENT_TYPES } from "@/lib/admin/content-schema"
+import { listOverrides } from "@/lib/admin/overrides"
+import type { EcoTag } from "@/lib/eco-tags"
 import { readPublished } from "./store"
 
 /**
@@ -64,6 +66,34 @@ export function snapshotSha256(files: SnapshotFile[]): string {
 }
 
 /**
+ * Overrides publish alongside content types, same lifecycle (Postgres -> Git
+ * snapshot -> public site), same commit. They are configuration rather than
+ * ContentItem-backed content (see lib/admin/overrides.ts), so they are
+ * projected into their legacy file shapes here rather than via readPublished.
+ * The pure projection is split out from the DB read so it's unit-testable
+ * without a database (see scripts/check-override-snapshot.ts).
+ */
+type OverrideLike = { key: string; data: unknown }
+
+export function buildEcoOverridesFile(rows: OverrideLike[]): SnapshotFile {
+  const map: Record<string, EcoTag[]> = {}
+  for (const r of rows) map[r.key] = r.data as EcoTag[]
+  return { path: "content/eco-overrides.json", content: serialize(map) }
+}
+
+export function buildLifecycleEdgesFile(rows: OverrideLike[]): SnapshotFile {
+  return { path: "content/lifecycle-edges.json", content: serialize(rows.map((r) => r.data)) }
+}
+
+async function exportEcoOverrides(): Promise<SnapshotFile> {
+  return buildEcoOverridesFile(await listOverrides("eco-tags"))
+}
+
+async function exportLifecycleEdges(): Promise<SnapshotFile> {
+  return buildLifecycleEdgesFile(await listOverrides("lifecycle-edges"))
+}
+
+/**
  * Build the full snapshot in memory from current PostgreSQL state. Fail-closed:
  * all types are read before returning, so a read failure throws and the caller
  * writes/commits nothing. Never returns a partial snapshot.
@@ -74,5 +104,7 @@ export async function exportSnapshot(): Promise<SnapshotFile[]> {
     const items = await readPublished(type)
     files.push({ path: `content/${type}.json`, content: serialize(items) })
   }
+  files.push(await exportEcoOverrides())
+  files.push(await exportLifecycleEdges())
   return files
 }
