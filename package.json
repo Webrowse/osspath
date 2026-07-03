@@ -12,6 +12,7 @@
     "check:backfill": "tsx scripts/check-backfill-select.ts",
     "check:orchestrator": "tsx scripts/check-orchestrator.ts",
     "check:corpus": "tsx scripts/check-corpus-relationships.ts",
+    "check:ecosystem": "tsx scripts/check-ecosystem-rules.ts",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
