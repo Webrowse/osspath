@@ -14,6 +14,7 @@
     "check:corpus": "tsx scripts/check-corpus-relationships.ts",
     "check:ecosystem": "tsx scripts/check-ecosystem-rules.ts",
     "check:graph": "tsx scripts/check-graph-engine.ts",
+    "check:search": "tsx scripts/check-search-index.ts",
     "start": "next start",
     "lint": "eslint",
     "db:generate": "prisma generate",
