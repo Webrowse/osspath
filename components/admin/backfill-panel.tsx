@@ -54,7 +54,7 @@ export function BackfillPanel({ initialProgress, initialActive }: BackfillPanelP
         <>
           <div className="adm-page-meta" style={{ marginBottom: 10 }}>
             Enrichment v{progress.version}: {progress.enriched} / {progress.total} repos enriched
-            {" "}({progress.remaining} remaining)
+            {" "}({progress.remaining} remaining{progress.skipped > 0 ? `, ${progress.skipped} permanently skipped` : ""})
           </div>
 
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>

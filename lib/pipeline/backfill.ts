@@ -38,14 +38,24 @@ export function inFailureCooldown(data: Data, now = Date.now()): boolean {
   return !Number.isNaN(at) && now - at < FAILURE_COOLDOWN_MS
 }
 
-export type BackfillProgress = { total: number; enriched: number; remaining: number; version: number }
+export type BackfillProgress = { total: number; enriched: number; remaining: number; skipped: number; version: number }
 
-/** Corpus-wide enrichment progress at the current version. */
+/**
+ * Corpus-wide enrichment progress at the current version. `skipped` is a
+ * subset of `enriched` (repos with data.enrichmentSkipped) surfaced
+ * separately so "fully enriched" and "permanently skipped" are never
+ * conflated when someone is reading progress to debug why remaining is 0.
+ */
 export async function enrichmentProgress(): Promise<BackfillProgress> {
   const rows = await prisma.contentItem.findMany({ where: { type: "oss" }, select: { data: true } })
   let enriched = 0
-  for (const r of rows) if (!needsEnrichment(r.data as Data)) enriched++
-  return { total: rows.length, enriched, remaining: rows.length - enriched, version: ENRICHMENT_VERSION }
+  let skipped = 0
+  for (const r of rows) {
+    const data = r.data as Data
+    if (!needsEnrichment(data)) enriched++
+    if (data.enrichmentSkipped) skipped++
+  }
+  return { total: rows.length, enriched, remaining: rows.length - enriched, skipped, version: ENRICHMENT_VERSION }
 }
 
 export type BackfillResult = { processed: number; succeeded: number; failed: number; progress: BackfillProgress }
