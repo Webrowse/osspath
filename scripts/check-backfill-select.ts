@@ -15,6 +15,11 @@ assert("stale version -> yes", needsEnrichment({ pushedAt: "p", enrichment: { ve
 assert("pushedAt changed -> yes", needsEnrichment({ pushedAt: "p2", enrichment: { version: V, sourcePushedAt: "p1" } }) === true)
 assert("null pushedAt both -> no", needsEnrichment({ enrichment: { version: V, sourcePushedAt: null } }) === false)
 
+// needsEnrichment: permanent skip overrides everything, including missing/stale enrichment
+assert("skipped, no enrichment at all -> no", needsEnrichment({ pushedAt: "p", enrichmentSkipped: { reason: "x", skippedAt: "t" } }) === false)
+assert("skipped + stale version -> no", needsEnrichment({ pushedAt: "p", enrichmentSkipped: { reason: "x" }, enrichment: { version: V - 1, sourcePushedAt: "p" } }) === false)
+assert("skipped + pushedAt changed -> no", needsEnrichment({ pushedAt: "p2", enrichmentSkipped: { reason: "x" }, enrichment: { version: V, sourcePushedAt: "p1" } }) === false)
+
 // inFailureCooldown: 6h backoff window
 const now = 1_000_000_000_000
 assert("recent failure -> cooldown", inFailureCooldown({ enrichAttemptedAt: new Date(now - 1000).toISOString() }, now) === true)

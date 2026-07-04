@@ -17,8 +17,15 @@ const FAILURE_COOLDOWN_MS = 6 * 60 * 60 * 1000
 
 type Data = Record<string, unknown>
 
-/** Whether a repo record needs enrichment under the version + pushedAt gate. */
+/**
+ * Whether a repo record needs enrichment under the version + pushedAt gate.
+ * A repo marked enrichmentSkipped (deterministically unparseable - e.g. a
+ * cargo-generate template with placeholder syntax in Cargo.toml) is treated
+ * as satisfied rather than retried forever; see data.enrichmentSkipped.reason
+ * for why. This is a permanent opt-out, unlike the failure cooldown below.
+ */
 export function needsEnrichment(data: Data): boolean {
+  if (data.enrichmentSkipped) return false
   const e = data.enrichment as { version?: number; sourcePushedAt?: string | null } | undefined
   if (!e || e.version !== ENRICHMENT_VERSION) return true
   const pushedAt = typeof data.pushedAt === "string" ? data.pushedAt : null
