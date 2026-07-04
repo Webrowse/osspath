@@ -9,6 +9,7 @@ import {
   getQualifiedCrates,
   getDepTopicAffinity,
   getDepPageCounts,
+  getLiveDepCounts,
   DEP_PAGE_THRESHOLD,
   DEP_MAX_REPOS,
 } from "@/lib/deps-data"
@@ -37,12 +38,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const entry = index[crate]
   if (!entry || entry.repoCount < DEP_PAGE_THRESHOLD) return { title: "Not Found" }
 
+  // Live corpus count — matches the numbers rendered on the page itself.
+  const liveCount = getOSSRepos().filter((r) => r.dependencies?.includes(crate)).length
+
   const displayName = crate.charAt(0).toUpperCase() + crate.slice(1)
   const title = `${displayName} Rust Projects and Repositories`
   const crateDesc = CRATE_DESCRIPTIONS[crate]
   const description = crateDesc
-    ? `${crateDesc.tagline} Browse ${entry.repoCount} Rust repositories using ${crate}.`
-    : `Discover ${entry.repoCount} open source Rust projects using ${crate}. Browse active repositories, stars, activity levels, maintainers, and common companion crates.`
+    ? `${crateDesc.tagline} Browse ${liveCount} Rust repositories using ${crate}.`
+    : `Discover ${liveCount} open source Rust projects using ${crate}. Browse active repositories, stars, activity levels, maintainers, and common companion crates.`
 
   return {
     title,
@@ -50,7 +54,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: { canonical: `/deps/${crate}` },
     openGraph: {
       title,
-      description: `${entry.repoCount} Rust repositories using ${crate} — active projects, top contributors, and companion crates.`,
+      description: `${liveCount} Rust repositories using ${crate} — active projects, top contributors, and companion crates.`,
       url: `/deps/${crate}`,
       type: "website",
       images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
@@ -58,7 +62,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     twitter: {
       card: "summary_large_image",
       title,
-      description: `${entry.repoCount} open source Rust projects using ${crate}.`,
+      description: `${liveCount} open source Rust projects using ${crate}.`,
       images: ["/opengraph-image"],
     },
   }
@@ -95,25 +99,42 @@ export default async function DepPage({ params }: PageProps) {
   const activeCount = allRepos.filter((r) => r.activityTier === "active").length
   const uniqueOwners = new Set(allRepos.map((r) => r.owner).filter(Boolean)).size
 
-  // Companions ranked by lift (topic affinity), not raw co-occurrence frequency.
-  // lift = companionCoverage / globalCoverage
-  // companionCoverage = repos_using_both / repos_using_target
-  // globalCoverage    = repos_using_companion / total_repos
+  // Health signals — computed live from the same corpus the repo list shows
+  const activePct = allRepos.length > 0 ? Math.round((activeCount / allRepos.length) * 100) : 0
+  const cutoff30  = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  const recentCount = allRepos.filter((r) => (r.pushedAt ?? "") > cutoff30).length
+  const lastVerified = allRepos.reduce((m, r) => ((r.depsCheckedAt ?? "") > m ? r.depsCheckedAt! : m), "")
+
+  // Companions computed live from the exact repo set this page shows, ranked
+  // by lift: how much more often a crate appears alongside this one than it
+  // does across the whole corpus. Same count definition as every other surface.
+  // lift = (repos_using_both / repos_using_target) / (repos_using_companion / total_repos)
+  const liveCounts     = getLiveDepCounts()
   const totalRepoCount = getOSSRepos().length // cache already warm from allRepos above
-  const linkedCompanions = entry.companions
-    .filter((c) => (index[c.name]?.repoCount ?? 0) >= DEP_PAGE_THRESHOLD)
-    .map((c) => {
-      const companionCoverage = c.count / entry.repoCount
-      const globalCoverage    = (index[c.name]?.repoCount ?? 0) / totalRepoCount
+  const coCounts: Record<string, number> = {}
+  for (const r of allRepos) {
+    for (const d of r.dependencies ?? []) {
+      if (d !== crate && (index[d]?.repoCount ?? 0) >= DEP_PAGE_THRESHOLD) {
+        coCounts[d] = (coCounts[d] ?? 0) + 1
+      }
+    }
+  }
+  const linkedCompanions = Object.entries(coCounts)
+    .map(([name, count]) => {
+      const percent           = Math.round((count / allRepos.length) * 1000) / 10
+      const companionCoverage = count / allRepos.length
+      const globalCoverage    = (liveCounts[name] ?? 0) / totalRepoCount
       const lift              = globalCoverage > 0 ? companionCoverage / globalCoverage : 0
-      return { ...c, lift }
+      return { name, count, percent, lift }
     })
+    .filter((c) => c.count >= 5 && c.percent >= 10)
     .sort(
       (a, b) =>
         b.lift    - a.lift    ||
         b.percent - a.percent ||
         a.name.localeCompare(b.name)
     )
+    .slice(0, 24)
 
   const relatedTopics  = getDepTopicAffinity(allRepos)
   const depPageCounts  = getDepPageCounts()
@@ -223,10 +244,11 @@ export default async function DepPage({ params }: PageProps) {
           >
             {(
               [
-                ["Repositories", fmt(entry.repoCount)],
-                ["Total stars",  fmt(totalStars)],
-                ["Active",       fmt(activeCount)],
-                ["Owners",       fmt(uniqueOwners)],
+                ["Repositories",     fmt(allRepos.length)],
+                ["Actively maintained", `${activePct}%`],
+                ["Updated ≤ 30 days", fmt(recentCount)],
+                ["Total stars",      fmt(totalStars)],
+                ["Owners",           fmt(uniqueOwners)],
               ] as const
             ).map(([label, value]) => (
               <div key={label} style={{ minWidth: 80 }}>
@@ -241,6 +263,22 @@ export default async function DepPage({ params }: PageProps) {
               </div>
             ))}
           </div>
+
+          {/* ── Provenance ──────────────────────────────────────────────────── */}
+          <p
+            style={{
+              margin: "-24px 0 40px",
+              fontSize: 12,
+              lineHeight: 1.6,
+              color: "var(--e-fg-dim)",
+              maxWidth: "68ch",
+            }}
+          >
+            Counted from the Cargo.toml manifests of the {fmt(allRepos.length)} indexed
+            repositories that declare <span style={{ fontFamily: "var(--font-ibm-plex-mono)" }}>{crate}</span> as
+            a dependency — not download counts.
+            {lastVerified && <> Dependency data last verified {lastVerified}.</>}
+          </p>
 
           {/* ── Browse in Repositories CTA ──────────────────────────────────── */}
           <div style={{ marginBottom: 40 }}>
@@ -307,6 +345,13 @@ export default async function DepPage({ params }: PageProps) {
               >
                 Often used with
               </div>
+              <p style={{ margin: "0 0 12px", fontSize: 12, color: "var(--e-fg-dim)", maxWidth: "68ch" }}>
+                Crates that show up unusually often in{" "}
+                <span style={{ fontFamily: "var(--font-ibm-plex-mono)" }}>{crate}</span> projects.
+                The most distinctive pairings rank first — crates these projects use far more
+                than the average indexed Rust project does, not just crates that are popular
+                everywhere. Each percentage is the share of {crate} projects that also use it.
+              </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                 {linkedCompanions.map((c) => (
                   <Link
@@ -362,8 +407,8 @@ export default async function DepPage({ params }: PageProps) {
               }}
             >
               {allRepos.length <= DEP_MAX_REPOS
-                ? `${allRepos.length} ${repoLabel}`
-                : `${DEP_MAX_REPOS} of ${fmt(allRepos.length)} ${repoLabel} · ranked by stars`}
+                ? `${allRepos.length} ${repoLabel} · ${recentCount} pushed in the last 30 days`
+                : `${DEP_MAX_REPOS} of ${fmt(allRepos.length)} ${repoLabel} · ranked by stars · ${fmt(recentCount)} pushed in the last 30 days`}
             </div>
             <div className="e-oss-grid">
               {topRepos.map((repo) => (

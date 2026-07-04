@@ -217,6 +217,32 @@ for (const r of sortedOSS) {
   entries.push(entry)
 }
 
+// ── Crates with dedicated /deps pages ─────────────────────────────────────────
+// Membership: companion-index repoCount >= 25 — keep in sync with
+// DEP_PAGE_THRESHOLD in lib/deps-data.ts (same rule that decides which
+// /deps/[crate] pages exist). Displayed counts are live from oss.json so the
+// palette agrees with the pages it links to.
+const DEP_PAGE_THRESHOLD = 25
+const COMPANION_INDEX = load("content/oss-companion-index.json")
+const liveDepCounts = {}
+for (const r of OSS) {
+  for (const d of r.dependencies ?? []) {
+    liveDepCounts[d] = (liveDepCounts[d] ?? 0) + 1
+  }
+}
+const qualifiedCrates = Object.entries(COMPANION_INDEX)
+  .filter(([, v]) => v.repoCount >= DEP_PAGE_THRESHOLD)
+  .map(([name]) => name)
+  .sort((a, b) => (liveDepCounts[b] ?? 0) - (liveDepCounts[a] ?? 0))
+for (const name of qualifiedCrates) {
+  entries.push({
+    type:  "crate",
+    title: name,
+    sub:   `${(liveDepCounts[name] ?? 0).toLocaleString("en-US")} repos use it`,
+    href:  `/deps/${name}`,
+  })
+}
+
 // ── Write ─────────────────────────────────────────────────────────────────────
 const out     = join(ROOT, "public/search-index.json")
 const payload = JSON.stringify(entries)
@@ -227,3 +253,4 @@ const ecoTagged    = sortedOSS.filter(r => getEcoTags(r.dependencies, r.owner, r
 const kb           = (Buffer.byteLength(payload) / 1024).toFixed(1)
 console.log(`✓ search-index.json — ${entries.length} entries, ${kb} KB raw`)
 console.log(`  repos: ${repoCount} (${ecoTagged} with eco tags, sorted by stars)`)
+console.log(`  crates: ${qualifiedCrates.length} (live counts, sorted by usage)`)

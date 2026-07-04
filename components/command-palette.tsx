@@ -13,6 +13,7 @@ type SearchEntry = {
 }
 
 const TYPE_LABEL: Record<string, string> = {
+  crate:     "Crate",
   repo:      "Repository",
   company:   "Company",
   job:       "Job",
@@ -25,16 +26,19 @@ const TYPE_LABEL: Record<string, string> = {
 }
 
 // Lower number = ranked first within the same match-quality tier.
+// Crates outrank repos: for a crate-name query (tokio, axum) the crate
+// intelligence page is the primary destination; the same-named repo follows.
 const TYPE_PRIORITY: Record<string, number> = {
-  repo:      0,
-  job:       1,
-  grant:     2,
-  funder:    3,
-  company:   4,
-  ecosystem: 5,
-  community: 6,
-  event:     7,
-  page:      8,
+  crate:     0,
+  repo:      1,
+  job:       2,
+  grant:     3,
+  funder:    4,
+  company:   5,
+  ecosystem: 6,
+  community: 7,
+  event:     8,
+  page:      9,
 }
 
 function search(q: string, index: SearchEntry[]): SearchEntry[] {

@@ -10,7 +10,6 @@ import { getCompanyForOwner } from "@/lib/company-data"
 import { getProgramsForRepo } from "@/lib/grants-data"
 import { DepList } from "@/components/editorial/dep-list"
 import { CorrectionLink } from "@/components/editorial/correction-link"
-import type { OSSPath } from "@/content/oss-paths"
 
 export const dynamicParams = false
 
@@ -90,12 +89,22 @@ export default async function OSSRepoPage({ params }: PageProps) {
   const fundingForRepo = getProgramsForRepo(slug)
 
   // Similar repos: Tier 2 relationships (Jaccard similarity on Cargo deps),
-  // computed by the pipeline and stored inline on the repo record.
+  // computed by the pipeline and stored inline on the repo record. Each match
+  // carries its overlap score plus the most distinctive shared crates
+  // (lowest corpus-wide usage first) so the suggestion explains itself.
   const slugIndex     = Object.fromEntries(allRepos.map(r => [`${r.owner}/${r.name}`, r]))
-  const similarEntries = (r.relationships?.similar ?? []).slice(0, 10)
-  const similarRepos  = similarEntries
-    .map(e => slugIndex[e.repo])
-    .filter((r): r is OSSPath => r != null)
+  const ownDeps       = new Set(r.dependencies ?? [])
+  const similarRepos  = (r.relationships?.similar ?? [])
+    .slice(0, 10)
+    .flatMap(e => {
+      const repo = slugIndex[e.repo]
+      if (!repo) return []
+      const shared = (repo.dependencies ?? [])
+        .filter(d => ownDeps.has(d) && d in depPageCounts)
+        .sort((a, b) => (depPageCounts[a] ?? 0) - (depPageCounts[b] ?? 0))
+        .slice(0, 3)
+      return [{ repo, score: e.score, shared }]
+    })
 
   // Companion crates: Tier 2 co-occurrence - crates commonly used alongside
   // this repo's own dependencies.
@@ -103,6 +112,23 @@ export default async function OSSRepoPage({ params }: PageProps) {
 
   // Technologies: Tier 2 Ecosystem Intelligence's curated, named subset of deps.
   const technologies = r.ecosystemIntelligence?.technologies ?? []
+
+  // Build profile: Tier 1 Cargo enrichment — the facts a developer would
+  // otherwise dig out of Cargo.toml / Cargo.lock by hand.
+  const cargo = r.enrichment?.cargo
+  const buildFacts: Array<[string, string]> = []
+  if (cargo?.edition)  buildFacts.push(["Edition", cargo.edition])
+  if (cargo?.msrv)     buildFacts.push(["MSRV", cargo.msrv])
+  if (cargo?.isWorkspace != null) {
+    buildFacts.push(["Layout", cargo.isWorkspace
+      ? `Workspace · ${cargo.crates?.length ?? 0} crates`
+      : "Single crate"])
+  }
+  if (cargo?.features?.length)      buildFacts.push(["Features", String(cargo.features.length)])
+  if (cargo?.lockfileCrateCount)    buildFacts.push(["Lockfile crates", cargo.lockfileCrateCount.toLocaleString("en-US")])
+
+  // Classification provenance: deterministic reasoning strings from Tier 2.
+  const classification = r.ecosystemIntelligence
 
   // Qualified deps sorted by their own page's dependent count — all of them, slicing happens in DepList
   const sortedDeps = (r.dependencies ?? [])
@@ -223,6 +249,49 @@ export default async function OSSRepoPage({ params }: PageProps) {
                     {ECO_LABEL[tag]}
                   </Link>
                 ))}
+              </div>
+              {classification && classification.reasoning.length > 0 && (
+                <details style={{ marginTop: 12 }}>
+                  <summary style={{ fontSize: 12, color: "var(--e-fg-dim)", cursor: "pointer" }}>
+                    Why this classification
+                  </summary>
+                  <ul style={{ margin: "8px 0 0", paddingLeft: 18, display: "flex", flexDirection: "column", gap: 4 }}>
+                    {classification.reasoning.map((line, i) => (
+                      <li key={i} style={{ fontSize: 12, fontFamily: "var(--e-mono)", color: "var(--e-fg-dim)", lineHeight: 1.5 }}>
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                  <div style={{ marginTop: 6, fontSize: 11, color: "var(--e-fg-dim)" }}>
+                    Rule-based classification from parsed dependencies
+                    {" · "}confidence {Math.round(classification.confidence * 100)}%
+                  </div>
+                </details>
+              )}
+            </div>
+          )}
+
+          {/* Build profile (Tier 1 Cargo enrichment) */}
+          {buildFacts.length > 0 && (
+            <div style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 10 }}>
+                Build profile
+              </div>
+              <div style={{ display: "flex", gap: "8px 28px", flexWrap: "wrap" }}>
+                {buildFacts.map(([label, value]) => (
+                  <div key={label} style={{ minWidth: 60 }}>
+                    <div style={{ fontSize: 14, fontFamily: "var(--e-mono)", fontWeight: 500, color: "var(--color-foreground)", lineHeight: 1.3 }}>
+                      {value}
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--color-muted)", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                      {label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 8, fontSize: 11, color: "var(--e-fg-dim)" }}>
+                Parsed from Cargo.toml{cargo?.hasLockfile ? " and Cargo.lock" : ""}
+                {r.enrichment?.enrichedAt ? ` · ${r.enrichment.enrichedAt.slice(0, 10)}` : ""}
               </div>
             </div>
           )}
@@ -365,12 +434,30 @@ export default async function OSSRepoPage({ params }: PageProps) {
           {/* Similar repos */}
           {similarRepos.length > 0 && (
             <div style={{ marginBottom: 40 }}>
-              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 16 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--color-muted)", marginBottom: 6 }}>
                 Similar repositories
               </div>
+              <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--e-fg-dim)", maxWidth: "68ch" }}>
+                Matched by dependency overlap in Cargo manifests — each card notes
+                the most distinctive crates both projects share.
+              </p>
               <div className="e-oss-grid">
-                {similarRepos.map(repo => (
-                  <OSSCard key={repo.href} repo={repo} depPageCounts={depPageCounts} />
+                {similarRepos.map(({ repo, score, shared }) => (
+                  <div key={repo.href}>
+                    <OSSCard repo={repo} depPageCounts={depPageCounts} />
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: 11,
+                        fontFamily: "var(--e-mono)",
+                        color: "var(--e-fg-dim)",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      {shared.length > 0 && <>shares {shared.join(", ")} · </>}
+                      {Math.round(score * 100)}% dependency overlap
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -378,9 +465,18 @@ export default async function OSSRepoPage({ params }: PageProps) {
 
           {/* Footer */}
           <div style={{ marginTop: 32, paddingTop: 24, borderTop: "1px solid var(--color-border)", display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: 8 }}>
-            <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
-              ← Browse all repos
-            </Link>
+            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              <Link href="/oss" style={{ fontSize: 13, color: "var(--color-muted)", textDecoration: "none" }}>
+                ← Browse all repos
+              </Link>
+              {(r.checkedAt || r.depsCheckedAt) && (
+                <span style={{ fontSize: 11, color: "var(--e-fg-dim)" }}>
+                  {r.checkedAt && <>Metadata checked {r.checkedAt}</>}
+                  {r.checkedAt && r.depsCheckedAt && " · "}
+                  {r.depsCheckedAt && <>dependencies parsed {r.depsCheckedAt}</>}
+                </span>
+              )}
+            </div>
             <CorrectionLink />
           </div>
 

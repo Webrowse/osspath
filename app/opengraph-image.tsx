@@ -78,7 +78,7 @@ export default function OgImage() {
           flexDirection: "column",
         }}
       >
-        <span>Rust ecosystem</span>
+        <span>What real Rust projects</span>
         <span
           style={{
             background: "linear-gradient(90deg, #d97030 0%, #4f82ec 100%)",
@@ -87,7 +87,7 @@ export default function OgImage() {
             display: "flex",
           }}
         >
-          as a connected graph.
+          actually use.
         </span>
       </div>
 
@@ -102,7 +102,7 @@ export default function OgImage() {
           display: "flex",
         }}
       >
-        Jobs · Repos · Funding · Orgs · Ecosystems
+        Crate adoption · Companions · Health · Real codebases
       </div>
 
       {/* Entity pills */}

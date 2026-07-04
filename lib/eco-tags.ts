@@ -283,6 +283,10 @@ export function getEcoTags(
   return tags
 }
 
+// Short badge labels. The `axum` and `tokio` tags are *ecosystem* tags that
+// fire on multiple frameworks (axum/actix-web/rocket; tokio+tower stack), so
+// their badges must read as domains ("web", "async") — printing a crate name
+// on a repo that uses a competing crate reads as a data error.
 export const ECO_LABEL: Record<EcoTag, string> = {
   bevy:       "bevy",
   tauri:      "tauri",
@@ -293,8 +297,8 @@ export const ECO_LABEL: Record<EcoTag, string> = {
   database:   "db",
   grpc:       "grpc",
   cli:        "cli",
-  axum:       "axum",
-  tokio:      "tokio",
+  axum:       "web",
+  tokio:      "async",
 }
 
 export const ECO_DISPLAY_NAME: Record<EcoTag, string> = {

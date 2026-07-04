@@ -12,12 +12,31 @@ export const DEP_PAGE_THRESHOLD = 25
 // Maximum repos rendered per dep page — keeps HTML reasonable for high-count crates.
 export const DEP_MAX_REPOS = 50
 
-// Returns all crates qualifying for a dep page, sorted by repoCount desc.
+// ── The one count definition ──────────────────────────────────────────────────
+// Live per-crate dependent counts from the current corpus (content/oss.json).
+// This is the ONLY number the UI may display for "N repos use X" — everywhere.
+// The companion-index snapshot decides WHICH crates have /deps pages
+// (DEP_PAGE_THRESHOLD gate), never the number shown to users.
+let _liveDepCounts: Record<string, number> | null = null
+export function getLiveDepCounts(): Record<string, number> {
+  if (!_liveDepCounts) {
+    _liveDepCounts = {}
+    for (const r of getOSSRepos()) {
+      for (const d of r.dependencies ?? []) {
+        _liveDepCounts[d] = (_liveDepCounts[d] ?? 0) + 1
+      }
+    }
+  }
+  return _liveDepCounts
+}
+
+// Returns all crates qualifying for a dep page, sorted by live repo count desc.
 export function getQualifiedCrates(): string[] {
   const index = _getCompanionIndex()
+  const live  = getLiveDepCounts()
   return Object.entries(index)
     .filter(([, v]) => v.repoCount >= DEP_PAGE_THRESHOLD)
-    .sort((a, b) => b[1].repoCount - a[1].repoCount)
+    .sort((a, b) => (live[b[0]] ?? 0) - (live[a[0]] ?? 0))
     .map(([name]) => name)
 }
 
@@ -58,16 +77,19 @@ export function getDepStarWeights(): Record<string, number> {
   return _depStarWeights
 }
 
-// Returns { crate → repoCount } for every crate with a dep page that is not
-// on the denylist. Used by OSSCard to filter and rank dep links.
-// Cached at module level — derived from the already-cached companion index.
+// Returns { crate → live repoCount } for every crate with a dep page that is
+// not on the denylist. Used by OSSCard to filter and rank dep links, and as
+// the displayed count wherever these crates are shown. Membership comes from
+// the companion index (page existence); values are live corpus counts so all
+// surfaces agree with the /deps/[crate] pages.
 let _depPageCounts: Record<string, number> | null = null
 export function getDepPageCounts(): Record<string, number> {
   if (!_depPageCounts) {
     _depPageCounts = {}
+    const live = getLiveDepCounts()
     for (const [name, entry] of Object.entries(_getCompanionIndex())) {
       if (entry.repoCount >= DEP_PAGE_THRESHOLD && !OSSCARD_DEP_DENYLIST.has(name)) {
-        _depPageCounts[name] = entry.repoCount
+        _depPageCounts[name] = live[name] ?? entry.repoCount
       }
     }
   }

@@ -29,6 +29,10 @@ export type GraphStats = {
   totalFunders:    number
   fundingLinks:    number   // sum of funded_repos across all programs
   lifecycleEdges:  number
+  depLinks:        number   // total crate dependencies parsed across all repos
+  uniqueCrates:    number   // distinct crates seen in dependency manifests
+  pushedLast30:    number   // repos with a GitHub push in the 30 days before build
+  lastAnalyzed:    string   // most recent depsCheckedAt across the corpus (YYYY-MM-DD)
 }
 
 export type JourneyNodeType = "fund" | "repo" | "org" | "eco" | "job" | "crate"
@@ -117,6 +121,34 @@ export type LandingCrate = {
   href:        string   // /deps/name
 }
 
+export type HeroCompanion = {
+  name:    string
+  percent: number   // % of repos using the hero crate that also use this one
+  href:    string   // /deps/name
+}
+
+export type HeroRepo = {
+  fullName: string  // owner/name
+  href:     string  // internal /oss route
+  stars:    number
+}
+
+export type HeroOrg = {
+  name: string
+  href: string      // /ecosystem/slug
+}
+
+export type HeroCrateEvidence = {
+  crate:      string
+  tagline:    string        // first sentence of the editorial description
+  href:       string        // /deps/crate
+  repoCount:  number        // live count from the corpus
+  activePct:  number        // % of those repos with activityTier === "active"
+  companions: HeroCompanion[]
+  topRepos:   HeroRepo[]
+  orgs:       HeroOrg[]
+}
+
 export type LandingData = {
   graphStats:             GraphStats
   featuredJourneys:       LandingJourney[]
@@ -126,6 +158,7 @@ export type LandingData = {
   featuredEcosystems:     LandingEcosystem[]
   featuredCrates:         LandingCrate[]
   featuredJobs:           EditorialJob[]
+  heroEvidence:           HeroCrateEvidence[]
 }
 
 // ─── Private: crate editorial descriptions ────────────────────────────────────
@@ -384,6 +417,19 @@ export function getGraphStats(): GraphStats {
   const activeJobs  = getActiveJobs()
   const fundingLinks = PROGRAMS.reduce((n, p) => n + (p.funded_repos?.length ?? 0), 0)
 
+  const cutoff30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  let depLinks = 0
+  let pushedLast30 = 0
+  let lastAnalyzed = ""
+  const crateSet = new Set<string>()
+  for (const r of repos) {
+    const deps = r.dependencies ?? []
+    depLinks += deps.length
+    for (const d of deps) crateSet.add(d)
+    if ((r.pushedAt ?? "") > cutoff30) pushedLast30++
+    if ((r.depsCheckedAt ?? "") > lastAnalyzed) lastAnalyzed = r.depsCheckedAt!
+  }
+
   return {
     totalRepos:      repos.length,
     activeRepos:     repos.filter(r => r.activityTier === "active").length,
@@ -394,6 +440,10 @@ export function getGraphStats(): GraphStats {
     totalFunders:    FUNDERS.length,
     fundingLinks,
     lifecycleEdges:  LIFECYCLE_EDGES.length,
+    depLinks,
+    uniqueCrates:    crateSet.size,
+    pushedLast30,
+    lastAnalyzed,
   }
 }
 
@@ -579,6 +629,90 @@ export function getFeaturedCrates(): LandingCrate[] {
     }))
 }
 
+// ─── Hero evidence ────────────────────────────────────────────────────────────
+// Live per-crate evidence for the homepage hero. All numbers are computed from
+// the current corpus at build time so they match the /deps and /oss pages a
+// visitor lands on when clicking through.
+
+const HERO_CRATES = ["tokio", "serde", "axum", "clap", "wasm-bindgen", "sqlx"] as const
+
+const HERO_COMPANIONS_MAX = 6
+const HERO_REPOS_MAX      = 3
+const HERO_ORGS_MAX       = 4
+
+let _heroEvidence: HeroCrateEvidence[] | null = null
+
+export function getHeroEvidence(): HeroCrateEvidence[] {
+  if (_heroEvidence) return _heroEvidence
+
+  const allRepos      = getOSSRepos()
+  const depPageCounts = getDepPageCounts()
+  const ownerIndex    = getOwnerCompanyIndex()
+
+  _heroEvidence = HERO_CRATES.flatMap(crate => {
+    const users = allRepos.filter(r => r.dependencies?.includes(crate))
+    if (users.length === 0) return []
+
+    const activeCount = users.filter(r => r.activityTier === "active").length
+
+    // Live co-occurrence: among repos using this crate, which other crates
+    // (with their own /deps page) appear most often.
+    const coCounts: Record<string, number> = {}
+    for (const r of users) {
+      for (const d of r.dependencies ?? []) {
+        if (d === crate || !(d in depPageCounts)) continue
+        coCounts[d] = (coCounts[d] ?? 0) + 1
+      }
+    }
+    const companions: HeroCompanion[] = Object.entries(coCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, HERO_COMPANIONS_MAX)
+      .map(([name, count]) => ({
+        name,
+        percent: Math.round((count / users.length) * 100),
+        href:    `/deps/${name}`,
+      }))
+
+    const topRepos: HeroRepo[] = users
+      .filter(r => r.activityTier === "active" && r.owner)
+      .sort((a, b) => (b.stars ?? 0) - (a.stars ?? 0))
+      .slice(0, HERO_REPOS_MAX)
+      .map(r => ({
+        fullName: `${r.owner}/${r.name}`,
+        href:     `/oss/${r.owner}/${r.name}`,
+        stars:    r.stars ?? 0,
+      }))
+
+    // Organizations ranked by how many of their repos use the crate.
+    const orgCounts = new Map<string, { name: string; slug: string; n: number }>()
+    for (const r of users) {
+      if (!r.owner) continue
+      const c = ownerIndex.get(r.owner.toLowerCase())
+      if (!c) continue
+      const e = orgCounts.get(c.slug) ?? { name: c.name, slug: c.slug, n: 0 }
+      e.n++
+      orgCounts.set(c.slug, e)
+    }
+    const orgs: HeroOrg[] = [...orgCounts.values()]
+      .sort((a, b) => b.n - a.n)
+      .slice(0, HERO_ORGS_MAX)
+      .map(o => ({ name: o.name, href: `/ecosystem/${o.slug}` }))
+
+    return [{
+      crate,
+      tagline:    (CRATE_DESCRIPTIONS[crate] ?? "").split(".")[0] + ".",
+      href:       `/deps/${crate}`,
+      repoCount:  users.length,
+      activePct:  Math.round((activeCount / users.length) * 100),
+      companions,
+      topRepos,
+      orgs,
+    }]
+  })
+
+  return _heroEvidence
+}
+
 // ─── Combined entry point ─────────────────────────────────────────────────────
 
 export function getLandingData(): LandingData {
@@ -591,5 +725,6 @@ export function getLandingData(): LandingData {
     featuredEcosystems:      getFeaturedEcosystems(),
     featuredCrates:          getFeaturedCrates(),
     featuredJobs:            getActiveJobs().slice(0, 6),
+    heroEvidence:            getHeroEvidence(),
   }
 }

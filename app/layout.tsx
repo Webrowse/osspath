@@ -39,9 +39,9 @@ export const metadata: Metadata = {
   keywords: ["rust jobs", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering"],
   authors: [{ name: "Adarsh" }],
   openGraph: {
-    title: "OSSPath — Navigate the Rust Ecosystem",
+    title: "OSSPath — See What Real Rust Projects Actually Use",
     description:
-      "Explore repositories, jobs, organizations, funding programs, and ecosystem relationships across the Rust ecosystem.",
+      "Crate adoption, companion crates, project health, and the organizations behind them — computed from the Cargo manifests of thousands of indexed Rust repositories.",
     url: "/",
     siteName: "OSSPath",
     type: "website",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "OSSPath",
-    description: "Navigate the Rust ecosystem as a connected graph — jobs, repos, funding, and community signals.",
+    description: "See what real Rust projects actually use — crate adoption, companions, and health from thousands of indexed codebases.",
     images: ["/opengraph-image"],
   },
   robots: { index: true, follow: true },

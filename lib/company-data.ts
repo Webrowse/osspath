@@ -100,7 +100,14 @@ export function getCompaniesForDep(crate: string): EcosystemCompany[] {
     if (company) matched.add(company.slug)
   }
 
-  return COMPANIES.filter(c => matched.has(c.slug))
+  // Deduplicate by slug — COMPANIES may contain orphan duplicates
+  const seen = new Set<string>()
+  return COMPANIES.filter(c => {
+    if (!matched.has(c.slug)) return false
+    if (seen.has(c.slug)) return false
+    seen.add(c.slug)
+    return true
+  })
 }
 
 export { COMPANIES, ECO_LABEL }

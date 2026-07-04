@@ -1,11 +1,12 @@
 /** Single source of truth for editorial site navigation.
  *  Homepage uses anchor hrefs, archive pages use archive hrefs. */
 export const SITE_NAV = [
-  { label: "Jobs",       anchor: "#jobs",          archive: "/jobs" },
   { label: "Repos",      anchor: "#repos",         archive: "/oss" },
-  { label: "Funding",    anchor: "#funding",       archive: "/grants" },
+  { label: "Crates",     anchor: "#crates",        archive: "/deps" },
   { label: "Ecosystems", anchor: "#ecosystems",    archive: "/ecosystems" },
   { label: "Orgs",       anchor: "#organizations", archive: "/ecosystem" },
+  { label: "Funding",    anchor: "#funding",       archive: "/grants" },
+  { label: "Jobs",       anchor: "#jobs",          archive: "/jobs" },
 ] as const
 
 /** Explore dropdown — curated ecosystem resources, not graph entities. */

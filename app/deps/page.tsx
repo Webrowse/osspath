@@ -2,8 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { DepsBrowser } from "@/components/editorial/deps-browser"
-import { getQualifiedCrates, getDepStarWeights } from "@/lib/deps-data"
-import { getCompanionIndex } from "@/lib/oss-data"
+import { getQualifiedCrates, getDepStarWeights, getLiveDepCounts } from "@/lib/deps-data"
 
 export const metadata: Metadata = {
   title: "Rust Dependencies — Browse Crate Pages",
@@ -19,14 +18,14 @@ export const metadata: Metadata = {
 }
 
 export default function DepsIndexPage() {
-  const index       = getCompanionIndex()
+  const liveCounts  = getLiveDepCounts()
   const starWeights = getDepStarWeights()
   const qualified   = getQualifiedCrates()
 
   const crates = qualified.map(name => ({
     name,
-    repoCount:  index[name]?.repoCount ?? 0,
-    starWeight: starWeights[name]      ?? 0,
+    repoCount:  liveCounts[name]  ?? 0,
+    starWeight: starWeights[name] ?? 0,
   }))
 
   const topCount      = crates.filter(c => c.repoCount >= 100).length

@@ -54,6 +54,30 @@ export type OSSPath = {
     confidence: number
     reasoning: string[]
   }
+  /** Tier 1 (Cargo enrichment): parsed manifest/lockfile facts. */
+  enrichment?: {
+    version: number
+    enrichedAt: string
+    enrichers: string[]
+    sourcePushedAt?: string
+    cargo?: {
+      edition?: string | null
+      msrv?: string | null
+      license?: string | null
+      isWorkspace?: boolean
+      hasManifest?: boolean
+      hasLockfile?: boolean
+      lockfileCrateCount?: number | null
+      features?: string[]
+      keywords?: string[]
+      categories?: string[]
+      crates?: Array<{ name: string; path: string }>
+      manifestPaths?: string[]
+      dependencies?: string[]
+      devDependencies?: string[]
+      buildDependencies?: string[]
+    }
+  }
 }
 
 export const OSS_PATHS = rawOSS as OSSPath[]
