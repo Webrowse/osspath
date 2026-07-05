@@ -76,10 +76,31 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         )}
 
         <nav className="adm-nav">
-          <div className="adm-nav__section">Pipeline</div>
           <Link href="/admin" className="adm-nav__item adm-nav__item--queue">
-            <span>Dashboard</span>
+            <span>Control Center</span>
           </Link>
+
+          <div className="adm-nav__section">Curation</div>
+          <Link href="/admin/repos" className="adm-nav__item adm-nav__item--sub">
+            <span>Repositories</span>
+          </Link>
+          <Link href="/admin/queue" className="adm-nav__item adm-nav__item--sub">
+            <span>Review queue</span>
+          </Link>
+          <Link href="/admin/jobs" className="adm-nav__item adm-nav__item--sub">
+            <span>Job intelligence</span>
+          </Link>
+          <Link href="/admin/people" className="adm-nav__item adm-nav__item--sub">
+            <span>People</span>
+          </Link>
+          <Link href="/admin/resources" className="adm-nav__item adm-nav__item--sub">
+            <span>Resources</span>
+          </Link>
+          <Link href="/admin/audit" className="adm-nav__item adm-nav__item--sub">
+            <span>Audit trail</span>
+          </Link>
+
+          <div className="adm-nav__section">Pipeline</div>
           <Link href="/admin/reports" className="adm-nav__item adm-nav__item--sub">
             <span>Reports</span>
           </Link>

@@ -190,7 +190,7 @@ model GraphSnapshot {
 
 model Override {
   id        String   @id @default(cuid())
-  kind      String   // "eco-tags" | "lifecycle-edges"
+  kind      String   // "eco-tags" | "lifecycle-edges" | "repo-curation" | "job-curation" | "company-curation"
   key       String   // dedup key, meaning is kind-specific
   data      Json
   createdAt DateTime @default(now())
@@ -198,4 +198,24 @@ model Override {
   @@unique([kind, key])
   @@index([kind])
   @@map("overrides")
+}
+
+// ── Audit trail: every manual curation change ─────────────────────────────────
+// Append-only record of human actions taken through the admin: what changed,
+// who did it, when, and why. Written by the curation server actions alongside
+// the override write itself. Never updated or deleted from the app; this is
+// the accountability layer for "automation discovers, humans curate".
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actor     String   // admin email that performed the action
+  action    String   // e.g. "repo.feature" | "repo.hide" | "repo.override" | "job.hide" | "person.add"
+  target    String   // natural key of the thing changed, e.g. "owner/repo", a job URL, a person name
+  changes   Json?    // structured before/after or the payload written
+  reason    String?  // human-entered justification
+  createdAt DateTime @default(now())
+  @@index([action])
+  @@index([target])
+  @@index([createdAt])
+  @@map("audit_log")
 }

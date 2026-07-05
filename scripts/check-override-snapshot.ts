@@ -7,7 +7,7 @@
  *
  * Run: tsx scripts/check-override-snapshot.ts
  */
-import { buildEcoOverridesFile, buildLifecycleEdgesFile, serialize } from "@/lib/pipeline/snapshot"
+import { buildEcoOverridesFile, buildLifecycleEdgesFile, buildCurationFile, serialize } from "@/lib/pipeline/snapshot"
 
 let failed = 0
 function assert(label: string, cond: boolean) { if (!cond) { console.error(`x ${label}`); failed++ } }
@@ -50,6 +50,26 @@ function assert(label: string, cond: boolean) { if (!cond) { console.error(`x ${
 {
   const file = buildLifecycleEdgesFile([])
   assert("lifecycle-edges -> empty rows produce []", file.content.trim() === "[]")
+}
+
+// ── Curation overlay: map projection with admin bookkeeping stripped ────────
+{
+  const repos = [
+    { key: "BurntSushi/ripgrep", data: { featured: true, note: "gold standard CLI", queue: { "rising": "approved" }, updatedAt: "2026-07-05T00:00:00Z" } },
+    { key: "spam/spam", data: { hidden: { reason: "spam", at: "2026-07-05T00:00:00Z" } } },
+    { key: "only/bookkeeping", data: { queue: { "needs-review": "dismissed" }, updatedAt: "2026-07-05T00:00:00Z" } },
+  ]
+  const jobs = [{ key: "https://example.com/job", data: { path: "systems", skills: ["Tokio"], updatedAt: "x" } }]
+  const file = buildCurationFile(repos, jobs, [])
+  assert("curation -> correct path", file.path === "content/curation.json")
+  const parsed = JSON.parse(file.content)
+  assert("curation -> featured + note survive", parsed.repos["BurntSushi/ripgrep"].featured === true && parsed.repos["BurntSushi/ripgrep"].note === "gold standard CLI")
+  assert("curation -> queue/updatedAt bookkeeping stripped", parsed.repos["BurntSushi/ripgrep"].queue === undefined && parsed.repos["BurntSushi/ripgrep"].updatedAt === undefined)
+  assert("curation -> bookkeeping-only rows dropped entirely", parsed.repos["only/bookkeeping"] === undefined)
+  assert("curation -> hidden round-trips", parsed.repos["spam/spam"].hidden.reason === "spam")
+  assert("curation -> job overrides survive without updatedAt", parsed.jobs["https://example.com/job"].path === "systems" && parsed.jobs["https://example.com/job"].updatedAt === undefined)
+  assert("curation -> empty companies produce {}", JSON.stringify(parsed.companies) === "{}")
+  assert("curation -> byte-identical for equal input", buildCurationFile(repos, jobs, []).content === file.content)
 }
 
 // ── Determinism: canonical serialize() applies to override files too ────────

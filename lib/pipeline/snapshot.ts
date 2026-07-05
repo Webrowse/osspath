@@ -85,12 +85,47 @@ export function buildLifecycleEdgesFile(rows: OverrideLike[]): SnapshotFile {
   return { path: "content/lifecycle-edges.json", content: serialize(rows.map((r) => r.data)) }
 }
 
+/**
+ * Human curation overlay (featured / hidden / score overrides / curator
+ * notes), one map per domain keyed by natural key. Published beside the raw
+ * content types, never merged into them: consumers opt in, and deleting an
+ * override restores pure machine output. Queue review state and updatedAt are
+ * admin bookkeeping and stay out of the public snapshot.
+ */
+export function buildCurationFile(
+  repos: OverrideLike[], jobs: OverrideLike[], companies: OverrideLike[],
+): SnapshotFile {
+  const publicView = (rows: OverrideLike[]) => {
+    const map: Record<string, unknown> = {}
+    for (const r of rows) {
+      const rest = { ...((r.data ?? {}) as Record<string, unknown>) }
+      delete rest.queue
+      delete rest.updatedAt
+      if (Object.keys(rest).length > 0) map[r.key] = rest
+    }
+    return map
+  }
+  return {
+    path: "content/curation.json",
+    content: serialize({ repos: publicView(repos), jobs: publicView(jobs), companies: publicView(companies) }),
+  }
+}
+
 async function exportEcoOverrides(): Promise<SnapshotFile> {
   return buildEcoOverridesFile(await listOverrides("eco-tags"))
 }
 
 async function exportLifecycleEdges(): Promise<SnapshotFile> {
   return buildLifecycleEdgesFile(await listOverrides("lifecycle-edges"))
+}
+
+async function exportCuration(): Promise<SnapshotFile> {
+  const [repos, jobs, companies] = await Promise.all([
+    listOverrides("repo-curation"),
+    listOverrides("job-curation"),
+    listOverrides("company-curation"),
+  ])
+  return buildCurationFile(repos, jobs, companies)
 }
 
 /**
@@ -106,5 +141,6 @@ export async function exportSnapshot(): Promise<SnapshotFile[]> {
   }
   files.push(await exportEcoOverrides())
   files.push(await exportLifecycleEdges())
+  files.push(await exportCuration())
   return files
 }

@@ -12,7 +12,12 @@ import { prisma } from "@/lib/prisma"
  * kind-specific (see the callers in override-actions.ts).
  */
 
-export type OverrideKind = "eco-tags" | "lifecycle-edges"
+export type OverrideKind =
+  | "eco-tags"
+  | "lifecycle-edges"
+  | "repo-curation"
+  | "job-curation"
+  | "company-curation"
 
 export type OverrideRow = {
   id: string
