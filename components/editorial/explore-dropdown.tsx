@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState, useRef, useEffect } from "react"
-import { EXPLORE_NAV } from "@/lib/nav-config"
+import { EXPLORE_GROUPS } from "@/lib/nav-config"
 
 export function ExploreDropdown() {
   const [open, setOpen] = useState(false)
@@ -48,18 +48,31 @@ export function ExploreDropdown() {
 
       {open && (
         <div className="e-explore__panel" role="menu">
-          {EXPLORE_NAV.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="e-explore__item"
-              role="menuitem"
-              onClick={() => setOpen(false)}
-            >
-              <span className="e-explore__item-label">{l.label}</span>
-              <span className="e-explore__item-desc">{l.description}</span>
-            </Link>
+          {EXPLORE_GROUPS.map(group => (
+            <div key={group.label} className="e-explore__group">
+              <div className="e-explore__group-label">{group.label}</div>
+              {group.items.map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="e-explore__item"
+                  role="menuitem"
+                  onClick={() => setOpen(false)}
+                >
+                  <span className="e-explore__item-label">{l.label}</span>
+                  <span className="e-explore__item-desc">{l.description}</span>
+                </Link>
+              ))}
+            </div>
           ))}
+          <Link
+            href="/explore"
+            className="e-explore__all"
+            role="menuitem"
+            onClick={() => setOpen(false)}
+          >
+            Open the full library →
+          </Link>
         </div>
       )}
     </div>

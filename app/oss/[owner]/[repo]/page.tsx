@@ -10,6 +10,7 @@ import { getCompanyForOwner } from "@/lib/company-data"
 import { getProgramsForRepo } from "@/lib/grants-data"
 import { DepList } from "@/components/editorial/dep-list"
 import { CorrectionLink } from "@/components/editorial/correction-link"
+import { getRepoCareerRelevance } from "@/lib/career-paths"
 
 export const dynamicParams = false
 
@@ -129,6 +130,9 @@ export default async function OSSRepoPage({ params }: PageProps) {
 
   // Classification provenance: deterministic reasoning strings from Tier 2.
   const classification = r.ecosystemIntelligence
+
+  // Career relevance: which route legs this repo is evidence for.
+  const career = getRepoCareerRelevance(r)
 
   // Qualified deps sorted by their own page's dependent count — all of them, slicing happens in DepList
   const sortedDeps = (r.dependencies ?? [])
@@ -268,6 +272,42 @@ export default async function OSSRepoPage({ params }: PageProps) {
                   </div>
                 </details>
               )}
+            </div>
+          )}
+
+          {/* Career relevance — why a job-seeker should care about this repo */}
+          {career && (
+            <div className="repo-career" style={{ marginBottom: 32 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)" }}>
+                Why this repo matters for your career
+              </div>
+
+              <div className="repo-career__row">
+                <span style={{ fontSize: 12, color: "var(--e-fg-mute)", alignSelf: "center" }}>Good for learning:</span>
+                {[...new Set(career.paths.flatMap(p => p.areas))].slice(0, 4).map(area => (
+                  <span key={area} className="repo-career__chip">{area}</span>
+                ))}
+                <span className="repo-career__chip" style={{ borderStyle: "dashed" }}>
+                  {career.difficulty}
+                </span>
+              </div>
+
+              <div className="repo-career__row">
+                <span style={{ fontSize: 12, color: "var(--e-fg-mute)", alignSelf: "center" }}>On the route to:</span>
+                {career.paths.map(p => (
+                  <Link key={p.slug} href={p.href} className="repo-career__chip">
+                    {p.shortTitle} →
+                  </Link>
+                ))}
+              </div>
+
+              {career.contribution && (
+                <p className="repo-career__note">{career.contribution}</p>
+              )}
+              <p className="repo-career__note" style={{ opacity: 0.8 }}>
+                Derived from this repo&apos;s Cargo dependencies and activity — difficulty is an
+                estimate from codebase size and scope.
+              </p>
             </div>
           )}
 

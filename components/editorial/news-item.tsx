@@ -6,7 +6,14 @@ function formatDate(iso: string): string {
   } catch { return iso }
 }
 
-export function NewsRow({ item }: { item: NewsItem }) {
+// Feed sources presented as provenance, not database ids.
+const SOURCE_LABEL: Record<string, string> = {
+  twir:   "via This Week in Rust",
+  reddit: "via r/rust",
+  blog:   "via the Rust Blog",
+}
+
+export function NewsRow({ item, label }: { item: NewsItem; label?: string }) {
   return (
     <a
       className="e-news__row"
@@ -14,13 +21,17 @@ export function NewsRow({ item }: { item: NewsItem }) {
       target="_blank"
       rel="noopener noreferrer"
     >
-      <span className="e-news__kind">{item.kind}</span>
+      <span className="e-news__kind">{label ?? item.kind}</span>
       <span className="e-news__body">
         <span className="e-news__title">{item.title}</span>
         {item.blurb && <span className="e-news__blurb">{item.blurb}</span>}
       </span>
       <span className="e-news__meta">
-        {item.source && <span className="e-news__source">{item.source}</span>}
+        {item.source && (
+          <span className="e-news__source">
+            {SOURCE_LABEL[item.source.toLowerCase()] ?? item.source}
+          </span>
+        )}
         {item.date && <span className="e-news__date">{formatDate(item.date)}</span>}
       </span>
       <span className="e-news__arrow" aria-hidden="true">↗</span>

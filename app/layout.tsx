@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono, Newsreader, IBM_Plex_Mono } from "next/font/google"
+import { Geist, Geist_Mono, Newsreader, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google"
 import "./globals.css"
 import { Toaster } from "@/components/ui/sonner"
 
@@ -28,20 +28,29 @@ const ibmPlexMono = IBM_Plex_Mono({
   display: "swap",
 })
 
+// The body workhorse — previously referenced in CSS but never loaded, so all
+// body text silently fell back to system-ui.
+const ibmPlexSans = IBM_Plex_Sans({
+  variable: "--font-ibm-plex-sans",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
+})
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://osspath.com"),
   title: {
-    default: "OSSPath — Navigate the Rust Ecosystem",
+    default: "OSSPath — Find Your Path to a Rust Engineering Job",
     template: "%s | OSSPath",
   },
   description:
-    "Explore repositories, jobs, organizations, funding programs, and ecosystem relationships across the Rust ecosystem.",
-  keywords: ["rust jobs", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering"],
+    "Evidence-based career routes for Rust engineers: skills that matter, real repositories that prove them, and companies that hire — computed from thousands of production Rust codebases.",
+  keywords: ["rust jobs", "rust career path", "rust ecosystem", "open source rust", "rust grants", "remote rust engineering", "become a rust developer"],
   authors: [{ name: "Adarsh" }],
   openGraph: {
-    title: "OSSPath — See What Real Rust Projects Actually Use",
+    title: "OSSPath — Find Your Path to a Rust Engineering Job",
     description:
-      "Crate adoption, companion crates, project health, and the organizations behind them — computed from the Cargo manifests of thousands of indexed Rust repositories.",
+      "Evidence-based career routes for Rust engineers: the skills that matter, real repositories that prove them, and the companies that hire — computed from thousands of production Rust codebases.",
     url: "/",
     siteName: "OSSPath",
     type: "website",
@@ -90,7 +99,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${ibmPlexMono.variable} h-full`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} ${ibmPlexMono.variable} ${ibmPlexSans.variable} h-full`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: preferencesScript }} />

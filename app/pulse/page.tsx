@@ -7,11 +7,11 @@ import { PULSE } from "@/content/pulse"
 import { matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
-  title: "Ecosystem Pulse — Rust Community",
+  title: "Rust Community — Newsletters, Forums & Podcasts",
   description: "The important Rust community spaces — This Week in Rust, the Rust Users Forum, community newsletters, podcasts, and working-group channels.",
   alternates: { canonical: "/pulse" },
   openGraph: {
-    title: "Ecosystem Pulse — Rust Community",
+    title: "Rust Community — Newsletters, Forums & Podcasts",
     description: "Curated Rust community spaces — newsletters, forums, podcasts, and working-group channels worth following.",
     url: "/pulse",
     type: "website",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ecosystem Pulse — Rust Community",
+    title: "Rust Community — Newsletters, Forums & Podcasts",
     description: "Rust newsletters, forums, podcasts, and community channels — curated.",
     images: ["/opengraph-image"],
   },
@@ -39,8 +39,8 @@ export default async function PulseArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Community</div>
-              <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Ecosystem Pulse</h1>
+              <div className="e-section__num">Explore · Stay updated</div>
+              <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Community Signals</h1>
               <p className="e-archive-meta">
                 Community spaces, forums, newsletters, and podcasts worth following.
               </p>

@@ -6,10 +6,13 @@ import { HeroEvidence } from "@/components/editorial/hero-evidence"
 import { SectionHeader } from "@/components/editorial/section-header"
 import { ExploreDropdown } from "@/components/editorial/explore-dropdown"
 import { getLandingData } from "@/lib/landing-data"
+import { getPathCardStats } from "@/lib/career-paths"
 import { ECO_LABEL } from "@/lib/eco-tags"
-import { SITE_NAV, FOOTER_NAV, EXPLORE_NAV } from "@/lib/nav-config"
+import { EditorialFooter } from "@/components/editorial/editorial-footer"
+import { SITE_NAV, EXPLORE_NAV } from "@/lib/nav-config"
 
 export default function HomePage() {
+  const pathCards = getPathCardStats()
   const {
     graphStats,
     heroEvidence,
@@ -47,6 +50,10 @@ export default function HomePage() {
 
           <CommandPalette />
 
+          <Link href="/paths" className="e-btn e-btn--sm e-nav__start">
+            Start your route
+          </Link>
+
           <EditorialThemeToggle />
 
           <EditorialMobileMenu links={[
@@ -61,37 +68,44 @@ export default function HomePage() {
 
         {/* ── Hero — evidence is the product ───────────────────────────────── */}
         <section className="e-hero hp-hero-split" id="top">
-          <div className="e-col e-col--wide hp-hero-grid">
+          <div className="e-col e-col--x hp-hero-grid">
 
             {/* Left: text */}
             <div className="hp-hero-text">
               <div className="e-hero__eyebrow">
                 <span className="e-dot" />
-                <span>Evidence from real codebases</span>
+                <span>Career navigation</span>
               </div>
               <h1 className="e-hero__title">
-                See what real Rust projects{" "}
-                <em>actually use.</em>
+                Find your path to a{" "}
+                <em>Rust engineering job.</em>
               </h1>
               <p className="e-hero__sub">
-                Pick a crate — get its real-world adoption, what it&apos;s paired
-                with, which projects to read, and who builds on it commercially.
-                Computed from Cargo manifests, not download counts.
+                Pick a destination. OSSPath maps the route — the skills that
+                matter, the real code that proves them, the companies that hire —
+                computed from {graphStats.totalRepos.toLocaleString("en-US")} production
+                Rust repositories, not opinion.
               </p>
 
-              <div className="hp-stats">
-                {([
-                  { value: graphStats.totalRepos.toLocaleString("en-US"),    label: "repositories analyzed" },
-                  { value: graphStats.depLinks.toLocaleString("en-US"),      label: "dependency links parsed" },
-                  { value: graphStats.activeRepos.toLocaleString("en-US"),   label: "actively maintained" },
-                  { value: graphStats.pushedLast30.toLocaleString("en-US"),  label: "updated in last 30 days" },
-                ] as const).map(({ value, label }) => (
-                  <div key={label} className="hp-stat">
-                    <span className="hp-stat-v">{value}</span>
-                    <span className="hp-stat-l">{label}</span>
-                  </div>
+              <div className="hp-dest__label" id="destinations">I want to become a…</div>
+              <div className="hp-dest">
+                {pathCards.map(p => (
+                  <Link key={p.slug} href={`/paths/${p.slug}`} className="hp-dest__card">
+                    <span className="hp-dest__title">{p.shortTitle}</span>
+                    <span className="hp-dest__meta">
+                      {p.evidenceRepos.toLocaleString("en-US")} repos of evidence
+                      {p.openJobs > 0 && <> · {p.openJobs} open role{p.openJobs !== 1 ? "s" : ""}</>}
+                    </span>
+                  </Link>
                 ))}
               </div>
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 24, alignItems: "center" }}>
+                <Link href="/paths" className="e-btn">Map my route →</Link>
+                <a href="#how" className="e-btn e-btn--ghost">How it works</a>
+              </div>
+              <p style={{ marginTop: 16, fontSize: 12, color: "var(--e-fg-dim)" }}>
+                Every number on this page is live from the corpus · verified {graphStats.lastAnalyzed}
+              </p>
             </div>
 
             {/* Right: live crate evidence — the product */}
@@ -106,9 +120,37 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ── How it works — the product in four checkpoints ───────────────── */}
+        <section id="how" className="hp-story" aria-label="How OSSPath works">
+          <div className="e-col e-col--x">
+            <div className="hp-story__grid">
+              <div className="hp-story__step">
+                <span className="hp-story__k">01 · Destination</span>
+                <span className="hp-story__t">Pick where you&apos;re going</span>
+                <p className="hp-story__d">Backend, systems, infrastructure, or embedded — a real job, not a certificate.</p>
+              </div>
+              <div className="hp-story__step">
+                <span className="hp-story__k">02 · Route</span>
+                <span className="hp-story__t">We map the route</span>
+                <p className="hp-story__d">Skill legs computed from {graphStats.totalRepos.toLocaleString("en-US")} production Rust codebases — not opinion.</p>
+              </div>
+              <div className="hp-story__step">
+                <span className="hp-story__k">03 · Proof</span>
+                <span className="hp-story__t">Repos prove your skill</span>
+                <p className="hp-story__d">Read real architectures, land real PRs, build projects that survive review.</p>
+              </div>
+              <div className="hp-story__step">
+                <span className="hp-story__k">04 · Arrival</span>
+                <span className="hp-story__t">Jobs are the destination</span>
+                <p className="hp-story__d">Every route ends at the companies hiring for exactly that stack.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── 01 Popular Crates ────────────────────────────────────────────── */}
         <section id="crates" className="e-section">
-          <div className="e-col">
+          <div className="e-col e-col--wide">
             <SectionHeader
               num="01"
               title="Popular Crates"
@@ -140,8 +182,8 @@ export default function HomePage() {
         </section>
 
         {/* ── 02 Ecosystems ────────────────────────────────────────────────── */}
-        <section id="ecosystems" className="e-section">
-          <div className="e-col">
+        <section id="ecosystems" className="e-section e-section--band">
+          <div className="e-col e-col--wide">
             <SectionHeader
               num="02"
               title="Ecosystems"
@@ -169,7 +211,7 @@ export default function HomePage() {
 
         {/* ── 03 Featured Repositories ─────────────────────────────────────── */}
         <section id="repos" className="e-section">
-          <div className="e-col">
+          <div className="e-col e-col--wide">
             <SectionHeader
               num="03"
               title="Featured Repositories"
@@ -205,7 +247,7 @@ export default function HomePage() {
 
         {/* ── 04 Organizations ─────────────────────────────────────────────── */}
         <section id="organizations" className="e-section">
-          <div className="e-col">
+          <div className="e-col e-col--wide">
             <SectionHeader
               num="04"
               title="Organizations"
@@ -244,8 +286,8 @@ export default function HomePage() {
         </section>
 
         {/* ── 05 Funding Programs ──────────────────────────────────────────── */}
-        <section id="funding" className="e-section">
-          <div className="e-col">
+        <section id="funding" className="e-section e-section--band">
+          <div className="e-col e-col--wide">
             <SectionHeader
               num="05"
               title="Funding Programs"
@@ -287,7 +329,7 @@ export default function HomePage() {
         {/* ── 06 Open Positions ────────────────────────────────────────────── */}
         {featuredJobs.length > 0 && (
           <section id="jobs" className="e-section">
-            <div className="e-col">
+            <div className="e-col e-col--wide">
               <SectionHeader
                 num="06"
                 title="Open Positions"
@@ -321,28 +363,7 @@ export default function HomePage() {
       </main>
 
       {/* ── Footer ───────────────────────────────────────────────────────────── */}
-      <footer className="e-footer">
-        <div className="e-col e-col--wide">
-          <div className="e-footer__row">
-            <div>
-              <div className="e-footer__brand">
-                <svg width="18" height="18" viewBox="0 0 64 64" aria-hidden="true" focusable="false" style={{ display: "inline", verticalAlign: "text-bottom", marginRight: 8 }}>
-                  <polygon fill="currentColor" points="15,4 24.53,9.5 24.53,20.5 15,26 5.47,20.5 5.47,9.5"/>
-                  <polygon fill="currentColor" points="32,21 41.53,26.5 41.53,37.5 32,43 22.47,37.5 22.47,26.5"/>
-                  <polygon fill="#CE422B" points="49,38 58.53,43.5 58.53,54.5 49,60 39.47,54.5 39.47,43.5"/>
-                </svg>
-                osspath
-              </div>
-              <div className="e-footer__tagline">Curated weekly. Quiet by design.</div>
-            </div>
-          </div>
-          <div className="e-footer__links">
-            {FOOTER_NAV.map(l => (
-              <Link key={l.href} href={l.href}>{l.label}</Link>
-            ))}
-          </div>
-        </div>
-      </footer>
+      <EditorialFooter />
 
     </div>
   )

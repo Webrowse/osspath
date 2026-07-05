@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next"
 import { getQualifiedCrates } from "@/lib/deps-data"
+import { getCareerPathSlugs } from "@/lib/career-paths"
 import { getQualifiedTopics } from "@/lib/topics-data"
 import { OSS_PATHS } from "@/content/oss-paths"
 import { JOBS } from "@/content/jobs"
@@ -13,6 +14,12 @@ const BASE = "https://osspath.com"
 function staticUrls(): MetadataRoute.Sitemap {
   return [
     { url: BASE,                       lastModified: new Date(), changeFrequency: "weekly",  priority: 1.0 },
+    { url: `${BASE}/paths`,            lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
+    ...getCareerPathSlugs().map(slug => ({
+      url: `${BASE}/paths/${slug}`, lastModified: new Date(),
+      changeFrequency: "weekly" as const, priority: 0.9,
+    })),
+    { url: `${BASE}/explore`,          lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${BASE}/oss`,              lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
     { url: `${BASE}/jobs`,             lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
     { url: `${BASE}/ecosystem`,        lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },

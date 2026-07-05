@@ -35,7 +35,7 @@ export default function LearningPage() {
 
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Explore</div>
+              <div className="e-section__num">Explore · Learn deeply</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>
                 Learning
               </h1>

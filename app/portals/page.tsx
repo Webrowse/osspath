@@ -39,7 +39,7 @@ export default async function PortalsArchivePage({ searchParams }: PageProps) {
         <div className="e-col">
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Resources</div>
+              <div className="e-section__num">Explore · Opportunities</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Job Portals</h1>
               <p className="e-archive-meta">
                 Rust-relevant job boards and aggregators. Complementary sources — not curated by this site.

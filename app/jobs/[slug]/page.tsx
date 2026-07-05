@@ -14,6 +14,8 @@ import type { EcoTag } from "@/lib/eco-tags"
 import type { FundingProgram } from "@/content/grants"
 import { formatCheckedAt } from "@/lib/content-utils"
 import { CorrectionLink } from "@/components/editorial/correction-link"
+import { matchPathForJob } from "@/lib/career-paths"
+import { ECO_DISPLAY_NAME } from "@/lib/eco-tags"
 
 export const dynamicParams = false
 
@@ -79,6 +81,14 @@ export default async function JobDetailPage({ params }: PageProps) {
 
   const isRemote  = job.remoteConfirmed || job.tags.some(t => t.toLowerCase() === "remote")
   const locations = job.tags.filter(t => !["remote", "full-time", "full time", "onsite"].includes(t.toLowerCase()))
+
+  // Career route: which destination this job maps to, and the skill legs it implies
+  const pathMatch = matchPathForJob(job)
+  const requirementChips: string[] = [
+    ...(job.rustMentioned ? ["Rust"] : []),
+    ...(job.topics ?? []),
+    ...(job.ecosystems ?? []).map(e => ECO_DISPLAY_NAME[e]),
+  ]
 
   return (
     <EditorialLayout>
@@ -203,30 +213,76 @@ export default async function JobDetailPage({ params }: PageProps) {
 
           {/* Apply CTA */}
           <div style={{ marginBottom: 48 }}>
-            <a
-              href={job.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "10px 20px",
-                background: "var(--e-accent)",
-                color: "#fff",
-                fontSize: 14,
-                fontWeight: 600,
-                fontFamily: "var(--e-mono)",
-                textDecoration: "none",
-                borderRadius: 4,
-              }}
-            >
+            <a href={job.href} target="_blank" rel="noopener noreferrer" className="e-btn">
               Apply at {job.company} →
             </a>
             <p style={{ fontSize: 12, color: "var(--e-fg-faint)", marginTop: 8 }}>
               {formatCheckedAt(job.checkedAt) ?? `Last reviewed ${job.checkedAt}`}
             </p>
           </div>
+
+          {/* ── Path to this job ─────────────────────────────────────────── */}
+          {pathMatch && (
+            <div style={{ marginBottom: 48 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 6 }}>
+                How to become the person who gets this job
+              </div>
+              <p style={{ fontSize: 13, color: "var(--e-fg-dim)", margin: "0 0 16px", lineHeight: 1.6, maxWidth: "64ch" }}>
+                This listing maps to the <b style={{ color: "var(--e-fg)" }}>{pathMatch.path.title}</b> route
+                {pathMatch.signals.length > 0 && <> — {pathMatch.signals.join(", ")}</>}.
+              </p>
+
+              {/* Requirements detected */}
+              {requirementChips.length > 0 && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--e-fg-dim)", marginBottom: 8 }}>
+                    Signals in the listing
+                  </div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                    {requirementChips.slice(0, 10).map(c => (
+                      <span key={c} className="e-tag e-tag--soft" style={{ fontSize: 12 }}>✓ {c}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Skill map */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
+                {(["required", "recommended", "bonus"] as const).map(level => {
+                  const areas = pathMatch.path.areas.filter(a => a.level === level)
+                  if (areas.length === 0) return null
+                  const label = level === "bonus" ? "Sets you apart" : level === "required" ? "You'll need" : "Strongly helps"
+                  return (
+                    <div key={level} style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 12, alignItems: "baseline" }}>
+                      <span style={{ fontFamily: "var(--e-mono)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.06em", color: level === "required" ? "var(--e-accent)" : "var(--e-fg-dim)" }}>
+                        {label}
+                      </span>
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                        {areas.map(a => (
+                          <Link
+                            key={a.id}
+                            href={`/paths/${pathMatch.path.slug}#leg-${a.id}`}
+                            style={{ textDecoration: "none" }}
+                          >
+                            <span className="e-tag e-tag--soft" style={{ cursor: "pointer", fontSize: 12 }}>
+                              {a.name}
+                              <span style={{ color: "var(--e-fg-faint)", marginLeft: 6, fontFamily: "var(--e-mono)", fontSize: 11 }}>
+                                {a.crates.slice(0, 3).map(c => c.name).join(" · ")}
+                              </span>
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <Link href={`/paths/${pathMatch.path.slug}`} className="e-btn e-btn--ghost">
+                Open the full route — repos, projects, readiness checklist →
+              </Link>
+            </div>
+          )}
 
           {/* Org repositories */}
           {orgTopRepos.length > 0 && company && (

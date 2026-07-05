@@ -8,11 +8,11 @@ import { filterActive, matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Remote Rust Jobs",
-  description: "Curated remote Rust engineering roles. Manually reviewed before listing. No job board noise.",
+  description: "Where the paths lead — open Rust roles at organizations whose open-source work is indexed here. Each role links to the code behind it.",
   alternates: { canonical: "/jobs" },
   openGraph: {
     title: "Remote Rust Jobs",
-    description: "Curated remote Rust engineering roles. Manually reviewed before listing.",
+    description: "Where the paths lead — open Rust roles, each linked to the code behind it.",
     url: "/jobs",
     type: "website",
     images: [{ url: "/opengraph-image", width: 1200, height: 630 }],
@@ -43,7 +43,7 @@ export default async function JobsArchivePage({ searchParams }: PageProps) {
               <div className="e-section__num">Open positions</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Remote Rust Jobs</h1>
               <p className="e-archive-meta">
-                Manually curated. Reviewed before publication.
+                Where the paths lead. Every role is hand-reviewed and linked to the organization&apos;s open-source footprint.
               </p>
             </div>
             <Suspense>

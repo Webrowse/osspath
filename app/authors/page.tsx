@@ -29,9 +29,9 @@ export default function AuthorsPage() {
 
           <div className="e-archive-header">
             <div>
-              <div className="e-section__num">Explore</div>
+              <div className="e-section__num">Explore · People</div>
               <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>
-                Authors
+                People
               </h1>
               <p className="e-archive-meta">
                 Writers, crate authors, and educators whose output is worth following
