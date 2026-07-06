@@ -3573,73 +3573,116 @@ a.e-oss__eco-badge:hover { opacity: 0.75; }
   border-radius: 0 6px 6px 0;
 }
 
-/* ── Career layer: climb chooser + route visibility ──────────────────────── */
+/* ── Career layer: capability clusters + approach switcher ─────────────────── */
 
-.climb-pick {
-  position: sticky;
-  top: 66px;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  background: color-mix(in oklab, var(--e-bg) 96%, transparent);
-  backdrop-filter: blur(6px);
-  border: 1px solid var(--e-line);
-  border-radius: 10px;
-  box-shadow: 0 2px 10px var(--e-shadow-soft);
-  padding: 9px 14px;
-}
-.climb-pick__title {
+.cap__evidence-n {
   font-family: var(--e-mono);
   font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
   color: var(--e-fg-dim);
   white-space: nowrap;
 }
-.climb-pick__opts {
+
+/* The rigid part: outcomes you must come away with */
+.cap__outcomes {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cap__outcomes li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--e-fg);
+}
+.cap__outcomes li::before {
+  content: "◎";
+  position: absolute;
+  left: 0;
+  top: 1px;
+  color: var(--e-accent);
+  font-size: 12px;
+}
+
+/* The flexible part: approach tabs (vehicles) */
+.appr__tabs {
   display: inline-flex;
+  flex-wrap: wrap;
   border: 1px solid var(--e-line);
   border-radius: 7px;
   overflow: hidden;
+  margin-bottom: 8px;
 }
-.climb-pick__opt {
+.appr__tab {
   appearance: none;
   border: none;
   background: transparent;
   font-family: var(--e-mono);
-  font-size: 12.5px;
-  padding: 7px 14px;
+  font-size: 12px;
+  padding: 7px 12px;
   color: var(--e-fg-mute);
   cursor: pointer;
   border-right: 1px solid var(--e-line);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-.climb-pick__opt:last-child { border-right: none; }
-.climb-pick__opt:hover { color: var(--e-fg); background: var(--e-surface); }
-.climb-pick__opt.is-on {
+.appr__tab:last-child { border-right: none; }
+.appr__tab:hover { color: var(--e-fg); background: var(--e-surface); }
+.appr__tab.is-on {
   background: var(--e-accent);
   color: #fff;
 }
-.climb-pick__goal {
-  margin: 0;
-  font-size: 12px;
-  color: var(--e-fg-dim);
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  flex: 1;
+.appr__tab-n {
+  font-size: 10px;
+  opacity: 0.75;
 }
-@media (max-width: 700px) { .climb-pick__goal { display: none; } }
-
-/* Only the chosen climb renders per leg; all three stay in the HTML. */
-[data-climb="learning"]    .climb--contributor,
-[data-climb="learning"]    .climb--production,
-[data-climb="contributor"] .climb--learning,
-[data-climb="contributor"] .climb--production,
-[data-climb="production"]  .climb--learning,
-[data-climb="production"]  .climb--contributor { display: none; }
+.appr__vehicle {
+  margin: 0 0 12px;
+  font-size: 12.5px;
+  color: var(--e-fg-dim);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+.appr__crates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.appr__diff {
+  font-family: var(--e-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--e-line);
+  color: var(--e-fg-dim);
+  margin-left: 8px;
+  vertical-align: 2px;
+}
+.appr__diff--approachable {
+  border-color: color-mix(in oklab, var(--e-ok, #3a9d5d) 50%, transparent);
+  color: var(--e-ok, #3a9d5d);
+}
+.appr__diff--advanced {
+  border-color: color-mix(in oklab, var(--e-accent) 45%, transparent);
+  color: var(--e-accent);
+}
+.appr__browse {
+  margin-top: 10px;
+}
+.appr__browse a {
+  font-family: var(--e-mono);
+  font-size: 12px;
+  color: var(--e-accent);
+  text-decoration: none;
+}
+.appr__browse a:hover { text-decoration: underline; }
 
 /* ── Career layer: leg checklists ────────────────────────────────────────── */
 

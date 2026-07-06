@@ -249,8 +249,8 @@ export default async function JobDetailPage({ params }: PageProps) {
               {/* Skill map */}
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
                 {(["required", "recommended", "bonus"] as const).map(level => {
-                  const areas = pathMatch.path.areas.filter(a => a.level === level)
-                  if (areas.length === 0) return null
+                  const capabilities = pathMatch.path.capabilities.filter(c => c.level === level)
+                  if (capabilities.length === 0) return null
                   const label = level === "bonus" ? "Sets you apart" : level === "required" ? "You'll need" : "Strongly helps"
                   return (
                     <div key={level} style={{ display: "grid", gridTemplateColumns: "110px 1fr", gap: 12, alignItems: "baseline" }}>
@@ -258,16 +258,16 @@ export default async function JobDetailPage({ params }: PageProps) {
                         {label}
                       </span>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                        {areas.map(a => (
+                        {capabilities.map(cap => (
                           <Link
-                            key={a.id}
-                            href={`/paths/${pathMatch.path.slug}#leg-${a.id}`}
+                            key={cap.id}
+                            href={`/paths/${pathMatch.path.slug}#leg-${cap.id}`}
                             style={{ textDecoration: "none" }}
                           >
                             <span className="e-tag e-tag--soft" style={{ cursor: "pointer", fontSize: 12 }}>
-                              {a.name}
+                              {cap.name}
                               <span style={{ color: "var(--e-fg-faint)", marginLeft: 6, fontFamily: "var(--e-mono)", fontSize: 11 }}>
-                                {a.crates.slice(0, 3).map(c => c.name).join(" · ")}
+                                {cap.approaches.length > 1 ? `${cap.approaches.length} ways in` : cap.approaches[0]?.crates.slice(0, 3).map(c => c.name).join(" · ") ?? ""}
                               </span>
                             </span>
                           </Link>

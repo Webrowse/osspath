@@ -5,8 +5,8 @@ import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { JobCard } from "@/components/editorial/job-card"
 import { ReadinessTracker, LegChecklist } from "@/components/career/readiness-tracker"
 import type { TrackerArea } from "@/components/career/readiness-tracker"
-import { ClimbChooser } from "@/components/career/climb-chooser"
-import { getCareerPath, getCareerPathSlugs } from "@/lib/career-paths"
+import { ApproachSwitcher, type ApproachTab } from "@/components/career/approach-switcher"
+import { getCareerPath, getCareerPathSlugs, type ResolvedApproach } from "@/lib/career-paths"
 import { getGraphStats } from "@/lib/landing-data"
 
 export const dynamicParams = false
@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!path) return { title: "Not Found" }
 
   const title = `${path.title} — Career Path`
-  const description = `The route to becoming a ${path.title}: required skills with evidence from ${path.evidenceRepos.toLocaleString("en-US")} production Rust repositories, repos to study, projects to build, and companies hiring.`
+  const description = `The capabilities that make a ${path.title} — with multiple routes to each one, drawn live from ${path.evidenceRepos.toLocaleString("en-US")} production Rust repositories. Same destination, your choice of journey.`
 
   return {
     title,
@@ -46,6 +46,69 @@ const LEVEL_LABEL: Record<string, string> = {
   bonus:       "differentiator",
 }
 
+const DIFFICULTY_LABEL: Record<string, string> = {
+  approachable: "approachable",
+  intermediate: "intermediate",
+  advanced:     "advanced",
+}
+
+/** One approach's repo alternatives - server-rendered, toggled by the switcher. */
+function ApproachPanel({ approach }: { approach: ResolvedApproach }) {
+  return (
+    <div>
+      {approach.crates.length > 0 && (
+        <div className="appr__crates">
+          {approach.crates.map(c =>
+            c.href ? (
+              <Link key={c.name} href={c.href} className="route__crate">
+                <span className="route__crate-name">{c.name}</span>
+                {c.liveCount > 0 && (
+                  <span className="route__crate-n">{c.liveCount.toLocaleString("en-US")} repos</span>
+                )}
+              </Link>
+            ) : (
+              <span key={c.name} className="route__crate route__crate--flat">
+                <span className="route__crate-name">{c.name}</span>
+                {c.liveCount > 0 && (
+                  <span className="route__crate-n">{c.liveCount.toLocaleString("en-US")} repos</span>
+                )}
+              </span>
+            )
+          )}
+        </div>
+      )}
+
+      <div className="route__repos">
+        {approach.repos.map(r => (
+          <Link key={r.fullName} href={r.href} className="route__repo">
+            <span className="route__repo-top">
+              <span className="route__repo-name">
+                {r.fullName}
+                <span className={`appr__diff appr__diff--${r.difficulty}`}>
+                  {DIFFICULTY_LABEL[r.difficulty]}
+                </span>
+              </span>
+              <span className="route__repo-meta">{r.signals.join(" · ")}</span>
+            </span>
+            <span className="route__repo-note">{r.note}</span>
+          </Link>
+        ))}
+        {approach.repos.length === 0 && (
+          <p className="route__concepts">No strong matches surfaced right now — browse the corpus link below.</p>
+        )}
+      </div>
+
+      {approach.totalMatches > approach.repos.length && approach.browseHref && (
+        <div className="appr__browse">
+          <Link href={approach.browseHref}>
+            {approach.totalMatches.toLocaleString("en-US")} repos in the corpus can prove this — browse them all →
+          </Link>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default async function CareerPathPage({ params }: PageProps) {
   const { slug } = await params
   const path = getCareerPath(slug)
@@ -53,14 +116,14 @@ export default async function CareerPathPage({ params }: PageProps) {
 
   const stats = getGraphStats()
 
-  const trackerAreas: TrackerArea[] = path.areas.map(a => {
-    const firstRepo = a.routes.learning[0] ?? a.routes.contributor[0] ?? a.routes.production[0] ?? null
+  const trackerAreas: TrackerArea[] = path.capabilities.map(cap => {
+    const firstRepo = cap.approaches.flatMap(a => a.repos)[0] ?? null
     return {
-      id:        a.id,
-      name:      a.name,
-      weight:    a.weight,
-      checklist: a.checklist,
-      project:   a.project,
+      id:        cap.id,
+      name:      cap.name,
+      weight:    cap.weight,
+      checklist: cap.checklist,
+      project:   cap.project,
       studyHref: firstRepo?.href ?? null,
       studyName: firstRepo?.fullName ?? null,
     }
@@ -91,8 +154,8 @@ export default async function CareerPathPage({ params }: PageProps) {
                 <h1 className="pj__dest-title">{path.title}</h1>
                 <p className="pj__dest-tagline">{path.tagline}</p>
                 <p className="pj__evidence">
-                  Milestones are fixed — how you climb each one is yours. Live evidence
-                  from {path.evidenceRepos.toLocaleString("en-US")} of{" "}
+                  The capabilities are fixed — the repos that get you there are your
+                  choice. Live evidence from {path.evidenceRepos.toLocaleString("en-US")} of{" "}
                   {stats.totalRepos.toLocaleString("en-US")} indexed production repositories
                   · verified {stats.lastAnalyzed}.
                 </p>
@@ -102,108 +165,75 @@ export default async function CareerPathPage({ params }: PageProps) {
             </aside>
 
             <div className="pj__content">
-          <ClimbChooser>
           <div className="route" style={{ marginTop: 28 }}>
-            {path.areas.map((area, i) => (
-              <section key={area.id} id={`leg-${area.id}`} className="route__leg">
+            {path.capabilities.map((cap, i) => (
+              <section key={cap.id} id={`leg-${cap.id}`} className="route__leg">
                 <div className="route__marker" aria-hidden="true">
                   <span className="route__n">{String(i + 1).padStart(2, "0")}</span>
                 </div>
 
                 <div className="route__body">
                   <div className="route__head">
-                    <h2 className="route__name">{area.name}</h2>
-                    <span className={`route__level route__level--${area.level}`}>
-                      {LEVEL_LABEL[area.level]}
+                    <h2 className="route__name">{cap.name}</h2>
+                    <span className={`route__level route__level--${cap.level}`}>
+                      {LEVEL_LABEL[cap.level]}
                     </span>
+                    {cap.totalEvidence > 0 && (
+                      <span className="cap__evidence-n">
+                        {cap.totalEvidence.toLocaleString("en-US")} repos of evidence
+                      </span>
+                    )}
                   </div>
 
-                  <p className="route__why">{area.why}</p>
+                  <p className="route__why">{cap.why}</p>
 
-                  {/* Evidence crates */}
+                  {/* The rigid part: what this cluster must leave you with */}
                   <div className="route__block">
-                    <div className="route__label">The evidence</div>
-                    <div className="route__crates">
-                      {area.crates.map(c =>
-                        c.href ? (
-                          <Link key={c.name} href={c.href} className="route__crate">
-                            <span className="route__crate-name">{c.name}</span>
-                            {c.liveCount > 0 && (
-                              <span className="route__crate-n">{c.liveCount.toLocaleString("en-US")} repos</span>
-                            )}
-                          </Link>
-                        ) : (
-                          <span key={c.name} className="route__crate route__crate--flat">
-                            <span className="route__crate-name">{c.name}</span>
-                            {c.liveCount > 0 && (
-                              <span className="route__crate-n">{c.liveCount.toLocaleString("en-US")} repos</span>
-                            )}
-                          </span>
-                        )
-                      )}
-                    </div>
-                    {area.concepts.length > 0 && (
+                    <div className="route__label">The destination — non-negotiable</div>
+                    <ul className="cap__outcomes">
+                      {cap.outcomes.map(o => (
+                        <li key={o}>{o}</li>
+                      ))}
+                    </ul>
+                    {cap.concepts.length > 0 && (
                       <div className="route__concepts">
-                        + beyond Cargo: {area.concepts.join(" · ")}
+                        + beyond Cargo: {cap.concepts.join(" · ")}
                       </div>
                     )}
                   </div>
 
-                  {/* Climbing routes: same summit, pick your terrain */}
-                  {(["learning", "contributor", "production"] as const).map(routeId => {
-                    const repos = area.routes[routeId]
-                    if (repos.length === 0) return null
-                    const meta = {
-                      learning: {
-                        label: "Learning route · goal: understand",
-                        note:  "Small, focused codebases — the leg's crates aren't buried under everything else. Readable in a weekend.",
-                      },
-                      contributor: {
-                        label: "Contributor route · goal: OSS proof",
-                        note:  "Actively maintained with a landable issue backlog — merged PRs here are portfolio evidence.",
-                      },
-                      production: {
-                        label: "Production route · goal: professional ability",
-                        note:  "The serious architectures — read how teams running this at scale structure it.",
-                      },
-                    }[routeId]
-                    return (
-                      <div key={routeId} className={`route__block climb climb--${routeId}`}>
-                        <div className="route__label">{meta.label}</div>
-                        <div className="route__repos">
-                          {repos.map(r => (
-                            <Link key={r.fullName} href={r.href} className="route__repo">
-                              <span className="route__repo-top">
-                                <span className="route__repo-name">{r.fullName}</span>
-                                <span className="route__repo-meta">
-                                  {r.signals.join(" · ")}
-                                </span>
-                              </span>
-                              <span className="route__repo-note">{r.note}</span>
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="route__concepts">{meta.note}</div>
-                      </div>
-                    )
-                  })}
+                  {/* The flexible part: pick any vehicle */}
+                  <div className="route__block">
+                    <div className="route__label">
+                      The vehicles — {cap.approaches.length > 1
+                        ? `${cap.approaches.length} ways in, any combination works`
+                        : "pick a repo and go deep"}
+                    </div>
+                    <ApproachSwitcher
+                      tabs={cap.approaches.map((a): ApproachTab => ({
+                        id: a.id, name: a.name, vehicle: a.vehicle, totalMatches: a.totalMatches,
+                      }))}
+                      panels={cap.approaches.map(a => (
+                        <ApproachPanel key={a.id} approach={a} />
+                      ))}
+                    />
+                  </div>
 
                   {/* Build */}
                   <div className="route__block">
                     <div className="route__label">Prove it — build this</div>
-                    <p className="route__project">{area.project}</p>
+                    <p className="route__project">{cap.project}</p>
                   </div>
 
                   {/* Self-assessment */}
                   <div className="route__block">
                     <div className="route__label">Can you honestly tick these?</div>
-                    <LegChecklist pathSlug={path.slug} areaId={area.id} items={area.checklist} />
+                    <LegChecklist pathSlug={path.slug} areaId={cap.id} items={cap.checklist} />
                   </div>
                 </div>
               </section>
             ))}
           </div>
-          </ClimbChooser>
 
           {/* ── The destination: who hires ─────────────────────────────── */}
           <div style={{ marginTop: 56 }}>

@@ -68,3 +68,4 @@ next-env.d.ts
 
 # search index - regenerated at build by scripts/build-search-index.mjs
 /public/search-index.json
+design-reference/ghibli/

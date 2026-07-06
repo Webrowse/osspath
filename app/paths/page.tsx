@@ -34,9 +34,10 @@ export default function PathsIndexPage() {
               Where do you want to end up?
             </h1>
             <p className="e-archive-meta" style={{ marginTop: 10, maxWidth: "62ch" }}>
-              Each route is computed from the {stats.totalRepos.toLocaleString("en-US")} production
-              Rust repositories indexed here — the skills they actually use, the repos worth
-              studying, the projects that prove each leg, and the companies hiring at the end.
+              Each destination is a fixed set of capabilities — and for every capability,
+              several routes through the {stats.totalRepos.toLocaleString("en-US")} production
+              Rust repositories indexed here. The skills are non-negotiable; the repos that
+              teach them are your choice.
             </p>
           </header>
 
@@ -49,7 +50,7 @@ export default function PathsIndexPage() {
                 <span className="path-card__stats">
                   <b>{c.evidenceRepos.toLocaleString("en-US")}</b> repos of evidence
                   <span className="path-card__dot">·</span>
-                  <b>{c.areaCount}</b> legs
+                  <b>{c.capabilityCount}</b> capabilities
                   {c.openJobs > 0 && (
                     <>
                       <span className="path-card__dot">·</span>
