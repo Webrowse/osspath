@@ -191,14 +191,10 @@ const ECO_OPTIONS: { value: EcoTag; label: string }[] = [
 export function OSSBrowser({
   repos,
   depPageCounts,
-  initialDeps,
-  initialEcos,
   companyByOwner,
 }: {
   repos: OSSListRepo[]
   depPageCounts?: Record<string, number>
-  initialDeps?: string[]
-  initialEcos?: string[]
   companyByOwner?: Record<string, { slug: string; name: string }>
 }) {
   const router   = useRouter()
@@ -218,15 +214,9 @@ export function OSSBrowser({
   const [selectedTopics,    setSelectedTopics]    = useState<Set<string>>(new Set())
   const [topicSearch,       setTopicSearch]       = useState("")
   const [ownerSearch,       setOwnerSearch]       = useState("")
-  const [selectedDeps,      setSelectedDeps]      = useState<Set<string>>(
-    () => new Set(initialDeps ?? [])
-  )
+  const [selectedDeps,      setSelectedDeps]      = useState<Set<string>>(new Set())
   const [depSearch,         setDepSearch]         = useState("")
-  const [selectedEcos,      setSelectedEcos]      = useState<Set<EcoTag>>(
-    () => new Set((initialEcos ?? []).filter((e): e is EcoTag =>
-      ECO_OPTIONS.some(o => o.value === e)
-    ))
-  )
+  const [selectedEcos,      setSelectedEcos]      = useState<Set<EcoTag>>(new Set())
   const [selectedTechs,     setSelectedTechs]     = useState<Set<string>>(new Set())
   const [techSearch,        setTechSearch]        = useState("")
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set())
@@ -236,6 +226,21 @@ export function OSSBrowser({
   const [visibleCount,      setVisibleCount]      = useState(PAGE_SIZE)
   const [filterSheetOpen,   setFilterSheetOpen]   = useState(false)
   const [mounted,           setMounted]           = useState(false)
+
+  // Apply dep/eco filters from the URL once on mount. Deliberately not read
+  // via useSearchParams(): that hook forces Next to bail this whole component
+  // to client-only rendering during static generation, which would drop the
+  // repo grid from the crawled HTML. Reading window.location.search in an
+  // effect keeps the unfiltered grid in the static output and layers the
+  // requested filter on top right after hydration.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const deps = params.getAll("dep")
+    const ecos = params.getAll("eco").filter((e): e is EcoTag => ECO_OPTIONS.some(o => o.value === e))
+    if (deps.length) setSelectedDeps(new Set(deps))
+    if (ecos.length) setSelectedEcos(new Set(ecos))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Sync selectedDeps + selectedEcos → URL
   useEffect(() => {

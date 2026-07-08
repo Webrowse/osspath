@@ -26,14 +26,7 @@ export const metadata: Metadata = {
   },
 }
 
-interface PageProps {
-  searchParams: Promise<{ dep?: string | string[]; eco?: string | string[] }>
-}
-
-export default async function OSSArchivePage({ searchParams }: PageProps) {
-  const { dep, eco } = await searchParams
-  const initialDeps = Array.isArray(dep) ? dep : dep ? [dep] : []
-  const initialEcos = Array.isArray(eco) ? eco : eco ? [eco] : []
+export default function OSSArchivePage() {
   const depPageCounts = getDepPageCounts()
   const depPageCount  = getQualifiedCrates().length
   // Plain, serializable owner -> company map for the client component
@@ -84,8 +77,6 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
           <OSSBrowser
             repos={repos}
             depPageCounts={depPageCounts}
-            initialDeps={initialDeps}
-            initialEcos={initialEcos}
             companyByOwner={companyByOwner}
           />
         </div>
