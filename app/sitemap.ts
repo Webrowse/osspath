@@ -2,7 +2,7 @@ import { MetadataRoute } from "next"
 import { getQualifiedCrates } from "@/lib/deps-data"
 import { getCareerPathSlugs } from "@/lib/career-paths"
 import { getQualifiedTopics } from "@/lib/topics-data"
-import { OSS_PATHS } from "@/content/oss-paths"
+import { getOSSRepos } from "@/lib/oss-data"
 import { JOBS } from "@/content/jobs"
 import { GRANTS } from "@/content/grants"
 import { FUNDERS } from "@/content/funders"
@@ -40,7 +40,7 @@ function staticUrls(): MetadataRoute.Sitemap {
 }
 
 function repoUrls(): MetadataRoute.Sitemap {
-  return OSS_PATHS.map((r) => ({
+  return getOSSRepos().map((r) => ({
     url: `${BASE}/oss/${r.owner}/${r.name}`,
     lastModified: r.pushedAt ? new Date(r.pushedAt) : new Date(),
     changeFrequency: "monthly" as const,

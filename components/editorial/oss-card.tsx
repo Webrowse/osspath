@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSListRepo } from "@/content/oss-paths"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 
 function fmt(n: number): string {
@@ -37,7 +37,7 @@ export function OSSCard({
   repo,
   depPageCounts,
 }: {
-  repo: OSSPath
+  repo: OSSListRepo
   depPageCounts?: Record<string, number>
 }) {
   const router    = useRouter()

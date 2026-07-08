@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { OSSCard } from "./oss-card"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import type { EcoTag } from "@/lib/eco-tags"
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSListRepo } from "@/content/oss-paths"
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -19,13 +19,12 @@ const PAGE_SIZE = 100
 
 // ── Normalization ──────────────────────────────────────────────────────────
 
-export interface NormalizedRepo extends OSSPath {
+export interface NormalizedRepo extends OSSListRepo {
   stars:           number
   forks:           number
   openIssuesCount: number
   topics:          string[]
   owner:           string
-  language:        string
   kind:            "code" | "reference"
   license:         string
   activityTier:    "active" | "maintenance" | "dormant"
@@ -35,7 +34,7 @@ export interface NormalizedRepo extends OSSPath {
   companyName:     string | null
 }
 
-function normalize(r: OSSPath, companyByOwner: Record<string, { slug: string; name: string }>): NormalizedRepo {
+function normalize(r: OSSListRepo, companyByOwner: Record<string, { slug: string; name: string }>): NormalizedRepo {
   return {
     ...r,
     stars:           r.stars           ?? 0,
@@ -43,13 +42,12 @@ function normalize(r: OSSPath, companyByOwner: Record<string, { slug: string; na
     openIssuesCount: r.openIssuesCount ?? 0,
     topics:          r.topics          ?? [],
     owner:           r.owner,
-    language:        r.language        ?? "unknown",
     kind:            r.kind            ?? "code",
     license:         r.license         ?? "unknown",
     activityTier:    (r.activityTier as "active" | "maintenance" | "dormant") ?? "dormant",
     dependencies:    r.dependencies    ?? [],
     ecoTags:         getEcoTags(r.dependencies, { owner: r.owner, name: r.name ?? undefined, topics: r.topics ?? undefined }),
-    technologies:    r.ecosystemIntelligence?.technologies ?? [],
+    technologies:    r.technologies ?? [],
     companyName:     companyByOwner[r.owner.toLowerCase()]?.name ?? null,
   }
 }
@@ -197,7 +195,7 @@ export function OSSBrowser({
   initialEcos,
   companyByOwner,
 }: {
-  repos: OSSPath[]
+  repos: OSSListRepo[]
   depPageCounts?: Record<string, number>
   initialDeps?: string[]
   initialEcos?: string[]

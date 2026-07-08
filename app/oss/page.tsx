@@ -2,7 +2,8 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSBrowser } from "@/components/editorial/oss-browser"
-import { OSS_PATHS } from "@/content/oss-paths"
+import type { OSSListRepo } from "@/content/oss-paths"
+import { getOSSRepos } from "@/lib/oss-data"
 import { getDepPageCounts, getQualifiedCrates } from "@/lib/deps-data"
 import { getOwnerCompanyIndex } from "@/lib/company-data"
 
@@ -40,6 +41,26 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
   const companyByOwner = Object.fromEntries(
     [...getOwnerCompanyIndex().entries()].map(([owner, c]) => [owner, { slug: c.slug, name: c.name }]),
   )
+  // Slim projection sent to the client: drops enrichment/relationships/
+  // ecosystemIntelligence (the bulk of each repo's JSON weight) since the
+  // browser's filter UI never reads them.
+  const repos: OSSListRepo[] = getOSSRepos().map((r) => ({
+    name: r.name,
+    owner: r.owner,
+    href: r.href,
+    note: r.note,
+    stars: r.stars,
+    forks: r.forks,
+    openIssuesCount: r.openIssuesCount,
+    topics: r.topics,
+    license: r.license,
+    kind: r.kind,
+    activityTier: r.activityTier,
+    dependencies: r.dependencies,
+    labels: r.labels,
+    pushedAt: r.pushedAt,
+    technologies: r.ecosystemIntelligence?.technologies,
+  }))
 
   return (
     <EditorialLayout>
@@ -52,7 +73,7 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
                 Repositories
               </h1>
               <p className="e-archive-meta">
-                {OSS_PATHS.length} curated Rust repositories — filter by stars, activity, license, owner, topic, ecosystem, or dependency.{" "}
+                {repos.length} curated Rust repositories — filter by stars, activity, license, owner, topic, ecosystem, or dependency.{" "}
                 <Link href="/deps" style={{ color: "var(--e-accent)", textDecoration: "none" }}>
                   Browse {depPageCount} crate pages →
                 </Link>
@@ -61,7 +82,7 @@ export default async function OSSArchivePage({ searchParams }: PageProps) {
           </div>
 
           <OSSBrowser
-            repos={OSS_PATHS}
+            repos={repos}
             depPageCounts={depPageCounts}
             initialDeps={initialDeps}
             initialEcos={initialEcos}

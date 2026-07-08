@@ -1,5 +1,3 @@
-import rawOSS from "./oss.json"
-
 export type OSSPath = {
   name: string
   eco: string
@@ -80,4 +78,14 @@ export type OSSPath = {
   }
 }
 
-export const OSS_PATHS = rawOSS as OSSPath[]
+// Slim projection of OSSPath for the /oss browser: drops the large
+// enrichment/relationships/ecosystemIntelligence blobs (most of the per-repo
+// byte weight) that the client filter UI never reads. Full OSSPath objects
+// satisfy this type structurally, so static detail pages can keep passing
+// the full record to OSSCard without any change.
+export type OSSListRepo = Pick<OSSPath,
+  | "name" | "owner" | "href" | "note"
+  | "stars" | "forks" | "openIssuesCount"
+  | "topics" | "license" | "kind" | "activityTier"
+  | "dependencies" | "labels" | "pushedAt"
+> & { technologies?: string[] }

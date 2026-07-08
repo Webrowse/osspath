@@ -10,13 +10,19 @@
  * - Duplicate entries
  */
 
+import { readFileSync } from "fs"
+import { join } from "path"
 import { JOBS } from "../content/jobs"
-import { OSS_PATHS } from "../content/oss-paths"
+import type { OSSPath } from "../content/oss-paths"
 import { GRANTS } from "../content/grants"
 import { PULSE } from "../content/pulse"
 import { EVENTS } from "../content/events"
 import { COMPANIES } from "../content/companies"
 import { REVIEW_INTERVALS, type ContentType } from "../lib/content-utils"
+
+const OSS_PATHS: OSSPath[] = JSON.parse(
+  readFileSync(join(__dirname, "../content/oss.json"), "utf-8")
+)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
