@@ -1,10 +1,8 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
-import { JobCard } from "@/components/editorial/job-card"
-import { ArchiveSearch } from "@/components/editorial/archive-search"
+import { JobsArchive } from "@/components/editorial/jobs-archive"
 import { JOBS } from "@/content/jobs"
-import { filterActive, matchesQuery } from "@/lib/content-utils"
+import { filterActive } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Remote Rust Jobs",
@@ -25,48 +23,14 @@ export const metadata: Metadata = {
   },
 }
 
-interface PageProps {
-  searchParams: Promise<{ q?: string }>
-}
-
-export default async function JobsArchivePage({ searchParams }: PageProps) {
-  const { q = "" } = await searchParams
+export default function JobsArchivePage() {
   const active = filterActive(JOBS)
-  const items = q ? active.filter((j) => matchesQuery(j as Record<string, unknown>, q)) : active
 
   return (
     <EditorialLayout>
       <section style={{ paddingTop: "clamp(40px, 6vw, 64px)", paddingBottom: "clamp(64px, 9vw, 104px)" }}>
         <div className="e-col">
-          <div className="e-archive-header">
-            <div>
-              <div className="e-section__num">Open positions</div>
-              <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Remote Rust Jobs</h1>
-              <p className="e-archive-meta">
-                Where the paths lead. Every role is hand-reviewed and linked to the organization&apos;s open-source footprint.
-              </p>
-            </div>
-            <Suspense>
-              <ArchiveSearch placeholder="Filter by company, role, or keyword…" defaultValue={q} />
-            </Suspense>
-          </div>
-
-          <div style={{ marginTop: 8, marginBottom: 24 }}>
-            <span className="e-section__meta">
-              {items.length} {items.length === 1 ? "result" : "results"}
-              {q && ` for "${q}"`}
-            </span>
-          </div>
-
-          {items.length > 0 ? (
-            <div className="e-jobs">
-              {items.map((job) => (
-                <JobCard key={`${job.company}-${job.role}`} job={job} />
-              ))}
-            </div>
-          ) : (
-            <p className="e-archive-empty">No jobs match that filter.</p>
-          )}
+          <JobsArchive jobs={active} />
         </div>
       </section>
     </EditorialLayout>

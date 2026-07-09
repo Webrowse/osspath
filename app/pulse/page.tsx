@@ -1,10 +1,7 @@
-import { Suspense } from "react"
 import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
-import { PulseRow } from "@/components/editorial/pulse-item"
-import { ArchiveSearch } from "@/components/editorial/archive-search"
+import { PulseArchive } from "@/components/editorial/pulse-archive"
 import { PULSE } from "@/content/pulse"
-import { matchesQuery } from "@/lib/content-utils"
 
 export const metadata: Metadata = {
   title: "Rust Community — Newsletters, Forums & Podcasts",
@@ -25,47 +22,12 @@ export const metadata: Metadata = {
   },
 }
 
-interface PageProps {
-  searchParams: Promise<{ q?: string }>
-}
-
-export default async function PulseArchivePage({ searchParams }: PageProps) {
-  const { q = "" } = await searchParams
-  const items = q ? PULSE.filter((p) => matchesQuery(p as Record<string, unknown>, q)) : PULSE
-
+export default function PulseArchivePage() {
   return (
     <EditorialLayout>
       <section style={{ paddingTop: "clamp(40px, 6vw, 64px)", paddingBottom: "clamp(64px, 9vw, 104px)" }}>
         <div className="e-col">
-          <div className="e-archive-header">
-            <div>
-              <div className="e-section__num">Explore · Stay updated</div>
-              <h1 className="e-section__title" style={{ fontSize: "clamp(26px, 3.4vw, 32px)" }}>Community Signals</h1>
-              <p className="e-archive-meta">
-                Community spaces, forums, newsletters, and podcasts worth following.
-              </p>
-            </div>
-            <Suspense>
-              <ArchiveSearch placeholder="Filter by title or type…" defaultValue={q} />
-            </Suspense>
-          </div>
-
-          <div style={{ marginTop: 8, marginBottom: 24 }}>
-            <span className="e-section__meta">
-              {items.length} {items.length === 1 ? "resource" : "resources"}
-              {q && ` matching "${q}"`}
-            </span>
-          </div>
-
-          {items.length > 0 ? (
-            <div className="e-pulse">
-              {items.map((item) => (
-                <PulseRow key={item.title} item={item} />
-              ))}
-            </div>
-          ) : (
-            <p className="e-archive-empty">No resources match that filter.</p>
-          )}
+          <PulseArchive items={PULSE} />
         </div>
       </section>
     </EditorialLayout>

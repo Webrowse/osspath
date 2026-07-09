@@ -8,7 +8,7 @@ import { JOBS } from "@/content/jobs"
 import { filterActive } from "@/lib/content-utils"
 import type { EditorialJob } from "@/content/jobs"
 import type { EcoTag } from "@/lib/eco-tags"
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSPublicRepo } from "@/content/oss-paths"
 
 // ─── Model ────────────────────────────────────────────────────────────────────
 //
@@ -938,7 +938,7 @@ const PATH_DEFS: CareerPathDef[] = [
 // ─── Matching ─────────────────────────────────────────────────────────────────
 
 type RepoCtx = {
-  r:        OSSPath
+  r:        OSSPublicRepo
   deps:     ReadonlySet<string>
   haystack: string   // lowercased name + topics + note, for keyword matching
 }
@@ -975,7 +975,7 @@ function approachEvidence(ctx: RepoCtx, a: Approach): { hit: boolean; kwScore: n
   return { hit: a.kwRequired ? kwHit : kwHit || depHit, kwScore, depHits }
 }
 
-function difficultyOf(r: OSSPath): RepoDifficulty {
+function difficultyOf(r: OSSPublicRepo): RepoDifficulty {
   const cargo  = r.enrichment?.cargo
   const locked = cargo?.lockfileCrateCount ?? null
   const stars  = r.stars ?? 0
@@ -988,13 +988,13 @@ const OVERLAY_DIFFICULTY: Record<string, RepoDifficulty> = {
   beginner: "approachable", intermediate: "intermediate", advanced: "advanced",
 }
 
-function contributorFriendly(r: OSSPath): boolean {
+function contributorFriendly(r: OSSPublicRepo): boolean {
   const stars  = r.stars ?? 0
   const issues = r.openIssuesCount ?? 0
   return r.activityTier === "active" && stars >= 300 && stars <= 15_000 && issues >= 10 && issues <= 300
 }
 
-function pushRecency(r: OSSPath): "week" | "month" | null {
+function pushRecency(r: OSSPublicRepo): "week" | "month" | null {
   if (!r.pushedAt) return null
   const age = Date.now() - new Date(r.pushedAt).getTime()
   if (age <= 7  * 24 * 3600 * 1000) return "week"
@@ -1271,7 +1271,7 @@ export type RepoCareerRelevance = {
   contribution:    string | null   // portfolio-impact sentence, when earned
 }
 
-export function getRepoCareerRelevance(repo: OSSPath): RepoCareerRelevance | null {
+export function getRepoCareerRelevance(repo: OSSPublicRepo): RepoCareerRelevance | null {
   const ctx: RepoCtx = {
     r: repo,
     deps: new Set(repo.dependencies ?? []),

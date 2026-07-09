@@ -4,14 +4,14 @@ import { getEcoTags } from "@/lib/eco-tags"
 import { COMPANIES } from "@/content/companies"
 import { getOwnerCompanyIndex } from "@/lib/company-data"
 import type { EcoTag } from "@/lib/eco-tags"
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSPublicRepo } from "@/content/oss-paths"
 import type { EcosystemCompany } from "@/content/companies"
 
 export { getJobsForEcosystem as getActiveJobsForEcosystem } from "@/lib/jobs-data"
 export { getProgramsForEcosystem } from "@/lib/grants-data"
 
 // All repos tagged with the given ecosystem, sorted by stars descending.
-export function getReposByEco(tag: EcoTag): OSSPath[] {
+export function getReposByEco(tag: EcoTag): OSSPublicRepo[] {
   return getOSSRepos()
     .filter(r =>
       getEcoTags(r.dependencies, {

@@ -1,4 +1,4 @@
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSPublicRepo } from "@/content/oss-paths"
 import { TOPIC_ALIASES, TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
 import { getCompanionIndex as _getCompanionIndex, getOSSRepos } from "@/lib/oss-data"
 export type { CompanionEntry, CompanionIndex } from "@/lib/oss-data"
@@ -13,7 +13,7 @@ export const DEP_PAGE_THRESHOLD = 25
 export const DEP_MAX_REPOS = 50
 
 // ── The one count definition ──────────────────────────────────────────────────
-// Live per-crate dependent counts from the current corpus (content/oss.json).
+// Live per-crate dependent counts from the current corpus.
 // This is the ONLY number the UI may display for "N repos use X" — everywhere.
 // The companion-index snapshot decides WHICH crates have /deps pages
 // (DEP_PAGE_THRESHOLD gate), never the number shown to users.
@@ -111,7 +111,7 @@ for (const [canonical, aliases] of Object.entries(TOPIC_ALIASES)) {
 
 // Returns canonical topic slugs that have ≥40% coverage among the given repos.
 // Pass allRepos (not the sliced topRepos) for accurate percentages.
-export function getDepTopicAffinity(repos: OSSPath[]): string[] {
+export function getDepTopicAffinity(repos: OSSPublicRepo[]): string[] {
   if (!repos.length) return []
   const counts: Record<string, number> = {}
   for (const repo of repos) {

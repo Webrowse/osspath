@@ -4,16 +4,16 @@ import { COMPANIES } from "@/content/companies"
 import { getOSSRepos } from "@/lib/oss-data"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import { getDepPageCounts } from "@/lib/deps-data"
-import type { OSSPath } from "@/content/oss-paths"
+import type { OSSPublicRepo } from "@/content/oss-paths"
 import type { EcoTag } from "@/lib/eco-tags"
 
 export type { EcosystemCompany }
 
 export type CompanyProfile = EcosystemCompany & {
-  repos:              OSSPath[]
+  repos:              OSSPublicRepo[]
   repoCount:          number
   totalStars:         number
-  topRepo:            OSSPath | null
+  topRepo:            OSSPublicRepo | null
   ecosystems:         EcoTag[]
   topDeps:            string[]
   activityBreakdown:  { active: number; maintenance: number; dormant: number }

@@ -78,12 +78,29 @@ export type OSSPath = {
   }
 }
 
-// Slim projection of OSSPath for the /oss browser: drops the large
-// enrichment/relationships/ecosystemIntelligence blobs (most of the per-repo
-// byte weight) that the client filter UI never reads. Full OSSPath objects
-// satisfy this type structurally, so static detail pages can keep passing
-// the full record to OSSCard without any change.
-export type OSSListRepo = Pick<OSSPath,
+// Public-safe projection of OSSPath: everything except `relationships`
+// (similar/companion repo links — only rendered by the single-repo detail
+// page) and the bulk of `ecosystemIntelligence`/`enrichment` (only
+// `technologies` and `enrichment.cargo.{lockfileCrateCount,isWorkspace}`
+// are read outside that page). This is what every public route gets from
+// getOSSRepos() — generated at build time into content/oss-list.json by
+// scripts/build-oss-list.mjs, so the production server never has to parse
+// the full 35MB corpus to serve a list/detail-summary/derived-index page.
+// The single-repo detail page reads the full corpus separately through
+// lib/oss-detail-data.ts (restricted to that route by
+// scripts/check-public-purity.mjs) — a real OSSPath is a structural
+// superset of OSSPublicRepo, so it satisfies this type wherever it flows
+// into shared helpers (e.g. lib/career-paths.ts's getRepoCareerRelevance).
+export type OSSPublicRepo = Omit<OSSPath, "relationships" | "ecosystemIntelligence" | "enrichment"> & {
+  ecosystemIntelligence?: { technologies?: string[] }
+  enrichment?: { cargo?: { lockfileCrateCount?: number | null; isWorkspace?: boolean } }
+}
+
+// Slim projection of OSSPublicRepo for the /oss browser: drops everything
+// the client filter UI never reads. OSSPublicRepo objects satisfy this type
+// structurally, so static detail pages can keep passing repo records to
+// OSSCard without any change.
+export type OSSListRepo = Pick<OSSPublicRepo,
   | "name" | "owner" | "href" | "note"
   | "stars" | "forks" | "openIssuesCount"
   | "topics" | "license" | "kind" | "activityTier"

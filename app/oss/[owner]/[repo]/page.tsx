@@ -4,6 +4,7 @@ import type { Metadata } from "next"
 import { EditorialLayout } from "@/components/editorial/editorial-layout"
 import { OSSCard } from "@/components/editorial/oss-card"
 import { getOSSRepos } from "@/lib/oss-data"
+import { getOSSRepoDetails } from "@/lib/oss-detail-data"
 import { getDepPageCounts } from "@/lib/deps-data"
 import { getEcoTags, ECO_LABEL } from "@/lib/eco-tags"
 import { getCompanyForOwner } from "@/lib/company-data"
@@ -72,8 +73,7 @@ function fmtPushedAt(iso: string): string {
 
 export default async function OSSRepoPage({ params }: PageProps) {
   const { owner, repo: repoName } = await params
-  const allRepos = getOSSRepos()
-  const r = allRepos.find(r => r.owner === owner && r.name === repoName)
+  const r = getOSSRepoDetails().find(r => r.owner === owner && r.name === repoName)
   if (!r) notFound()
 
   const depPageCounts = getDepPageCounts()
@@ -93,7 +93,9 @@ export default async function OSSRepoPage({ params }: PageProps) {
   // computed by the pipeline and stored inline on the repo record. Each match
   // carries its overlap score plus the most distinctive shared crates
   // (lowest corpus-wide usage first) so the suggestion explains itself.
-  const slugIndex     = Object.fromEntries(allRepos.map(r => [`${r.owner}/${r.name}`, r]))
+  // Cross-referenced against the slim public list — OSSCard only needs
+  // list-level fields, not the full detail record.
+  const slugIndex     = Object.fromEntries(getOSSRepos().map(r => [`${r.owner}/${r.name}`, r]))
   const ownDeps       = new Set(r.dependencies ?? [])
   const similarRepos  = (r.relationships?.similar ?? [])
     .slice(0, 10)

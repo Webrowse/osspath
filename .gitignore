@@ -68,4 +68,8 @@ next-env.d.ts
 
 # search index - regenerated at build by scripts/build-search-index.mjs
 /public/search-index.json
+
+# slim public projection of content/oss.json - regenerated at build by
+# scripts/build-oss-list.mjs. Public routes read this, never the full corpus.
+/content/oss-list.json
 design-reference/ghibli/

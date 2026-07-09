@@ -11,7 +11,7 @@ import { getEcoTags, ECO_LABEL, ECO_DISPLAY_NAME, ECO_TAG_ORDER } from "@/lib/ec
 import { getOwnerCompanyIndex }            from "@/lib/company-data"
 import { getFunderBySlug }                 from "@/lib/grants-data"
 import type { EcoTag }                     from "@/lib/eco-tags"
-import type { OSSPath }                    from "@/content/oss-paths"
+import type { OSSPublicRepo }              from "@/content/oss-paths"
 import type { EcosystemCompany, OrgType }  from "@/content/companies"
 import type { FundingProgram }             from "@/content/grants"
 import type { Funder }                     from "@/content/funders"
@@ -263,7 +263,7 @@ type RepoIndexes = {
 }
 
 let _repoIndexes:  RepoIndexes | null = null
-let _repoLookup:   Map<string, OSSPath> | null = null
+let _repoLookup:   Map<string, OSSPublicRepo> | null = null
 
 function getRepoIndexes(): RepoIndexes {
   if (_repoIndexes) return _repoIndexes
@@ -307,7 +307,7 @@ function getRepoIndexes(): RepoIndexes {
   return _repoIndexes
 }
 
-function getRepoLookup(): Map<string, OSSPath> {
+function getRepoLookup(): Map<string, OSSPublicRepo> {
   if (!_repoLookup) {
     _repoLookup = new Map(
       getOSSRepos()
