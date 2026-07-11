@@ -72,4 +72,5 @@ next-env.d.ts
 # slim public projection of content/oss.json - regenerated at build by
 # scripts/build-oss-list.mjs. Public routes read this, never the full corpus.
 /content/oss-list.json
+/content/oss-qualified-crates.json
 design-reference/ghibli/

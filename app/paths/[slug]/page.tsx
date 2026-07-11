@@ -21,6 +21,7 @@ export function generateStaticParams(): { slug: string }[] {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
+  if (!getCareerPathSlugs().includes(slug)) return { title: "Not Found" }
   const path = getCareerPath(slug)
   if (!path) return { title: "Not Found" }
 
@@ -111,6 +112,10 @@ function ApproachPanel({ approach }: { approach: ResolvedApproach }) {
 
 export default async function CareerPathPage({ params }: PageProps) {
   const { slug } = await params
+  // Cheap check against the static path-slug list (no corpus I/O) before
+  // getCareerPath() runs full capability/approach resolution over the whole
+  // corpus — dynamicParams=false means every live invocation is a miss.
+  if (!getCareerPathSlugs().includes(slug)) notFound()
   const path = getCareerPath(slug)
   if (!path) notFound()
 

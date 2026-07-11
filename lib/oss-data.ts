@@ -14,6 +14,7 @@ const ROOT = process.cwd()
 
 let _ossRepos: OSSPublicRepo[] | null = null
 let _companionIndex: CompanionIndex | null = null
+let _qualifiedCrateSet: Set<string> | null = null
 
 // The slim, public-safe corpus projection — see OSSPublicRepo in
 // content/oss-paths.ts for what's dropped and why. Every public route reads
@@ -32,4 +33,19 @@ export function getCompanionIndex(): CompanionIndex {
     )
   }
   return _companionIndex!
+}
+
+// Just the crate names that qualify for a /deps/[crate] page — a few KB,
+// generated at build time by scripts/build-oss-list.mjs. Lets a miss on
+// /deps/[crate] (dynamicParams=false, so every live invocation is a miss —
+// legit hits are served from the static cache) be ruled out without parsing
+// the full 3.9MB companion index.
+export function isQualifiedCrate(crate: string): boolean {
+  if (!_qualifiedCrateSet) {
+    const names: string[] = JSON.parse(
+      readFileSync(join(ROOT, "content/oss-qualified-crates.json"), "utf-8")
+    )
+    _qualifiedCrateSet = new Set(names)
+  }
+  return _qualifiedCrateSet.has(crate)
 }

@@ -2,7 +2,7 @@ import type { OSSPublicRepo } from "@/content/oss-paths"
 import { TOPIC_ALIASES, TOPIC_DISPLAY_NAMES } from "@/lib/topic-config"
 import { getCompanionIndex as _getCompanionIndex, getOSSRepos } from "@/lib/oss-data"
 export type { CompanionEntry, CompanionIndex } from "@/lib/oss-data"
-export { getOSSRepos, getCompanionIndex } from "@/lib/oss-data"
+export { getOSSRepos, getCompanionIndex, isQualifiedCrate } from "@/lib/oss-data"
 
 // Minimum global repo count for a crate to get a /deps/{crate} page.
 // Must stay in sync with scripts/build-companion-index.mjs (MIN_REPOS) and

@@ -7,6 +7,7 @@ import {
   getCompanionIndex,
   getOSSRepos,
   getQualifiedCrates,
+  isQualifiedCrate,
   getDepTopicAffinity,
   getDepPageCounts,
   getLiveDepCounts,
@@ -34,9 +35,7 @@ export async function generateStaticParams(): Promise<{ crate: string }[]> {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { crate } = await params
-  const index = getCompanionIndex()
-  const entry = index[crate]
-  if (!entry || entry.repoCount < DEP_PAGE_THRESHOLD) return { title: "Not Found" }
+  if (!isQualifiedCrate(crate)) return { title: "Not Found" }
 
   // Live corpus count — matches the numbers rendered on the page itself.
   const liveCount = getOSSRepos().filter((r) => r.dependencies?.includes(crate)).length
@@ -80,10 +79,12 @@ function fmt(n: number): string {
 
 export default async function DepPage({ params }: PageProps) {
   const { crate } = await params
-  const index = getCompanionIndex()
-  const entry = index[crate]
+  // Cheap check against the tiny qualified-crate list (no corpus I/O) before
+  // touching the 3.9MB companion index — dynamicParams=false means every
+  // live invocation is a miss (legit hits are served from the static cache).
+  if (!isQualifiedCrate(crate)) notFound()
 
-  if (!entry || entry.repoCount < DEP_PAGE_THRESHOLD) notFound()
+  const index = getCompanionIndex()
 
   // All repos that depend on this crate, sorted stars desc → pushedAt desc
   const allRepos = getOSSRepos()
