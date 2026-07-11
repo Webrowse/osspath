@@ -73,6 +73,14 @@ function fmtPushedAt(iso: string): string {
 
 export default async function OSSRepoPage({ params }: PageProps) {
   const { owner, repo: repoName } = await params
+
+  // Cheap existence check against the slim public list before touching the
+  // full corpus. dynamicParams=false means every param this process ever
+  // actually renders live (as opposed to serving from the static cache) is
+  // a stale link or a bot guessing owner/repo — i.e. always a miss — so this
+  // keeps the ~35MB detail corpus out of the running server on every hit.
+  if (!getOSSRepos().some(x => x.owner === owner && x.name === repoName)) notFound()
+
   const r = getOSSRepoDetails().find(r => r.owner === owner && r.name === repoName)
   if (!r) notFound()
 
