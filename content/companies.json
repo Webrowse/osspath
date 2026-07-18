@@ -839,5 +839,12 @@
     "name": "Alacritty",
     "sector": "Terminal Emulator",
     "slug": "alacritty"
+  },
+  {
+    "checkedAt": "2026-07-18",
+    "href": "https://github.com/alacritty",
+    "name": "Alacritty",
+    "sector": "Terminal Emulator",
+    "slug": "alacritty"
   }
 ]

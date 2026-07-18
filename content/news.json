@@ -484,5 +484,203 @@
     "kind": "Blog",
     "source": "twir",
     "title": "The C to Rust Migration Book"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://blog.rust-lang.org/2026/07/09/Rust-1.97.0/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Announcing Rust 1.97.0"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://blog.rust-lang.org/2026/07/13/crates-io-development-update/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "crates.io: development update"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://bun.com/blog/bun-in-rust",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Rewriting Bun in Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://bullmq.io/news/260712/rust-release/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Announcing BullMQ for Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://github.com/zs-dima/prost-protovalidate/releases/tag/v0.6.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "prost-protovalidate 0.6 — buf.validate (protovalidate) for prost and buffa: compile-time codegen + runtime CEL, 2872/2872 conformance"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://github.com/StaszeKrk/plaza/releases/tag/v1.0.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "plaza 1.0: a ratatui package-manager TUI that searches pacman, the AUR, apt, dnf, and Flatpak at once"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://github.com/danube-messaging/danube/releases/tag/v0.15.1",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Danube v0.15.1: native Apache Iceberg integration for streaming-to-lakehouse export"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://www.willsearch.com.br/sentinel/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Guardian Sentinel. The Terminal User Interface for Guardian Decentralized Database - P2P"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://github.com/kunobi-ninja/kobe/releases/tag/v0.33.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "kobe 0.33.0: a Rust operator for instant CI Kubernetes clusters"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://navigatorbuilds.github.io/elara-mesh/blog/black-box-for-ai-agents.html",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Elara Mesh: what the black box for AI agents actually does"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://github.com/kunobi-ninja/kache/releases/tag/v0.10.0",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "kache 0.10.0: instant download dedup, no more polling"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://richer-richard.github.io/cochlea/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "cochlea 0.1.0: a headless, deterministic audio engine for AI agents"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://opensourcesecurity.io/2026/2026-07-rfmf-lori-niko/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Open Source Security Podcast: Rust Foundation Maintainers Fund with Lori and Niko"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://pulsebeam.dev/blog/moving-to-thread-per-core",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Moving a Rust WebRTC SFU to thread-per-core"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://abundance.build/blog/2026-07-11-faster-rust-tests-in-ci-with-parallel-steps/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Faster Rust tests in CI with parallel steps"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://encore.dev/blog/typescript-parser-wasm",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "We compiled our TypeScript parser to WASM"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://kerkour.com/rust-hype",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Understanding the Rust hype for the busy developer"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://dev.to/akavlabs_69/i-red-teamed-my-own-llm-security-gateway-in-four-passes-heres-every-gap-i-found-5cl9",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "I red-teamed my own LLM security gateway (Rust) in four passes — every detection gap and how I closed it"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://dystroy.org/blog/picamobile/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Fearless Embedded Rust: A FPV Lego car"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://www.aravpanwar.com/writing/building-decayfmt-in-rust/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "What I learned building a self-corrupting file format in Rust"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://corentin-core.github.io/posts/ruxe-async-runtime-agnostic/",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Come Async You Are"
+  },
+  {
+    "blurb": "",
+    "checkedAt": "2026-07-18",
+    "date": "2026-07-18",
+    "href": "https://blog.theembeddedrustacean.com/oxidize-xiao",
+    "kind": "Blog",
+    "source": "twir",
+    "title": "Oxidize XIAO — An Embedded Rust Community Program"
   }
 ]
